@@ -11,6 +11,7 @@ export class HUD {
       <div class="hitmarker" id="hitmarker"><i></i><i></i></div>
       <div class="dmg-ind" id="dmg"></div>
       <div class="hud-tl"><div class="score">SCORE <b id="score">0</b></div><div class="combo" id="combo"></div></div>
+      <div class="minimap" id="minimap" aria-label="Map"><div class="minimap-grid"></div><div class="minimap-label">MAP</div><div class="minimap-dots" id="minimapDots"></div><div class="minimap-player" id="minimapPlayer"></div></div>
       <div class="hud-tr"><div class="wave">WAVE <b id="wave">1</b></div><div class="modifier" id="modifier"></div><div class="left"><b id="left">0</b> enemies left</div><div class="timer" id="timer"></div><div class="pvpscore" id="pvpscore" hidden></div></div><div class="board" id="board" hidden></div>
       <div class="bossbar" id="bossbar"><div class="bossname" id="bossname"></div><div class="bar big"><div class="fill red" id="bossfill"></div></div></div>
       <div class="hud-bl">
@@ -24,7 +25,7 @@ export class HUD {
       <div class="killfeed" id="killfeed"></div>
       <div class="screen" id="screen"><div class="panel" id="panel"></div></div>`;
     const q = (id) => root.querySelector('#' + id);
-    this.el = { crosshair: q('crosshair'), gret: q('gret'), hitmarker: q('hitmarker'), dmg: q('dmg'), score: q('score'), combo: q('combo'), wave: q('wave'), modifier: q('modifier'), left: q('left'), timer: q('timer'), hpfill: q('hpfill'), hpnum: q('hpnum'), mag: q('mag'), reserve: q('reserve'), reloading: q('reloading'), tally: q('tally'), weapon: q('weapon'), hint: q('hint'), slots: q('slots'), tip: q('tip'), msg: q('msg'), msgsub: q('msgsub'), killfeed: q('killfeed'), screen: q('screen'), panel: q('panel'), nades: q('nades'), scope: q('scope'), focusmark: q('focusmark'), focusmeter: q('focusmeter'), fmfill: q('fmfill'), bossbar: q('bossbar'), bossname: q('bossname'), bossfill: q('bossfill'), pvpscore: q('pvpscore'), board: q('board'), gstam: q('gstam'), gstamfill: q('gstamfill') };
+    this.el = { crosshair: q('crosshair'), gret: q('gret'), hitmarker: q('hitmarker'), dmg: q('dmg'), score: q('score'), combo: q('combo'), wave: q('wave'), modifier: q('modifier'), left: q('left'), timer: q('timer'), hpfill: q('hpfill'), hpnum: q('hpnum'), mag: q('mag'), reserve: q('reserve'), reloading: q('reloading'), tally: q('tally'), weapon: q('weapon'), hint: q('hint'), slots: q('slots'), tip: q('tip'), msg: q('msg'), msgsub: q('msgsub'), killfeed: q('killfeed'), screen: q('screen'), panel: q('panel'), nades: q('nades'), scope: q('scope'), focusmark: q('focusmark'), focusmeter: q('focusmeter'), fmfill: q('fmfill'), bossbar: q('bossbar'), bossname: q('bossname'), bossfill: q('bossfill'), pvpscore: q('pvpscore'), board: q('board'), gstam: q('gstam'), gstamfill: q('gstamfill'), minimap: q('minimap'), minimapDots: q('minimapDots'), minimapPlayer: q('minimapPlayer') };
     this._msgT = 0; this._scope = false; this._nades = -1; this._pad = false; this.onDevice = null; this._fmShow = false; this._fmFrac = -1; this._fmReady = false; this._lastTally = -1; this._lastSlots = ''; this._ads = false; this._mode = ''; this.onScreenClick = null; this._tipT = 0;
     this.el.screen.addEventListener('click', () => { if (this.onScreenClick) this.onScreenClick(); });
   }
@@ -67,6 +68,17 @@ export class HUD {
   setHealth(hp, max) { const f = Math.max(0, hp / max); this.el.hpfill.style.width = (f * 100).toFixed(1) + '%'; this.el.hpnum.textContent = Math.ceil(hp); this.root.classList.toggle('low', f < 0.3); }
   setBoard(html) { const on = !!html; this.el.board.hidden = !on; if (on) this.el.board.innerHTML = html; }
   setPvpScore(html) { const on = !!html; this.el.pvpscore.hidden = !on; if (on) this.el.pvpscore.innerHTML = html; this.el.wave.parentElement.hidden = on; this.el.left.parentElement.hidden = on; }
+  setMinimap(data) {
+    const { bounds, player, enemies = [], objects = [], teammates = [] } = data;
+    const sx = 100 / Math.max(1, bounds.maxX - bounds.minX), sz = 100 / Math.max(1, bounds.maxZ - bounds.minZ);
+    const point = (p) => ({ left: `${Math.max(2, Math.min(98, (p.x - bounds.minX) * sx))}%`, top: `${Math.max(2, Math.min(98, (p.z - bounds.minZ) * sz))}%` });
+    const dots = [];
+    for (const p of enemies) { const pos = point(p); dots.push(`<i class="map-dot enemy" style="left:${pos.left};top:${pos.top}" title="Enemy"></i>`); }
+    for (const p of teammates) { const pos = point(p); dots.push(`<i class="map-dot teammate" style="left:${pos.left};top:${pos.top}" title="Player"></i>`); }
+    for (const o of objects) { if (!o.pos) continue; const pos = point(o.pos); dots.push(`<i class="map-dot ${o.kind}" style="left:${pos.left};top:${pos.top}" title="${o.kind}"></i>`); }
+    this.el.minimapDots.innerHTML = dots.join('');
+    const pp = point(player.pos); this.el.minimapPlayer.style.left = pp.left; this.el.minimapPlayer.style.top = pp.top; this.el.minimapPlayer.style.transform = `translate(-50%, -50%) rotate(${player.yaw * 180 / Math.PI}deg)`;
+  }
   setWave(n, left) { this.el.wave.textContent = n; this.el.left.textContent = left; }
   setModifier(text) { this.el.modifier.textContent = text || ''; }
   setTimer(text) { this.el.timer.textContent = text || ''; }

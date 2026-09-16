@@ -821,6 +821,16 @@ function step(now) {
   const w = player.weapon; if (w.isGun) hud.setAmmo(w.mag, w.reserve, w.magSize, w.reloading); else hud.setKatana();
   hud.setSlots(player.weapons.map((wp, i) => ({ name: wp.name, active: i === player.weaponIndex, ammo: wp.isGun ? wp.mag + '/' + wp.reserve : '∞', empty: wp.isGun && wp.mag === 0 && wp.reserve === 0 })));
   hud.setGrenades(player.grenades); hud.setGrappleStamina(player.grapStam); hud.setHealth(player.hp, player.maxHp); hud.setSpread(w.spreadPx); hud.update(dt);
+  hud.setMinimap({
+    bounds: level.bounds,
+    player: { pos: player.body.pos, yaw: player.yaw },
+    enemies: enemies.enemies.filter((e) => e.alive).map((e) => ({ x: e.body.pos.x, z: e.body.pos.z })),
+    teammates: [...remote.values()].filter((r) => r.alive && r.root && r.root.visible).map((r) => ({ x: r.body.pos.x, z: r.body.pos.z })),
+    objects: [
+      ...level.rings.map((pos) => ({ kind: 'grapple', pos })),
+      ...pickups.filter((p) => p.mesh && p.mesh.visible).map((p) => ({ kind: 'pickup', pos: p.mesh.position }))
+    ]
+  });
   if (online()) hud.setFocusMeter(playing, player.grapStam, false, 'GRAPPLE');
   else hud.setFocusMeter(playing && (w.kind === 'katana' || game.katanaStreak > 0 || game.focus.active), game.focus.active ? 1 : clamp(game.katanaStreak / KATANA_CHARGE_KILLS, 0, 1), game.focus.active, 'KATANA');
   if (game.boss) { if (game.boss.alive) hud.setBoss(game.boss.T.name, game.boss.hp / game.boss.maxHp); else { hud.setBoss(null, null); game.boss = null; } }
