@@ -85,23 +85,56 @@ function createBuilder(scene, world) {
     world.finalize();
     return L;
   }
-  // a paper plane that loops overhead, purely decorative
+  function aircraft(type, scale, ink) {
+    const g = new THREE.Group(); const mat = makeInkMaterial({ ink, fill: true, side: THREE.DoubleSide }); const dark = makeInkMaterial({ ink: INK.BLACK, fill: true, side: THREE.DoubleSide });
+    const tri = (vertices, material) => { const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3)); geo.computeVertexNormals(); g.add(new THREE.Mesh(geo, material)); };
+    if (type === 'prop') {
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.22 * scale, 0.3 * scale, 2.8 * scale, 8), mat); body.rotation.x = Math.PI / 2; body.position.z = 0.1 * scale; g.add(body);
+      g.add(new THREE.Mesh(new THREE.BoxGeometry(3.2 * scale, 0.08 * scale, 0.42 * scale), mat));
+      g.add(new THREE.Mesh(new THREE.BoxGeometry(0.35 * scale, 0.55 * scale, 0.55 * scale), mat)).position.set(0, 0.3 * scale, 0.95 * scale);
+      const prop = new THREE.Group(); prop.position.z = -1.35 * scale;
+      for (const angle of [0, Math.PI / 2]) { const blade = new THREE.Mesh(new THREE.BoxGeometry(0.12 * scale, 1.8 * scale, 0.06 * scale), dark); blade.rotation.z = angle; prop.add(blade); }
+      prop.add(new THREE.Mesh(new THREE.SphereGeometry(0.16 * scale, 8, 6), dark)); g.add(prop);
+      const tail = new THREE.Mesh(new THREE.BoxGeometry(0.9 * scale, 0.08 * scale, 0.5 * scale), mat); tail.position.z = 1.35 * scale; g.add(tail);
+    } else {
+      tri([0, 0.12 * scale, -2.5 * scale, -2.0 * scale, 0, 0, 1.45 * scale, 0, 0.55 * scale], mat);
+      tri([0, 0.12 * scale, -2.5 * scale, 2.0 * scale, 0, 0, -1.45 * scale, 0, 0.55 * scale], mat);
+      tri([0, 0.16 * scale, -2.1 * scale, 0, 0.75 * scale, 1.05 * scale, 0, 0.05 * scale], dark);
+      tri([0, 0.12 * scale, 0.85 * scale, -0.65 * scale, 0, 1.35 * scale, 0, 0.05 * scale], mat);
+      if (type === 'jet') {
+        const wing = new THREE.Mesh(new THREE.BoxGeometry(3.6 * scale, 0.06 * scale, 0.35 * scale), mat); wing.position.z = -0.15 * scale; wing.rotation.z = 0.05; g.add(wing);
+        for (const x of [-0.72, 0.72]) { const engine = new THREE.Mesh(new THREE.CylinderGeometry(0.13 * scale, 0.13 * scale, 0.8 * scale, 8), dark); engine.rotation.x = Math.PI / 2; engine.position.set(x * scale, -0.12 * scale, -0.25 * scale); g.add(engine); }
+      }
+    }
+    return g;
+  }
+  // Aircraft follow looping routes at varied altitudes, purely decorative.
   function planes(n, baseR, baseH, o = {}) {
     const sc = o.scale || 1;
     for (let i = 0; i < n; i++) {
-      const g = new THREE.ConeGeometry(1.2 * sc, 4 * sc, 3); g.rotateX(Math.PI / 2);
-      const m = new THREE.Mesh(g, makeInkMaterial({ ink: o.ink ?? INK.BLUE })); scene.add(m); L.meshes.push(m);
+      const m = aircraft(i % 3 === 0 ? 'prop' : 'paper', sc, o.colors?.[i % o.colors.length] ?? o.ink ?? INK.BLUE); scene.add(m); L.meshes.push(m);
       L.grappleMovers.push({ mesh: m, radius: 2.2 * sc });
       const r = baseR + i * (o.rStep ?? 12), h = baseH + i * (o.hStep ?? 6), ph = i * 2.1, sp = (o.speed ?? 0.11) + i * 0.01;
       L.animated.push({ mesh: m, update: (t) => { const a = t * sp + ph; m.position.set(Math.cos(a) * r, h + Math.sin(a * 2.3) * 3, Math.sin(a) * r * 0.7); m.lookAt(Math.cos(a + 0.05) * r, h + Math.sin((a + 0.05) * 2.3) * 3, Math.sin(a + 0.05) * r * 0.7); m.rotateZ(Math.sin(a * 3) * 0.6); } });
     }
   }
-  return { L, addGeo, collider, box, slab, wallX, wallZ, stairs, rail, cyl, sphere, ring, spawn, sniper, pickup, finish, planes, scene, world };
+  function crossingPlanes(n, span, baseH, o = {}) {
+    for (let i = 0; i < n; i++) {
+      const scale = o.scale ?? 2.2, m = aircraft(i % 3 === 0 ? 'prop' : 'jet', scale, o.colors?.[i % o.colors.length] ?? o.ink ?? INK.BLUE); scene.add(m); L.meshes.push(m); L.grappleMovers.push({ mesh: m, radius: 2.2 * scale });
+      const diagonal = i % 2 === 0, phase = i / n, speed = (o.speed ?? 0.07) * (i % 3 === 0 ? 1 : 0.82), height = baseH + (i % 4) * 4;
+      L.animated.push({ mesh: m, update: (t) => {
+        const u = ((((t * speed + phase) % 1) + 1) % 1) * 2 - 1, next = Math.min(1, u + 0.025);
+        const x = u * span, z = (diagonal ? u : -u) * span * 0.62, nx = next * span, nz = (diagonal ? next : -next) * span * 0.62;
+        m.position.set(x, height + Math.sin((u + phase) * Math.PI) * 2.5, z); m.lookAt(nx, height, nz); m.rotateZ(Math.sin(t * 4 + phase * 8) * 0.22);
+      } });
+    }
+  }
+  return { L, addGeo, collider, box, slab, wallX, wallZ, stairs, rail, cyl, sphere, ring, spawn, sniper, pickup, finish, planes, crossingPlanes, scene, world };
 }
 
 // ============================ map 1: Doodle District ============================
 function buildDistrict(B, arena = false) {
-  const { L, box, slab, wallX, wallZ, stairs, rail, cyl, sphere, ring, spawn, sniper, pickup, planes, addGeo, collider } = B;
+  const { L, box, slab, wallX, wallZ, stairs, rail, cyl, sphere, ring, spawn, sniper, pickup, planes, crossingPlanes, addGeo, collider, scene } = B;
   // ---------------- ground + perimeter ----------------
   // solo keeps the tight old block; a match gets a far wider arena, a dome and a hanging playground
   const P = arena ? 68 : 55, T = 6, PH = arena ? 30 : 18, E = P - 3.8, D = P - 3;
@@ -146,7 +179,7 @@ function buildDistrict(B, arena = false) {
     const pad = (x, y, z, w, d) => { box(x, y, z, w, 0.5, d, { noNav: true }); cable(x, y + 0.5, z); ring(x, y - 1.3, z, 'y'); };
     for (const [x, y, z, w, d] of [[0, 24, 0, 8, 8], [-42, 18, -24, 6, 6], [44, 21, 30, 6, 6], [28, 27, -46, 5, 5], [-30, 30, 44, 5, 5]]) pad(x, y, z, w, d);
     // paper planes big enough to hook: they loop around the map at different heights
-    planes(4, 30, 26, { scale: 1.7, rStep: 9, hStep: 6, speed: 0.11, ink: INK.BLUE });
+    planes(4, 30, 26, { scale: 1.7, rStep: 9, hStep: 6, speed: 0.28, colors: [INK.BLUE, INK.RED, INK.ORANGE, INK.GREEN] });
   }
 
   // ---------------- central tower (solo only: a match wants the field open) ----------------
@@ -246,6 +279,22 @@ function buildDistrict(B, arena = false) {
   // ---------------- highway ----------------
   {
     const z = -30, y = 7;
+    const car = (x, lane, speed, ink, taxi = false, type = 'car') => {
+      const g = new THREE.Group(); const body = makeInkMaterial({ ink, fill: true, side: THREE.DoubleSide }); const dark = makeInkMaterial({ ink: INK.BLACK, fill: true, side: THREE.DoubleSide });
+      const part = (geo, mat, px, py, pz) => { const m = new THREE.Mesh(geo, mat); m.position.set(px, py, pz); g.add(m); };
+      const long = type === 'bus' ? 6.5 : type === 'truck' ? 5.6 : 3.8, wide = type === 'bus' ? 1.7 : 1.45;
+      part(new THREE.BoxGeometry(long, type === 'bus' ? 1.35 : 0.55, wide), body, 0, type === 'bus' ? 0.8 : 0.45, 0);
+      if (type === 'bus') { part(new THREE.BoxGeometry(5.3, 0.8, 1.48), dark, 0.25, 1.65, 0); part(new THREE.BoxGeometry(0.16, 0.9, 1.5), makeInkMaterial({ ink: INK.ORANGE, fill: true }), -2.8, 1.45, 0); }
+      else if (type === 'truck') { part(new THREE.BoxGeometry(3.5, 1.45, 1.6), body, 0.9, 1.1, 0); part(new THREE.BoxGeometry(1.55, 0.7, 1.55), dark, -1.6, 0.82, 0); }
+      else { part(new THREE.BoxGeometry(2.0, 0.55, 1.2), body, 0.15, 0.93, 0); part(new THREE.BoxGeometry(1.45, 0.38, 1.22), dark, 0.15, 0.96, 0); }
+      const wheelX = type === 'bus' ? [-2.35, 2.35] : type === 'truck' ? [-1.7, 1.7] : [-1.35, 1.35];
+      for (const wx of wheelX) for (const wz of [-wide / 2, wide / 2]) part(new THREE.CylinderGeometry(type === 'bus' ? 0.34 : 0.27, type === 'bus' ? 0.34 : 0.27, 0.12, 8).rotateX(Math.PI / 2), dark, wx, 0.25, wz);
+      part(new THREE.BoxGeometry(0.12, 0.12, 0.3), makeInkMaterial({ ink: INK.ORANGE, fill: true }), long / 2, 0.5, -0.42);
+      part(new THREE.BoxGeometry(0.12, 0.12, 0.3), makeInkMaterial({ ink: INK.ORANGE, fill: true }), long / 2, 0.5, 0.42);
+      if (taxi) part(new THREE.BoxGeometry(0.65, 0.1, 0.7), makeInkMaterial({ ink: INK.RED, fill: true }), -0.15, type === 'bus' ? 2.2 : 1.25, 0);
+      g.position.set(x, y + 0.05, z + lane); scene.add(g); L.meshes.push(g);
+      L.animated.push({ mesh: g, update: (t) => { const span = 108; let px = ((x + speed * t + 54) % span + span) % span - 54; g.position.x = px; } });
+    };
     slab(-52, z - 4.5, 52, z + 4.5, y, 0.6);
     wallX(-52, 52, z - 4.3, y, 0.9, 0.4, [[-33, -29], [27, 31], [-2, 2]]); // north barrier gaps: bridges to houses
     wallX(-52, 52, z + 4.3, y, 0.9, 0.4, [[-36.5, -33], [33, 36.5]]); // south barrier gaps: stairs
@@ -254,6 +303,8 @@ function buildDistrict(B, arena = false) {
     
     // road markings
     for (let x = -50; x < 50; x += 4) box(x + 1, y, z, 2, 0.02, 0.2, { noCollide: true, ink: INK.BLACK });
+    car(-42, -2.1, 4.8, INK.RED, true); car(-14, -2.1, 4.2, INK.GREEN); car(18, -2.1, 5.2, INK.PINK); car(46, -2.1, 4.5, INK.ORANGE, false, 'bus');
+    car(-8, 2.1, -5.0, INK.BLUE); car(24, 2.1, -4.2, INK.ORANGE, true); car(50, 2.1, -5.6, INK.GREEN, false, 'truck'); car(-40, 2.1, -4.6, INK.RED, false, 'bus');
     spawn(-48, y, z); spawn(48, y, z); sniper(0, y, z); pickup(-10, y, z); pickup(24, y, z);
   }
 
@@ -310,7 +361,8 @@ function buildDistrict(B, arena = false) {
 
   L.teamSpawns = [[-40, 0, 18], [-34, 12, 12], [-48, 7, -30], [-52, 0, 30], [-30, 7, -48]].map(([x, y, z]) => new THREE.Vector3(x, y, z));
   L.teamSpawns = [L.teamSpawns, [[40, 0, 8], [34, 12, 18], [48, 7, -30], [52, 0, 30], [16, 7, -45]].map(([x, y, z]) => new THREE.Vector3(x, y, z))];
-  if (!arena) planes(3, 30, 30, { rStep: 8, hStep: 6, scale: 1.4 });
+  if (!arena) planes(3, 30, 30, { rStep: 8, hStep: 6, scale: 1.4, speed: 0.32, colors: [INK.PINK, INK.BLUE, INK.ORANGE] });
+  crossingPlanes(arena ? 10 : 8, arena ? 58 : 48, arena ? 34 : 30, { scale: arena ? 2.2 : 1.9, speed: arena ? 0.2 : 0.16, colors: [INK.BLUE, INK.RED, INK.GREEN, INK.ORANGE, INK.PINK] });
   return B.finish();
 }
 
