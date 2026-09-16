@@ -5,7 +5,7 @@ import { clamp, rand, choose } from './util.js';
 class Sfx {
   constructor() {
     this.ctx = null; this.master = null; this.noiseBuf = null; this.volume = 0.55;
-    this.listenerPos = new THREE.Vector3(); this.listenerRight = new THREE.Vector3(1, 0, 0);
+    this.listenerPos = new   THREE.Vector3(); this.listenerRight = new THREE.Vector3(1, 0, 0);
   }
   init() {
     if (this.ctx) return;
