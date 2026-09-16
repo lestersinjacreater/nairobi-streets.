@@ -8,7 +8,7 @@ import { buildHumanoid, buildWeaponProp } from './enemies.js';
 import { clamp, damp, angleLerp, wrapAngle } from './util.js';
 
 const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0);
-const WEAPON_KINDS = ['rifle', 'shotgun', 'sniper', 'blade'];
+const WEAPON_KINDS = ['rifle', 'shotgun', 'sniper', 'blade', 'boxing'];
 const HIT = [['head', 0.3], ['torso', 0.33], ['hips', 0.2], ['armL', 0.11], ['armR', 0.11], ['foreL', 0.1], ['foreR', 0.1], ['legL', 0.13], ['legR', 0.13], ['shinL', 0.11], ['shinR', 0.11]];
 
 // what a player broadcasts about itself, ~20 times a second:
@@ -139,9 +139,9 @@ export class RemotePlayer {
     if (!b.onGround) { J.legL.rotation.x = -0.5; J.legR.rotation.x = 0.6; J.shinL.rotation.x = 1.0; J.shinR.rotation.x = 0.5; }
     // guns are carried up and forward, two hands on them, tilting with where they look; the
     // blade hangs at the side until it is raised to guard
-    const blade = this.weaponIndex === WEAPON_KINDS.length - 1; const aim = blade ? 0 : (this.aiming ? 1 : sp > 6.5 ? 0.8 : 0.95);
+    const blade = WEAPON_KINDS[this.weaponIndex] === 'blade'; const gloves = WEAPON_KINDS[this.weaponIndex] === 'boxing'; const aim = blade || gloves ? 0 : (this.aiming ? 1 : sp > 6.5 ? 0.8 : 0.95);
     const look = clamp(this.pitch, -1.1, 1.1);
-    if (blade) {
+    if (blade || gloves) {
       const g = this.blocking ? 1 : 0;
       J.armR.rotation.x = -0.9 - g * 0.9 - s * 0.6 * w * (1 - g); J.armR.rotation.z = -0.3 - g * 0.5; J.foreR.rotation.x = -1.0 - g * 0.6; J.armL.rotation.x = s * 0.8 * w * (1 - g) - g * 1.4; J.foreL.rotation.x = -0.5;
     } else {

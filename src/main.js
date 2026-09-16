@@ -243,7 +243,6 @@ function startWave(n) {
   else hud.message('WAVE ' + n, n === 1 ? 'They are crawling off the page' : mod.name || choose(['DRAW HARDER', 'KEEP DOODLING', 'DO NOT STAY GROUNDED', 'SWING AWAY', 'REFLECT THEIR BULLETS']), 2.6);
   audio.wave();
   if (n <= tips().length) hud.tip(tips()[n - 1], 7);
-  player.grenades = Math.min(player.maxGrenades, player.grenades + 1);
   for (let i = 0; i < 7; i++) spawnPickup(i < 5 ? 'ammo' : 'health', choose(level.pickups));
   if (n >= 5 && n % 5 === 0 && n > checkpoint) { checkpoint = n; localStorage.setItem('doodle_checkpoint', String(n)); hud.kill('CHECKPOINT · WAVE ' + n, 0); }
 }
@@ -276,7 +275,7 @@ function updateWaves(dt) {
     }
   }
   if (!game.queue.length && enemies.alive === 0) {
-    game.intermission = 8; hud.message('WAVE ' + game.wave + ' CLEAR', 'CATCH YOUR BREATH · +' + 200 * game.wave, 2.5);
+    game.intermission = 8; player.grenades = Math.min(player.maxGrenades, player.grenades + 3); hud.message('WAVE ' + game.wave + ' CLEAR', 'CATCH YOUR BREATH · +200 · +3 GRENADES', 2.5);
     game.addScore(200 * game.wave, null); audio.waveClear(); player.hp = Math.min(player.maxHp, player.hp + 40);
   }
   hud.setWave(game.wave, enemies.alive + game.queue.length);
@@ -363,7 +362,7 @@ function updateFocus(dt) {
 }
 
 // ---------------- free for all: spawning, death, scoring ----------------
-const HOW = { rifle: 'RIFLE', shotgun: 'SHOTGUN', sniper: 'SNIPER', katana: 'KATANA', grenade: 'GRENADE', deflect: 'OWN BULLET' };
+const HOW = { rifle: 'RIFLE', shotgun: 'SHOTGUN', sniper: 'SNIPER', katana: 'KATANA', boxing: 'BOXING GLOVES', grenade: 'GRENADE', deflect: 'OWN BULLET' };
 const howWord = (src) => HOW[src] || null;
 const spawnSpots = () => (level.arenaSpawns && level.arenaSpawns.length ? level.arenaSpawns : level.spawns);
 function arenaSpawn() {

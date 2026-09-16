@@ -345,7 +345,7 @@ export class Katana extends ViewModel {
     _v2.copy(P.forward); _v.set(-P.forward.z, 0, P.forward.x).multiplyScalar(s * 0.7); _v2.add(_v).y -= 0.35; _v2.normalize();
     let any = false;
     for (const h of hits) { any = true; const point = h.enemy.center.clone(); point.y += rand(-0.2, 0.4); ctx.enemies.damage(h.enemy, this.damage, { point, dir: _v2.clone(), part: 'torso', source: 'katana', crit: false, slashDir: s }); }
-    if (ctx.playersInArc) for (const t of ctx.playersInArc(P.eye, P.forward, 3.0, Math.cos(0.95))) { any = true; ctx.hitPlayer(t, 55, { point: t.center.clone(), dir: _v2.clone(), part: 'torso', source: 'katana', crit: false }); }
+    if (ctx.playersInArc) for (const t of ctx.playersInArc(P.eye, P.forward, this.kind === 'boxing' ? 2.4 : 3.0, Math.cos(0.95))) { any = true; ctx.hitPlayer(t, this.kind === 'boxing' ? 28 : 55, { point: t.center.clone(), dir: _v2.clone(), part: 'torso', source: this.kind, crit: false }); }
     if (ctx.cutRopes && ctx.cutRopes(P.eye, P.forward, 3.4)) any = true;
     if (ctx.breakablesInArc) for (const br of ctx.breakablesInArc(P.eye, P.forward, 3.2, Math.cos(1.0))) { any = true; ctx.breakHit(br, this.damage, br.pos.clone(), _v2.clone()); }
     // a swing only cuts; bullets are turned aside by the raised guard, never by a slash
@@ -365,6 +365,20 @@ export class Katana extends ViewModel {
       sm.mesh.visible = on;
       // grow along the blade and fill out in height as it soaks, never past the steel
       if (on) { const f = clamp((lv - sm.at) / 0.28, 0.2, 1); sm.mesh.scale.set(1, 0.35 + 0.65 * f, 0.4 + 0.6 * f); }
+    }
+  }
+}
+
+export class BoxingGloves extends Katana {
+  constructor(ctx) {
+    super(ctx);
+    this.name = 'BOXING GLOVES'; this.hint = 'punch · fast close-range combo'; this.kind = 'boxing'; this.damage = 28; this.slashDur = 0.18;
+    this.blade.visible = false;
+    for (const smear of this.smears) smear.mesh.visible = false;
+    const gloveMat = makeInkMaterial({ ink: INK.RED, fill: true, side: THREE.DoubleSide });
+    for (const x of [-0.2, 0.2]) {
+      const glove = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 6), gloveMat);
+      glove.position.set(x, -0.16, -0.02); glove.scale.set(1.1, 0.85, 1.35); this.root.add(glove);
     }
   }
 }
