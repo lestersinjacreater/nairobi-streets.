@@ -45,7 +45,7 @@ let best = Number(localStorage.getItem('doodle_best') || 0);
 let musicWanted = localStorage.getItem('doodle_music') !== '0';
 let checkpoint = Number(localStorage.getItem('doodle_checkpoint') || 0);
 let myName = (localStorage.getItem('doodle_name') || '').slice(0, 14) || 'Doodler' + Math.floor(Math.random() * 90 + 10);
-const settings = { sens: Number(localStorage.getItem('doodle_sens') || 100), invert: localStorage.getItem('doodle_invert') === '1' };
+const settings = { sens: Number(localStorage.getItem('doodle_sens') || 100), invert: localStorage.getItem('doodle_invert') === '1', devMode: localStorage.getItem('doodle_dev_mode') === '1' };
 function applySettings() {
   input.mouseSens = 0.0022 * settings.sens / 100; input.padSensX = 3.4 * settings.sens / 100; input.padSensY = 2.6 * settings.sens / 100; input.invertY = settings.invert;
   localStorage.setItem('doodle_sens', String(settings.sens)); localStorage.setItem('doodle_invert', settings.invert ? '1' : '0');
@@ -56,6 +56,7 @@ let matchLeft = FFA_TIME, clockT = 0, clockRunning = false;
 const mmss = (t) => { t = Math.max(0, Math.ceil(t)); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
 const game = ctx.game = {
   state: 'start', mode: 'solo', menu: false, time: 0, hitstopT: 0, hitstopScale: 1, wave: 0, score: 0, combo: 0, comboT: 0, kills: 0, intermission: 0, queue: [], spawnT: 0, maxAlive: 6, deathT: 0,
+  devMode: settings.devMode,
   focus: { active: false, t: 0, chain: 0, target: null, dash: null, arm: 0, ready: false }, katanaStreak: 0, boss: null, respawnT: 0, matchT: 0, over: null, overT: 0,
   hitstop(d, s) { this.hitstopT = Math.max(this.hitstopT, d); this.hitstopScale = s; },
   addScore(pts, label) { const mult = 1 + Math.min(this.combo, 9) * 0.25; const p = Math.round(pts * mult); this.score += p; if (label) hud.kill(label, p); hud.setScore(this.score, this.combo); },
@@ -167,6 +168,19 @@ const shotQueue = [];
 ctx.onShot = (end) => { if (net.active && inMatch()) shotQueue.push(+end.x.toFixed(1), +end.y.toFixed(1), +end.z.toFixed(1)); };
 const TRACER_THICK = { rifle: 0.02, shotgun: 0.014, sniper: 0.03 };
 const _sm = new THREE.Vector3(), _se = new THREE.Vector3();
+let vehicleHitCooldown = 0;
+function checkVehicleImpacts(dt) {
+  vehicleHitCooldown = Math.max(0, vehicleHitCooldown - dt);
+  if (!player.alive || vehicleHitCooldown > 0 || !level.vehicles?.length) return;
+  for (const vehicle of level.vehicles) {
+    if (Math.abs(player.body.pos.x - vehicle.x) > vehicle.length / 2 + player.body.halfW || Math.abs(player.body.pos.z - vehicle.z) > vehicle.width / 2 + player.body.halfW) continue;
+    if (player.body.pos.y + player.body.height < vehicle.y || player.body.pos.y > vehicle.y + 2.4) continue;
+    vehicleHitCooldown = 0.8; player.takeDamage(vehicle.type === 'bus' || vehicle.type === 'truck' ? 45 : 30, new THREE.Vector3(vehicle.x, vehicle.y, vehicle.z));
+    player.body.vel.x = vehicle.speed > 0 ? 12 : -12; player.body.vel.z = 0; player.body.vel.y = 4;
+    hud.message('TRAFFIC IMPACT', vehicle.type === 'bus' ? 'BUS COLLISION' : vehicle.type === 'truck' ? 'TRUCK COLLISION' : 'CAR COLLISION', 1.2);
+    break;
+  }
+}
 
 // ---------------- pickups ----------------
 const pickups = []; let pickupId = 1;
@@ -598,6 +612,7 @@ function settingsHTML() {
     <label>Mouse sensitivity <input type="range" id="setSens" min="25" max="250" step="5" value="${settings.sens}"><b id="setSensV">${settings.sens}%</b></label>
     <label><input type="checkbox" id="setInv" ${settings.invert ? 'checked' : ''}> Invert vertical look</label>
     <label><input type="checkbox" id="setMus" ${musicWanted ? 'checked' : ''}> Music <span class="k">(M)</span></label>
+    <label><input type="checkbox" id="setDev" ${settings.devMode ? 'checked' : ''}> Developer mode <span class="k">(solo invulnerable)</span></label>
   </div>`;
 }
 function wireSettings() {
@@ -607,6 +622,7 @@ function wireSettings() {
   sens.addEventListener('input', () => { settings.sens = Number(sens.value); out.textContent = settings.sens + '%'; applySettings(); });
   box.querySelector('#setInv').addEventListener('change', (e) => { settings.invert = e.target.checked; applySettings(); });
   box.querySelector('#setMus').addEventListener('change', (e) => { musicWanted = e.target.checked; localStorage.setItem('doodle_music', musicWanted ? '1' : '0'); audio.musicOn(musicWanted); });
+  box.querySelector('#setDev').addEventListener('change', (e) => { settings.devMode = e.target.checked; game.devMode = settings.devMode; localStorage.setItem('doodle_dev_mode', settings.devMode ? '1' : '0'); hud.tip(settings.devMode ? 'DEVELOPER MODE ON' : 'DEVELOPER MODE OFF', 1.5); });
 }
 function wireName(box) {
   const nb = box.querySelector('#setName'); if (!nb) return;
@@ -794,7 +810,7 @@ function step(now) {
     game.time += sdt; if (player.shieldT > 0) player.shieldT -= dt;
     musicHealT -= dt; if (musicHealT <= 0) { musicHealT = 2; if (musicWanted && st === 'play' && !audio.musicPlaying && audio.ctx) audio.musicOn(true); if (input.anyInput) audio.resume(); }
     { const B = level.bounds, bp = player.body.pos; if (bp.x < B.minX - 8 || bp.x > B.maxX + 8 || bp.z < B.minZ - 8 || bp.z > B.maxZ + 8 || bp.y > 150) bp.y = -100; }
-    player.update(sdt); enemies.update(sdt); effects.update(sdt); updatePickups(sdt); netUpdate(dt);
+    player.update(sdt); checkVehicleImpacts(dt); enemies.update(sdt); effects.update(sdt); updatePickups(sdt); netUpdate(dt);
     if (st === 'play' && !online()) updateWaves(sdt);
     if (online()) updateArenaPickups(dt);
     if (game.comboT > 0) { game.comboT -= sdt; if (game.comboT <= 0) { game.combo = 0; hud.setScore(game.score, 0); } }

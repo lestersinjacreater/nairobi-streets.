@@ -115,6 +115,7 @@ export const CONTROLS_HTML = `
     <div><b>F</b> quick katana slash &nbsp; <b>R</b> reload &nbsp; <b>M</b> music</div>
     <div><b>G</b> grenade · hold it to throw further</div>
     <div><b>Tab</b> scoreboard (online) &nbsp; <b>Esc</b> pause</div>
+    <div><b>V</b> toggle first-person / third-person view</div>
     <div><b>Both mouse buttons</b> dash-slash once the gauge is lit</div>
     <div><b>1-5 / wheel</b> rifle · shotgun · sniper · katana · boxing gloves</div>
   </div>

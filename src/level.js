@@ -11,7 +11,7 @@ export const MEXICO_READY = false;
 export const LEVELS = [{ key: 'district', name: 'DOODLE DISTRICT', blurb: 'streets, rooftops and fire escapes' }, ...(MEXICO_READY ? [{ key: 'mexico', name: 'DOODLE MEXICO', blurb: 'a sun-baked plaza · pinatas, tacos and mariachi' }] : [])];
 
 function createBuilder(scene, world) {
-  const geos = {}; const L = { rings: [], spawns: [], snipers: [], pickups: [], animated: [], meshes: [], playerStart: new THREE.Vector3(0, 0, 42), bounds: { minX: -55, maxX: 55, minZ: -55, maxZ: 55 }, arenaSpawns: [], grappleMovers: [], breakables: [], key: 'district' };
+  const geos = {}; const L = { rings: [], spawns: [], snipers: [], pickups: [], animated: [], meshes: [], vehicles: [], playerStart: new THREE.Vector3(0, 0, 42), bounds: { minX: -55, maxX: 55, minZ: -55, maxZ: 55 }, arenaSpawns: [], grappleMovers: [], breakables: [], key: 'district' };
   const addGeo = (g, ink) => (geos[ink] || (geos[ink] = [])).push(g);
   const collider = (x, y, z, w, h, d, o = {}) => world.addBox({ x: x - w / 2, y, z: z - d / 2 }, { x: x + w / 2, y: y + h, z: z + d / 2 }, { noNav: !!o.noNav, noShoot: !!o.noShoot, noGrapple: !!o.noGrapple, tag: o.tag });
   function box(x, y, z, w, h, d, o = {}) {
@@ -112,16 +112,17 @@ function createBuilder(scene, world) {
   function planes(n, baseR, baseH, o = {}) {
     const sc = o.scale || 1;
     for (let i = 0; i < n; i++) {
+      const r = baseR + i * (o.rStep ?? 12), h = baseH + i * (o.hStep ?? 6), ph = i * 2.1, sp = (o.speed ?? 0.11) + i * 0.01;
       const m = aircraft(i % 3 === 0 ? 'prop' : 'paper', sc, o.colors?.[i % o.colors.length] ?? o.ink ?? INK.BLUE); scene.add(m); L.meshes.push(m);
       L.grappleMovers.push({ mesh: m, radius: 2.2 * sc });
-      const r = baseR + i * (o.rStep ?? 12), h = baseH + i * (o.hStep ?? 6), ph = i * 2.1, sp = (o.speed ?? 0.11) + i * 0.01;
       L.animated.push({ mesh: m, update: (t) => { const a = t * sp + ph; m.position.set(Math.cos(a) * r, h + Math.sin(a * 2.3) * 3, Math.sin(a) * r * 0.7); m.lookAt(Math.cos(a + 0.05) * r, h + Math.sin((a + 0.05) * 2.3) * 3, Math.sin(a + 0.05) * r * 0.7); m.rotateZ(Math.sin(a * 3) * 0.6); } });
     }
   }
   function crossingPlanes(n, span, baseH, o = {}) {
     for (let i = 0; i < n; i++) {
-      const scale = o.scale ?? 2.2, m = aircraft(i % 3 === 0 ? 'prop' : 'jet', scale, o.colors?.[i % o.colors.length] ?? o.ink ?? INK.BLUE); scene.add(m); L.meshes.push(m); L.grappleMovers.push({ mesh: m, radius: 2.2 * scale });
-      const diagonal = i % 2 === 0, phase = i / n, speed = (o.speed ?? 0.07) * (i % 3 === 0 ? 1 : 0.82), height = baseH + (i % 4) * 4;
+      const scale = o.scale ?? 2.2, diagonal = i % 2 === 0, phase = i / n, height = baseH + (i % 4) * 4;
+      const m = aircraft(i % 3 === 0 ? 'prop' : 'jet', scale, o.colors?.[i % o.colors.length] ?? o.ink ?? INK.BLUE); scene.add(m); L.meshes.push(m); L.grappleMovers.push({ mesh: m, radius: 2.2 * scale });
+      const speed = (o.speed ?? 0.07) * (i % 3 === 0 ? 1 : 0.82);
       L.animated.push({ mesh: m, update: (t) => {
         const u = ((((t * speed + phase) % 1) + 1) % 1) * 2 - 1, next = Math.min(1, u + 0.025);
         const x = u * span, z = (diagonal ? u : -u) * span * 0.62, nx = next * span, nz = (diagonal ? next : -next) * span * 0.62;
@@ -292,8 +293,9 @@ function buildDistrict(B, arena = false) {
       part(new THREE.BoxGeometry(0.12, 0.12, 0.3), makeInkMaterial({ ink: INK.ORANGE, fill: true }), long / 2, 0.5, -0.42);
       part(new THREE.BoxGeometry(0.12, 0.12, 0.3), makeInkMaterial({ ink: INK.ORANGE, fill: true }), long / 2, 0.5, 0.42);
       if (taxi) part(new THREE.BoxGeometry(0.65, 0.1, 0.7), makeInkMaterial({ ink: INK.RED, fill: true }), -0.15, type === 'bus' ? 2.2 : 1.25, 0);
+      const vehicle = { x, z: z + lane, y, speed, length: long, width: wide, type, hitCooldown: 0 };
       g.position.set(x, y + 0.05, z + lane); scene.add(g); L.meshes.push(g);
-      L.animated.push({ mesh: g, update: (t) => { const span = 108; let px = ((x + speed * t + 54) % span + span) % span - 54; g.position.x = px; } });
+      L.vehicles.push(vehicle); L.animated.push({ mesh: g, update: (t) => { const span = 108; vehicle.x = ((x + speed * t + 54) % span + span) % span - 54; g.position.x = vehicle.x; } });
     };
     slab(-52, z - 4.5, 52, z + 4.5, y, 0.6);
     wallX(-52, 52, z - 4.3, y, 0.9, 0.4, [[-33, -29], [27, 31], [-2, 2]]); // north barrier gaps: bridges to houses
