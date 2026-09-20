@@ -174,6 +174,7 @@ class Sfx {
   setTune(key) { if (this._tuneKey === key) return; this._tuneKey = key; if (this._mus) { this._mus.step = 0; this._mus.next = this.ctx.currentTime + 0.1; } }
   _musicTick() {
     if (this._tuneKey === 'mexico') return this._mariachiTick();
+    if (this._tuneKey === 'nairobi') return this._nairobiTick();
     const ctx = this.ctx, m = this._mus; if (!m) return; const I = this._intensity || 0; const out = this.musicGain;
     const bpm = 156, step = 60 / bpm / 4; const midi = (n) => 440 * Math.pow(2, (n - 69) / 12);
     // a throttled tab can fall far behind; skip forward rather than replaying every missed note
@@ -230,6 +231,24 @@ class Sfx {
       if (sb % 2 === 0) this._noiseAt(t, sb === 0 ? 0.05 : 0.03, sb === 0 ? 0.13 : 0.07, 'highpass', 6500, out);
       if (I > 0.45 && (sb === 6 || sb === 10)) this._noiseAt(t, 0.07, 0.16, 'bandpass', 1900, out);
       if (bar === T.bars - 1 && sb >= 8) this._noiseAt(t, 0.06, 0.1 + (sb - 8) * 0.04, 'bandpass', 1600 + (sb - 8) * 300, out);
+      m.next += step; m.step++;
+    }
+  }
+  // Doodle Nairobi: a benga shuffle in C, sixteen sixteenths a bar; walking bass and off-beat chops
+  _nairobiTick() {
+    const ctx = this.ctx, m = this._mus; if (!m) return; const I = this._intensity || 0; const out = this.musicGain;
+    const T = NAIROBI, step = 60 / T.bpm / 4; const midi = (n) => 440 * Math.pow(2, (n - 69) / 12);
+    if (m.next < ctx.currentTime - 0.8) m.next = ctx.currentTime + 0.05;
+    while (m.next < ctx.currentTime + 0.7) {
+      const t = m.next, i = m.step % T.length, bar = Math.floor(i / 16), sb = i % 16;
+      const chord = T.chord[bar], root = chord[0], n = T.lead[i];
+      if (n > 0) { const dur = T.len[i] * step * 0.9; this.tone({ freq: midi(n), dur, gain: 0.1, type: 'square', at: t, out }); this.tone({ freq: midi(n) * 1.003, dur, gain: 0.03, type: 'square', at: t, out }); }
+      if (sb % 2 === 0) this.tone({ freq: midi(root - 12 + (sb === 8 ? 7 : sb === 14 ? 12 : 0)), dur: step * 1.6, gain: 0.16, type: 'triangle', at: t, out });
+      if (sb === 4 || sb === 12) for (const iv of [0, chord[1], 7]) this.tone({ freq: midi(root + iv + 12), dur: step * 1.2, gain: 0.04, type: 'sawtooth', at: t, out });
+      if (sb === 0 || sb === 8) this.tone({ freq: 150, freqEnd: 45, dur: 0.1, gain: 0.4, type: 'sine', at: t, out });
+      if (sb === 4 || sb === 12) this._noiseAt(t, 0.09, 0.18, 'bandpass', 2200, out);
+      if (sb % 2 === 0) this._noiseAt(t, 0.025, sb % 4 === 2 ? 0.08 : 0.05, 'highpass', 8000, out);
+      if (I > 0.5 && (sb === 6 || sb === 14)) this._noiseAt(t, 0.06, 0.12, 'bandpass', 1800, out);
       m.next += step; m.step++;
     }
   }
@@ -315,6 +334,19 @@ const MEX_BARS = [
 ];
 const MEXICO = { lead: MEX_BARS.flatMap((b) => b.notes), len: MEX_BARS.flatMap((b) => b.lens), bpm: 150, chord: [Gm, D7, Gm, Gm, Cm, Gm, D7, Gm, Gm, Em7, Cm, Gm, Am7, D7, Cm, Gm], high: [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1] };
 MEXICO.bars = MEXICO.chord.length; MEXICO.length = MEXICO.bars * 12;
+// ---------- Doodle Nairobi: eight bars of benga in C, sixteen sixteenths a bar ----------
+const NAI_BARS = [
+  N(72, 2, 76, 2, 79, 4, 76, 2, 72, 2, 67, 4),
+  N(72, 2, 76, 2, 84, 4, 79, 2, 76, 2, 72, 4),
+  N(74, 2, 79, 2, 81, 4, 79, 2, 74, 2, 71, 4),
+  N(72, 2, 76, 2, 79, 4, 84, 2, 79, 2, 76, 4),
+  N(79, 2, 84, 2, 88, 4, 84, 2, 79, 2, 76, 4),
+  N(77, 2, 81, 2, 84, 4, 81, 2, 77, 2, 72, 4),
+  N(76, 2, 79, 2, 84, 2, 79, 2, 76, 2, 72, 2, 67, 4),
+  N(72, 4, 76, 2, 79, 2, 84, 4, 0, 4),
+];
+const NAIROBI = { lead: NAI_BARS.flatMap((b) => b.notes), len: NAI_BARS.flatMap((b) => b.lens), bpm: 132, chord: [C, C, G, C, C, F, G, C] };
+NAIROBI.bars = NAIROBI.chord.length; NAIROBI.length = NAIROBI.bars * 16;
 // the harmony trumpet sits a diatonic third under the lead (G major)
 const G_SCALE = [7, 9, 11, 0, 2, 4, 6];
 function thirdBelow(n) { const pc = ((n % 12) + 12) % 12; let k = G_SCALE.indexOf(pc); if (k < 0) return n - 4; k = (k + 5) % 7; let m = n - 1; while (((m % 12) + 12) % 12 !== G_SCALE[k]) m--; return m; }

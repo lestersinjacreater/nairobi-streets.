@@ -23,9 +23,10 @@ export class HUD {
       <div class="tip" id="tip"></div>
       <div class="message"><div class="msg-main" id="msg"></div><div class="msg-sub" id="msgsub"></div></div>
       <div class="killfeed" id="killfeed"></div>
+      <div class="maplabels" id="maplabels" hidden></div>
       <div class="screen" id="screen"><div class="panel" id="panel"></div></div>`;
     const q = (id) => root.querySelector('#' + id);
-    this.el = { crosshair: q('crosshair'), gret: q('gret'), hitmarker: q('hitmarker'), dmg: q('dmg'), score: q('score'), combo: q('combo'), wave: q('wave'), modifier: q('modifier'), left: q('left'), timer: q('timer'), hpfill: q('hpfill'), hpnum: q('hpnum'), mag: q('mag'), reserve: q('reserve'), reloading: q('reloading'), tally: q('tally'), weapon: q('weapon'), hint: q('hint'), slots: q('slots'), tip: q('tip'), msg: q('msg'), msgsub: q('msgsub'), killfeed: q('killfeed'), screen: q('screen'), panel: q('panel'), nades: q('nades'), scope: q('scope'), focusmark: q('focusmark'), focusmeter: q('focusmeter'), fmfill: q('fmfill'), bossbar: q('bossbar'), bossname: q('bossname'), bossfill: q('bossfill'), pvpscore: q('pvpscore'), board: q('board'), gstam: q('gstam'), gstamfill: q('gstamfill'), minimap: q('minimap'), minimapDots: q('minimapDots'), minimapPlayer: q('minimapPlayer') };
+    this.el = { crosshair: q('crosshair'), gret: q('gret'), hitmarker: q('hitmarker'), dmg: q('dmg'), score: q('score'), combo: q('combo'), wave: q('wave'), modifier: q('modifier'), left: q('left'), timer: q('timer'), hpfill: q('hpfill'), hpnum: q('hpnum'), mag: q('mag'), reserve: q('reserve'), reloading: q('reloading'), tally: q('tally'), weapon: q('weapon'), hint: q('hint'), slots: q('slots'), tip: q('tip'), msg: q('msg'), msgsub: q('msgsub'), killfeed: q('killfeed'), screen: q('screen'), panel: q('panel'), nades: q('nades'), scope: q('scope'), focusmark: q('focusmark'), focusmeter: q('focusmeter'), fmfill: q('fmfill'), bossbar: q('bossbar'), bossname: q('bossname'), bossfill: q('bossfill'), pvpscore: q('pvpscore'), board: q('board'), gstam: q('gstam'), gstamfill: q('gstamfill'), minimap: q('minimap'), minimapDots: q('minimapDots'), minimapPlayer: q('minimapPlayer'), maplabels: q('maplabels') };
     this._msgT = 0; this._scope = false; this._nades = -1; this._pad = false; this.onDevice = null; this._fmShow = false; this._fmFrac = -1; this._fmReady = false; this._lastTally = -1; this._lastSlots = ''; this._ads = false; this._mode = ''; this.onScreenClick = null; this._tipT = 0;
     this.el.screen.addEventListener('click', () => { if (this.onScreenClick) this.onScreenClick(); });
   }
@@ -92,8 +93,18 @@ export class HUD {
     setTimeout(() => d.remove(), 1700); while (this.el.killfeed.children.length > 6) this.el.killfeed.firstChild.remove();
   }
   damageFrom(angle) { const i = document.createElement('i'); i.style.transform = `rotate(${(angle * 180 / Math.PI).toFixed(1)}deg)`; this.el.dmg.appendChild(i); setTimeout(() => i.remove(), 1000); }
-  showScreen(html) { this.el.panel.innerHTML = html; this.el.screen.classList.add('show'); }
-  hideScreen() { this.el.screen.classList.remove('show'); }
+  showScreen(html, mode) {
+    this.el.panel.innerHTML = html; this.el.screen.classList.add('show');
+    this.el.screen.classList.toggle('mapview', mode === 'mapview');
+    if (mode !== 'mapview') this.setMapLabels(null);
+  }
+  hideScreen() { this.el.screen.classList.remove('show', 'mapview'); this.setMapLabels(null); }
+  setMapLabels(items) {
+    const el = this.el.maplabels; if (!el) return;
+    if (!items || !items.length) { el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    el.innerHTML = items.map((i) => `<span class="maplab" style="left:${i.x.toFixed(0)}px;top:${i.y.toFixed(0)}px">${i.name}</span>`).join('');
+  }
   setGameplayVisible(v) { this.root.classList.toggle('nogame', !v); }
   update(dt) {
     if (this._msgT > 0) { this._msgT -= dt; if (this._msgT <= 0) { this.el.msg.classList.remove('show'); this.el.msgsub.textContent = ''; } }

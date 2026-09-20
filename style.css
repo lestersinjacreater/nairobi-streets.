@@ -138,6 +138,16 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 .mapbtn i { font-style: normal; font-size: 14px; opacity: .75; }
 .mapbtn:hover { opacity: .85; }
 .mapbtn.on { opacity: 1; color: var(--paper); background: var(--ink); }
+.screen.mapview { background: rgba(246, 243, 230, .12); justify-content: flex-end; align-items: stretch; pointer-events: none; }
+.screen.mapview .panel { pointer-events: auto; text-align: left; width: min(340px, 38vw); max-width: 100%; margin: 16px; padding: 18px 20px; transform: rotate(-.3deg); }
+.screen.mapview .panel h1 { font-size: 42px; letter-spacing: 1px; }
+.screen.mapview .panel h2 { font-size: 20px; margin-bottom: 10px; }
+.maplegend { font-size: 16px; line-height: 1.45; margin: 8px 0 12px; }
+.maplegend div { margin: 3px 0; }
+.maplegend b { display: inline-block; min-width: 62px; color: var(--red); }
+.maplabels { position: absolute; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
+.maplab { position: absolute; transform: translate(-50%, -120%); font: 700 13px/1.1 "Comic Sans MS", "Chalkboard SE", cursive; color: var(--ink); background: rgba(250, 248, 238, .88); border: 2px solid var(--ink); padding: 2px 6px; white-space: nowrap; border-radius: 4px 7px 3px 6px; }
+#hud.nogame .maplabels { display: block; }
 
 /* grenades */
 .nades { display: inline-flex; gap: 3px; margin-left: 12px; vertical-align: middle; }

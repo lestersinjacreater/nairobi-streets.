@@ -19,12 +19,13 @@ import { rand, choose, clamp } from './util.js';
 const canvas = document.getElementById('c');
 const R = new InkRenderer(canvas);
 const world = new World();
-const knownMap = (k) => (LEVELS.some((m) => m.key === k) ? k : 'district');
-let mapKey = knownMap(localStorage.getItem('doodle_map') || 'district');
+const knownMap = (k) => (LEVELS.some((m) => m.key === k) ? k : 'nairobi');
+const tuneFor = (k) => (k === 'mexico' || k === 'nairobi' ? k : 'district');
+let mapKey = knownMap(localStorage.getItem('doodle_map') || 'nairobi');
 let level = buildLevel(R.scene, world, mapKey, { arena: false });
 let nav = new NavGrid(world, level.bounds, 1).build();
 let loadedKey = mapKey, arenaLoaded = false;
-audio.setTune(mapKey === 'mexico' ? 'mexico' : 'district');
+audio.setTune(tuneFor(mapKey));
 // the map in play: solo uses the picked map, a match uses the host's choice; a rebuild wipes broken props
 function setLevel(key, on, force = false) {
   if (!force && key === loadedKey && on === arenaLoaded) return; loadedKey = key; arenaLoaded = on;
@@ -32,7 +33,7 @@ function setLevel(key, on, force = false) {
   level.animated.length = 0; world.clear();
   level = buildLevel(R.scene, world, key, { arena: on }); nav = new NavGrid(world, level.bounds, 1).build();
   ctx.level = level; ctx.nav = nav; if (window.__game) { window.__game.level = level; window.__game.nav = nav; }
-  audio.setTune(key === 'mexico' ? 'mexico' : 'district');
+  audio.setTune(tuneFor(key));
 }
 const setArena = (on) => setLevel(knownMap(net.active ? (lobby.map || mapKey) : mapKey), on);
 const input = new Input(canvas);
@@ -189,6 +190,7 @@ function makePickup(kind) {
   const g = new THREE.Group();
   if (kind === 'ammo') { g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.5, 10), pmat.ammo)); const c = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.16, 8), pmat.cap); c.position.y = 0.33; g.add(c); const l = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.02), pmat.cap); l.position.set(0, 0, 0.24); g.add(l); }
   else if (level.key === 'mexico') { const sh = new THREE.CylinderGeometry(0.42, 0.42, 0.22, 12, 1, false, 0, Math.PI); sh.rotateZ(Math.PI / 2); sh.rotateX(-Math.PI / 2); g.add(new THREE.Mesh(sh, pmat.shell)); const f = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 0.2), pmat.health); f.position.y = 0.02; g.add(f); const m = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.08, 0.14), pmat.cap); m.position.y = 0.1; g.add(m); }
+  else if (level.key === 'nairobi') { const bun = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), pmat.shell); bun.scale.set(1, 0.42, 1); g.add(bun); const bun2 = new THREE.Mesh(new THREE.SphereGeometry(0.26, 8, 6), pmat.health); bun2.scale.set(1, 0.4, 1); bun2.position.set(0.12, 0.1, 0.04); g.add(bun2); }
   else { g.add(new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.2, 0.2), pmat.health), new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 0.2), pmat.health)); }
   return g;
 }
@@ -200,7 +202,7 @@ function spawnPickup(kind, pos, id = null) {
 }
 function removePickup(p) { R.scene.remove(p.mesh); const i = pickups.indexOf(p); if (i >= 0) pickups.splice(i, 1); }
 function collectPickup(p) {
-  if (p.kind === 'ammo') { player.addAmmoAll(0.4); player.grenades = Math.min(player.maxGrenades, player.grenades + 1); hud.kill('+AMMO · +GRENADE', 0); } else { player.hp = Math.min(player.maxHp, player.hp + 35); hud.kill(level.key === 'mexico' ? 'TACO · +35 HP' : '+35 HP', 0); }
+  if (p.kind === 'ammo') { player.addAmmoAll(0.4); player.grenades = Math.min(player.maxGrenades, player.grenades + 1); hud.kill('+AMMO · +GRENADE', 0); } else { player.hp = Math.min(player.maxHp, player.hp + 35); hud.kill(level.key === 'mexico' ? 'TACO · +35 HP' : level.key === 'nairobi' ? 'MANDAZI · +35 HP' : '+35 HP', 0); }
   audio.pickup(); effects.strokeBurst(p.mesh.position, p.kind === 'ammo' ? INK.BLUE : INK.GREEN, 12, 4, { life: 0.3 });
 }
 function updatePickups(dt) {
@@ -495,6 +497,7 @@ net.on('lobby', (d) => {
   for (const p of d.players) if (p.id !== net.id) addRemote(p.id, p.name);
   for (const id of [...remote.keys()]) if (!lobby.players.has(id)) removeRemote(id);
   if (inMatch()) { for (const p of d.players) if (!scores.has(p.id)) scores.set(p.id, { name: p.name, kills: 0, deaths: 0 }); refreshScoreHud(); }
+  else if (lobby.map) setLevel(lobby.map, true);
   renderLobby();
 });
 net.on('leave', (d) => { const nm = (lobby.players.get(d.id) || {}).name; removeRemote(d.id); if (inMatch()) hud.kill((nm || 'Someone') + ' LEFT', 0); renderLobby(); });
@@ -643,7 +646,23 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 function mainHTML() {
   return `<h1>DOODLE DISTRICT</h1><h2>A ballpoint survival shooter</h2>
     <div class="mainbtns"><button type="button" class="start" id="soloBtn">PLAY SOLO<i>Survive wave after wave</i></button><button type="button" id="onlineBtn">PLAY ONLINE<i>Free-for-all · up to 10 players</i></button></div>
-    ${mapHTML(mapKey, true)}${CONTROLS_HTML}${settingsHTML()}${checkpointHTML()}${best ? `<div class="beststat">BEST SCORE: ${best}</div>` : ''}`;
+    ${mapHTML(mapKey, true)}
+    <div class="mapsel"><button type="button" class="mapbtn" id="viewMapBtn">VIEW MAP<i>bird's eye · check it against the real CBD</i></button></div>
+    ${CONTROLS_HTML}${settingsHTML()}${checkpointHTML()}${best ? `<div class="beststat">BEST SCORE: ${best}</div>` : ''}`;
+}
+function mapViewHTML() {
+  const nairobi = mapKey === 'nairobi';
+  return `<h1>BIRD'S EYE</h1><h2>${mapName(mapKey)}</h2>
+    ${nairobi ? `<div class="maplegend">
+      <div><b>WEST</b> Uhuru Park · Uhuru Highway · Nyayo House</div>
+      <div><b>CENTRE</b> Kenyatta Avenue · City Square · KICC</div>
+      <div><b>NORTH</b> City Market · Jeevanjee Gardens</div>
+      <div><b>SOUTH</b> Times Tower · Haile Selassie Avenue</div>
+      <div><b>EAST</b> Moi Avenue · Tom Mboya Street</div>
+      <div class="hint">Streets and landmarks from OpenStreetMap, snapped onto the notebook grid</div>
+    </div>` : ''}
+    <div class="hint">WASD pan · mouse wheel zoom · Esc to leave</div>
+    <div class="row"><button type="button" class="alt" id="mapBack">BACK</button></div>`;
 }
 function onlineHTML() {
   return `<h1>PLAY ONLINE</h1><h2>Free-for-all · first to ${FFA_TARGET} kills · up to 10 players</h2>
@@ -694,7 +713,7 @@ function wireOnline() {
   if (q('backBtn')) q('backBtn').addEventListener('click', () => { lobby.status = ''; lobby.rejoinCode = null; screen = 'main'; showStart(); });
   if (q('refreshBtn')) { q('refreshBtn').addEventListener('click', () => refreshLobbies()); if (!lobbyList && !listBusy) refreshLobbies(); }
   if (q('lobbyRows')) q('lobbyRows').addEventListener('click', (e) => { const b = e.target.closest('button[data-join]'); if (b) { lockButtons(box); joinLobby(b.dataset.join); } });
-  wireMap((k) => { if (net.isHost) { lobby.map = k; broadcastLobby(); } });
+  wireMap((k) => { if (net.isHost) { lobby.map = k; mapKey = k; localStorage.setItem('doodle_map', k); setLevel(k, true); broadcastLobby(); } });
   if (q('startBtn')) q('startBtn').addEventListener('click', () => { if (net.isHost) hostStart(); else { net.send('startreq', {}); setStatus('ASKING THE HOST TO START…'); } });
   if (q('leaveBtn')) q('leaveBtn').addEventListener('click', () => { lobby.rejoinCode = null; leaveOnline(''); });
 }
@@ -704,13 +723,23 @@ function renderLobby() { if (game.state === 'lobby') showStart(); }
 function showStart() {
   hud.setGameplayVisible(false);
   if (game.state === 'lobby') screen = 'lobby';
+  if (screen === 'mapview') {
+    hud.showScreen(mapViewHTML(), 'mapview');
+    const p = hud.el.panel;
+    p.addEventListener('click', (e) => e.stopPropagation());
+    p.querySelector('#mapBack').addEventListener('click', (e) => { e.stopPropagation(); screen = 'main'; player.resetOverview(); hud.setMapLabels(null); showStart(); });
+    player.resetOverview();
+    return;
+  }
   const html = screen === 'lobby' ? lobbyHTML() : screen === 'online' ? onlineHTML() : mainHTML();
   hud.showScreen(html);
   const p = hud.el.panel;
   if (screen === 'main') {
-    wireSettings(); wireCheckpoints((w) => beginAtWave(w)); wireMap((k) => { mapKey = k; localStorage.setItem('doodle_map', k); showStart(); });
+    wireSettings(); wireCheckpoints((w) => beginAtWave(w)); wireMap((k) => { mapKey = k; localStorage.setItem('doodle_map', k); setLevel(k, false); showStart(); });
     p.querySelector('#soloBtn').addEventListener('click', (e) => { e.stopPropagation(); begin(); });
     p.querySelector('#onlineBtn').addEventListener('click', (e) => { e.stopPropagation(); screen = 'online'; showStart(); });
+    const vm = p.querySelector('#viewMapBtn');
+    if (vm) vm.addEventListener('click', (e) => { e.stopPropagation(); screen = 'mapview'; player.resetOverview(); showStart(); });
   } else wireOnline();
 }
 function showPause() {
@@ -769,7 +798,7 @@ hud.onScreenClick = () => {
   const st = game.state;
   if (st === 'over') { if (net.isHost) { net.send('backtolobby', {}); toLobbyScreen(); } return; }
   if (st === 'lobby') return;
-  if (st === 'start') { if (screen === 'main') begin(); return; }
+  if (st === 'start') { if (screen === 'mapview') return; if (screen === 'main') begin(); return; }
   if ((st === 'play' || st === 'dying') && game.menu) { resume(); return; }
   if (st === 'pause' || st === 'dead') resume();
 };

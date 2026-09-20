@@ -1,4 +1,4 @@
-// Level construction. Two maps share one builder: everything is merged ink geometry plus
+// Level construction. Maps share one builder: everything is merged ink geometry plus
 // axis-aligned box colliders, which is what the navigation grid is generated from.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -8,7 +8,11 @@ import { buildHumanoid } from './enemies.js';
 
 // Doodle Mexico is built and kept, but off the menu until it is ready; flip this to offer it again
 export const MEXICO_READY = false;
-export const LEVELS = [{ key: 'district', name: 'DOODLE DISTRICT', blurb: 'streets, rooftops and fire escapes' }, ...(MEXICO_READY ? [{ key: 'mexico', name: 'DOODLE MEXICO', blurb: 'a sun-baked plaza · pinatas, tacos and mariachi' }] : [])];
+export const LEVELS = [
+  { key: 'nairobi', name: 'DOODLE NAIROBI', blurb: 'OSM CBD · Kenyatta Ave, KICC, Uhuru Park' },
+  { key: 'district', name: 'DOODLE DISTRICT', blurb: 'streets, rooftops and fire escapes' },
+  ...(MEXICO_READY ? [{ key: 'mexico', name: 'DOODLE MEXICO', blurb: 'a sun-baked plaza · pinatas, tacos and mariachi' }] : []),
+];
 
 function createBuilder(scene, world) {
   const geos = {}; const L = { rings: [], spawns: [], snipers: [], pickups: [], animated: [], meshes: [], vehicles: [], playerStart: new THREE.Vector3(0, 0, 42), bounds: { minX: -55, maxX: 55, minZ: -55, maxZ: 55 }, arenaSpawns: [], grappleMovers: [], breakables: [], key: 'district' };
@@ -518,7 +522,306 @@ function buildMexico(B, arena = false) {
   B.finish(); return L;
 }
 
+// ============================ map 3: Doodle Nairobi ============================
+// CBD layout from OpenStreetMap (© OpenStreetMap contributors, ODbL).
+// Real plan, compressed ~10.5× onto the notebook page and snapped to X/Z so the
+// AABB world can collide it: Uhuru Park + Uhuru Highway west, Kenyatta Ave east-west
+// through City Square, KICC just east of the square, City Market / Jeevanjee north,
+// Times Tower / Haile Selassie south, Moi and Tom Mboya east.
+// Landmark centroids come from OSM; street widths are inflated so you can fight on them.
+function buildNairobi(B, arena = false) {
+  const { L, box, slab, wallX, wallZ, stairs, rail, cyl, sphere, ring, spawn, sniper, pickup, planes, crossingPlanes, addGeo, collider, scene } = B;
+  const OR = INK.ORANGE, GR = INK.GREEN, PK = INK.PINK, BK = INK.BLACK, BL = INK.BLUE, RD = INK.RED;
+  L.key = 'nairobi'; L.playerStart.set(0, 0, -8);
+  const P = 62; L.bounds = { minX: -P, maxX: P, minZ: -P, maxZ: P };
+  const mat = (ink, fill = false) => makeInkMaterial({ ink, fill, side: fill ? THREE.DoubleSide : THREE.FrontSide });
+  const mesh = (geo, ink, fill = false) => new THREE.Mesh(geo, mat(ink, fill));
+  const breakable = (kind, x, y, z, w, h, d, build, o = {}) => {
+    const g = new THREE.Group(); build(g); g.position.set(x, y, z); scene.add(g); L.meshes.push(g);
+    const br = { id: L.breakables.length, kind, group: g, hp: o.hp ?? 1, pos: new THREE.Vector3(x, y + h / 2, z), alive: true, ink: o.ink ?? OR, box: null };
+    br.box = collider(x, y, z, w, h, d, { noNav: true }); br.box.data.breakable = br; L.breakables.push(br); return br;
+  };
+  const crate = (x, z) => breakable('crate', x, 0, z, 1.1, 1.1, 1.1, (g) => {
+    g.add(mesh(new THREE.BoxGeometry(1.1, 1.1, 1.1).translate(0, 0.55, 0), BL));
+    for (const k of [-1, 1]) g.add(mesh(new THREE.BoxGeometry(1.14, 0.12, 0.12).translate(0, 0.55 + k * 0.35, 0.56), BK));
+  }, { hp: 30, ink: BL });
+  const kiosk = (x, z, ink = OR) => breakable('kiosk', x, 0, z, 1.7, 2.2, 1.3, (g) => {
+    g.add(mesh(new THREE.BoxGeometry(1.7, 1.9, 1.3).translate(0, 0.95, 0), ink));
+    g.add(mesh(new THREE.BoxGeometry(1.9, 0.12, 1.5).translate(0, 1.96, 0), BK));
+    g.add(mesh(new THREE.BoxGeometry(1.5, 0.7, 0.06).translate(0, 1.15, 0.66), BK));
+    g.add(mesh(new THREE.BoxGeometry(1.76, 0.18, 0.18).translate(0, 0.55, 0.68), GR));
+  }, { hp: 35, ink });
+  const jacaranda = (x, z, s = 1) => {
+    cyl(x, 0, z, 0.22 * s, 4.0 * s, { noNav: true, ink: BK, seg: 6 });
+    sphere(x, 4.3 * s, z, 1.25 * s, { ink: PK, seg: 8 });
+    sphere(x + 1.05 * s, 3.9 * s, z + 0.35 * s, 0.95 * s, { ink: PK, seg: 7 });
+    sphere(x - 0.9 * s, 4.0 * s, z - 0.4 * s, 0.9 * s, { ink: PK, seg: 7 });
+    sphere(x + 0.2 * s, 4.6 * s, z - 0.85 * s, 0.75 * s, { ink: PK, seg: 7 });
+  };
+  const lamp = (x, z) => { box(x, 0, z, 0.22, 5.6, 0.22); box(x, 5.6, z, 1.2, 0.22, 0.4, { noCollide: true }); };
+  const bench = (x, z) => { box(x, 0.4, z, 2.6, 0.14, 0.55, { noCollide: true }); box(x, 0, z, 2.2, 0.4, 0.18, { noCollide: true }); };
+  function fireEscape(x, z, floors, side = 1) {
+    let y = 0;
+    for (let f = 0; f < floors; f++) {
+      const dir = f % 2 === 0 ? '+x' : '-x';
+      const sx = dir === '+x' ? x - 3.2 : x + 3.2;
+      const lane = z + side * (f % 2 === 0 ? 6.2 : 8.2);
+      stairs(sx, y, lane, dir, 14, 1.8); y += 4;
+      const lx = dir === '+x' ? x + 3.5 : x - 3.5;
+      const z1 = z + side * 5.2, z2 = z + side * 9.2;
+      slab(lx - 1.1, Math.min(z1, z2), lx + 1.1, Math.max(z1, z2), y, 0.4);
+      rail(lx - 1.1, z + side * 9.2, lx + 1.1, z + side * 9.2, y);
+    }
+  }
+  function office(x, z, w, d, h, o = {}) {
+    box(x, 0, z, w, h, d, { ink: o.ink });
+    const ch = Math.min(2.2, Math.max(1.2, h * 0.1));
+    box(x, h, z, w * 0.55, ch, d * 0.55);
+    if (o.escape !== false && h >= 16) fireEscape(x, z, Math.min(6, Math.round(h / 4)), o.side ?? 1);
+    if (o.ring !== false && h >= 10) ring(x, h + ch + 2, z, 'y');
+    const sy = h + 0.2, sz = z + d * 0.42;
+    if (o.spawn) { spawn(x, sy, sz); pickup(x, sy, sz); }
+    if (o.sniper) sniper(x, sy, sz);
+  }
+  function roadEW(z, x1, x2, w = 8) {
+    slab(x1, z - w / 2, x2, z + w / 2, 0.1, 0.1);
+    for (let x = x1 + 2; x < x2; x += 5) box(x, 0.12, z, 2.0, 0.02, 0.16, { noCollide: true, ink: BK });
+  }
+  function roadNS(x, z1, z2, w = 8) {
+    slab(x - w / 2, z1, x + w / 2, z2, 0.1, 0.1);
+    for (let z = z1 + 2; z < z2; z += 5) box(x, 0.12, z, 0.16, 0.02, 2.0, { noCollide: true, ink: BK });
+  }
+  function sign(x, z, alongX) {
+    box(x, 0, z, 0.18, 3.2, 0.18, { noCollide: true, ink: BK });
+    box(x, 3.2, z, alongX ? 2.4 : 0.2, 0.5, alongX ? 0.2 : 2.4, { noCollide: true, ink: BK });
+  }
+
+  // ---------------- ground, lid, solid perimeter (no gaps to fall through) ----------------
+  const T = 7, PH = 24;
+  box(0, -1, 0, 2 * P + T + 8, 1, 2 * P + T + 8);
+  box(0, 0, -P, 2 * P + T, PH, T); box(0, 0, P, 2 * P + T, PH, T);
+  box(-P, 0, 0, T, PH, 2 * P + T); box(P, 0, 0, T, PH, 2 * P + T);
+  const NG = { noNav: true, noGrapple: true };
+  collider(0, PH, -P, 2 * P + T, 44, T, NG); collider(0, PH, P, 2 * P + T, 44, T, NG);
+  collider(-P, PH, 0, T, 44, 2 * P + T, NG); collider(P, PH, 0, T, 44, 2 * P + T, NG);
+  collider(0, 64, 0, 2 * P + 40, 6, 2 * P + 40, NG);
+  // skyline is backdrop only, outside the walls, so you cannot climb off the page
+  const skyline = (x, z, w, d, h) => {
+    addGeo(new THREE.BoxGeometry(w, h, d).translate(x, h / 2, z), BL);
+    if (h > 14) addGeo(new THREE.BoxGeometry(w * 0.62, h * 0.28, d * 0.62).translate(x, h + h * 0.14, z), BL);
+  };
+  const S = P + 10;
+  for (let i = -2; i <= 2; i++) {
+    skyline(i * 24, -S, 18, 8, 20 + (i & 1) * 10);
+    skyline(i * 24, S, 18, 8, 18 + (i & 1) * 12);
+    skyline(-S, i * 24, 8, 18, 22 + (i & 1) * 8);
+    skyline(S, i * 24, 8, 18, 19 + (i & 1) * 11);
+  }
+  spawn(-20, 0, -48); spawn(20, 0, -48); spawn(-20, 0, 48); spawn(20, 0, 48);
+  spawn(-48, 0, -20); spawn(-48, 0, 20); spawn(48, 0, -20); spawn(48, 0, 20);
+  L.labels = [
+    { name: 'UHURU PARK', x: -54, y: 6, z: 8 },
+    { name: 'UHURU HIGHWAY', x: -44, y: 10, z: 16 },
+    { name: 'NYAYO HOUSE', x: -34, y: 14, z: 4 },
+    { name: 'KENYATTA AVE', x: 6, y: 6, z: -8 },
+    { name: 'CITY SQUARE', x: 8, y: 10, z: 6 },
+    { name: 'KICC', x: 16, y: 24, z: 18 },
+    { name: 'CITY HALL', x: 0, y: 10, z: -18 },
+    { name: 'CITY MARKET', x: -22, y: 10, z: -36 },
+    { name: 'JEEVANJEE', x: -20, y: 8, z: -50 },
+    { name: 'MOI AVENUE', x: 30, y: 6, z: -8 },
+    { name: 'TOM MBOYA ST', x: 44, y: 6, z: -16 },
+    { name: 'TIMES TOWER', x: 24, y: 18, z: 34 },
+    { name: 'HAILE SELASSIE', x: 8, y: 6, z: 42 },
+    { name: 'NATION CENTRE', x: 8, y: 12, z: -42 },
+  ];
+
+  // ---------------- OSM street grid (snapped, widths playable) ----------------
+  roadEW(-8, -38, 50, 10);                   // Kenyatta Avenue
+  roadNS(30, -50, 40, 9);                    // Moi Avenue
+  roadNS(44, -50, 18, 8);                    // Tom Mboya Street
+  roadEW(42, -36, 52, 9);                    // Haile Selassie Avenue
+  roadEW(-54, -40, 20, 8);                   // University Way
+  roadEW(12, -18, 26, 8);                    // City Hall Way
+  roadNS(-20, -50, -12, 7);                  // Muindi Mbingu Street
+  roadEW(-30, -6, 28, 7);                    // Kimathi Street
+  roadNS(-32, -50, -12, 7);                  // Koinange Street
+  roadEW(-40, -36, -8, 6);                   // Banda Street
+  roadNS(-8, 14, 40, 7);                     // Parliament Road
+  roadEW(28, -14, 22, 7);                    // Harambee Avenue
+  sign(-20, -10, true); sign(18, -10, true); sign(28, -20, false); sign(44, -20, false);
+
+  // ---------------- City Square + Kenyatta statue (OSM 36.8224, -1.2878) ----------------
+  slab(-6, -2, 14, 10, 0.12, 0.12);
+  cyl(8, 0, 6, 3.4, 0.45, { seg: 14 });
+  cyl(8, 0.45, 6, 1.2, 2.6, { seg: 10 });
+  box(8, 3.05, 6, 0.7, 2.0, 0.4);
+  sphere(8, 5.3, 6, 0.4, { seg: 8 });
+  box(8.05, 3.05, 6, 0.1, 6.6, 0.1, { noCollide: true, ink: BK });
+  box(8.55, 8.7, 6, 1.1, 0.16, 0.06, { noCollide: true, ink: BK });
+  box(8.55, 8.52, 6, 1.1, 0.16, 0.06, { noCollide: true, ink: RD });
+  box(8.55, 8.34, 6, 1.1, 0.16, 0.06, { noCollide: true, ink: GR });
+  ring(8, 7.4, 6, 'y');
+  for (const [x, z] of [[-4, -2], [14, -2], [-4, 10], [14, 10]]) lamp(x, z);
+
+  // ---------------- Uhuru Park (west of the highway) ----------------
+  for (const [x, z, w, d] of [[-54, 6, 14, 36], [-54, -28, 12, 22], [-54, 36, 12, 16]]) {
+    box(x, 0, z, w, 0.08, d, { noCollide: true, ink: GR });
+  }
+  cyl(-54, 0.02, 8, 5.2, 0.1, { noCollide: true, ink: BL, seg: 16 });
+  addGeo(new THREE.TorusGeometry(5.3, 0.14, 6, 18).rotateX(Math.PI / 2).translate(-54, 0.16, 8), BL);
+  for (const [x, z, s] of [[-54, -22, 1], [-50, -8, 1.1], [-56, 18, 0.95], [-51, 32, 1], [-57, 44, 0.85], [-50, -40, 0.9]]) jacaranda(x, z, s);
+  for (const [x, z] of [[-52, -16], [-52, 22]]) bench(x, z);
+  spawn(-54, 0, -36); spawn(-54, 0, 40); pickup(-54, 0.2, 8); pickup(-50, 0, -20);
+
+  // ---------------- Jeevanjee Gardens (north) ----------------
+  box(-20, 0, -50, 16, 0.08, 10, { noCollide: true, ink: GR });
+  for (const [x, z] of [[-26, -50], [-14, -50], [-20, -54]]) jacaranda(x, z, 0.9);
+  bench(-20, -48); spawn(-20, 0, -50); pickup(-20, 0, -50);
+
+  // ---------------- KICC (OSM tower just east of City Square) ----------------
+  {
+    const x = 16, z = 18;
+    cyl(x, 0, z, 4.4, 20, { seg: 16 });
+    for (const y of [4.2, 8.2, 12.2, 16.2]) addGeo(new THREE.TorusGeometry(4.48, 0.07, 4, 22).rotateX(Math.PI / 2).translate(x, y, z), BK);
+    cyl(x, 20, z, 7.2, 1.35, { ink: OR, seg: 16 });
+    cyl(x, 21.35, z, 3.0, 2.0, { seg: 12 });
+    sphere(x, 24.0, z, 1.15, { ink: OR, seg: 10 });
+    ring(x, 23.2, z, 'y'); ring(x + 6.4, 19.6, z, 'y');
+    // ledges around the shaft so a swing has somewhere to land
+    box(x, 8, z + 5.6, 5.5, 0.4, 2.2); box(x + 5.6, 12, z, 2.2, 0.4, 5.5);
+    box(x - 5.6, 16, z, 2.4, 0.4, 5.5);
+    fireEscape(x, z, 5, 1);
+    sniper(x, 21.45, z + 5.4); spawn(x, 21.45, z + 5.4); pickup(x, 21.45, z + 5.4); pickup(x, 8.45, z + 5.6);
+  }
+
+  // ---------------- Times Tower (OSM, Haile Selassie) ----------------
+  {
+    const x = 24, z = 34;
+    box(x, 0, z, 9, 24, 9);
+    box(x, 24, z, 6.2, 2.6, 6.2);
+    box(x, 26.6, z, 1.6, 3.4, 1.6);
+    for (let y = 2.2; y < 23; y += 3.2) {
+      for (const [dx, dz, w, d] of [[4.56, 0, 0.12, 6.2], [-4.56, 0, 0.12, 6.2], [0, 4.56, 6.2, 0.12], [0, -4.56, 6.2, 0.12]]) {
+        box(x + dx, y, z + dz, w, 1.4, d, { noCollide: true, ink: BK });
+      }
+    }
+    rail(x - 3.1, z - 3.1, x + 3.1, z - 3.1, 24); rail(x - 3.1, z + 3.1, x + 3.1, z + 3.1, 24);
+    fireEscape(x, z, 6, -1);
+    ring(x, 30.4, z, 'y');
+    sniper(x, 24.15, z - 3.9); spawn(x, 24.15, z - 3.9); pickup(x, 24.15, z - 3.9);
+  }
+
+  // ---------------- OSM landmarks (centroids, shifted off the roads) ----------------
+  office(-34, 4, 7, 7, 22, { spawn: true, sniper: true, side: 1 });           // Nyayo House
+  office(-26, -18, 10, 8, 22, { spawn: true, sniper: true, side: -1 });       // Teleposta
+  office(-26, 8, 8, 8, 16, { spawn: true, side: 1 });                         // InterContinental
+  office(0, -18, 10, 7, 12, { spawn: true, side: -1 });                       // City Hall
+  office(-12, 4, 6, 5, 8, { escape: false, ring: false });                    // Holy Family
+  office(22, 4, 7, 6, 10, { side: 1 });                                       // Judiciary
+  office(26, 16, 8, 6, 12, { spawn: true, side: 1 });                         // Jogoo House
+  office(4, 34, 8, 6, 16, { spawn: true, sniper: true, side: -1 });            // Harambee House
+  office(-4, 34, 6, 5, 12, { side: -1 });                                     // Sheria House
+  office(36, 32, 8, 6, 14, { spawn: true, side: -1 });                         // Central Bank
+  office(32, 2, 7, 6, 14, { spawn: true });                                   // Reinsurance Plaza
+  office(-16, -24, 6, 6, 10, { side: -1 });                                   // I&M
+  office(-6, -24, 7, 5, 12, { side: -1 });                                    // ICEA
+  office(12, -22, 7, 6, 12, { spawn: true, side: -1 });                        // Stanley
+  office(8, -42, 6, 6, 14, { spawn: true, sniper: true, side: 1 });            // Nation Centre
+  office(38, -22, 6, 6, 10, { side: 1 });                                     // National Archives
+  office(-10, -42, 8, 7, 10, { side: 1 });                                    // Jamia
+  office(-12, 48, 6, 6, 16, { spawn: true, side: -1 });                       // Bunge / Parliament
+  office(44, 28, 7, 6, 14, { spawn: true, side: -1 });                        // Extelecoms
+  office(24, -40, 6, 6, 10, { side: 1 });                                     // Imenti House
+  office(20, -18, 6, 5, 16, { spawn: true, side: -1 });                       // Eco Bank
+
+  // ---------------- City Market (Muindi Mbingu / Market Street) ----------------
+  {
+    const x = -22, z = -36;
+    box(x, 0, z, 10, 6.0, 10);
+    for (let i = -2; i <= 2; i++) box(x, 6.0, z + i * 1.8, 10, 1.5, 0.9, { ink: OR });
+    stairs(x - 6.2, 0, z + 6.2, '+x', 14, 1.6, { rise: 6 / 14, run: 0.42 });
+    ring(x, 9.2, z, 'y');
+    const stall = (sx, sz, w, d) => {
+      box(sx, 0, sz, w, 0.85, d);
+      for (const [ox, oz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) box(sx + ox * (w / 2 - 0.14), 0, sz + oz * (d / 2 - 0.14), 0.12, 2.7, 0.12, { noCollide: true, ink: BK });
+      for (let i = 0; i < 4; i++) addGeo(new THREE.BoxGeometry(w + 0.5, 0.05, (d + 0.5) / 4).translate(sx, 2.78, sz - (d + 0.5) / 2 + (i + 0.5) * (d + 0.5) / 4), i % 2 ? PK : OR);
+      collider(sx, 2.72, sz, w + 0.5, 0.12, d + 0.5, { noNav: true });
+    };
+    stall(-28, -44, 4.0, 2.2); stall(-16, -44, 4.0, 2.2); stall(-28, -28, 2.2, 3.6);
+    box(-14, 0, -36, 2.8, 1.2, 1.5, { ink: OR }); box(-14, 1.2, -36, 3.0, 0.7, 1.6, { ink: GR });
+    kiosk(-12, -28, RD); kiosk(-30, -32, GR);
+    crate(-16, -28); crate(-28, -40); crate(-18, -44);
+    spawn(x, 7.55, z); sniper(x, 7.55, z); pickup(x, 7.55, z); pickup(-14, 0, -36);
+  }
+
+  // ---------------- Uhuru Highway (west, north-south, OSM) + matatus ----------------
+  {
+    const x = -44, y = 7;
+    slab(x - 5, -54, x + 5, 54, y, 0.55);
+    wallZ(-54, 54, x - 4.8, y, 0.85, 0.35, [[-12, -6], [38, 44]]);
+    wallZ(-54, 54, x + 4.8, y, 0.85, 0.35, [[-12, -6], [38, 44]]);
+    for (let z = -48; z <= 48; z += 16) box(x, 0, z, 1.6, 6.5, 1.6);
+    stairs(-36, 0, -10, '-x', 16, 2.2, { rise: 7 / 16, run: 0.45 });
+    stairs(-36, 0, 42, '-x', 16, 2.2, { rise: 7 / 16, run: 0.45 });
+    for (let z = -50; z < 50; z += 4) box(x, y, z + 1.2, 0.16, 0.02, 2.0, { noCollide: true, ink: BK });
+    const matatu = (z0, lane, speed, ink, stripe) => {
+      const g = new THREE.Group(); const long = 5.4, wide = 1.75;
+      const part = (geo, mk, px, py, pz) => { const m = new THREE.Mesh(geo, mk); m.position.set(px, py, pz); g.add(m); };
+      part(new THREE.BoxGeometry(long, 1.45, wide), mat(ink, true), 0, 1.0, 0);
+      part(new THREE.BoxGeometry(long + 0.08, 0.22, wide + 0.04), mat(stripe, true), 0, 1.05, 0);
+      part(new THREE.BoxGeometry(1.7, 0.7, wide - 0.1), mat(BK, true), -1.55, 1.75, 0);
+      part(new THREE.BoxGeometry(0.14, 0.8, wide + 0.04), mat(OR, true), -long / 2, 1.35, 0);
+      for (const wx of [-1.7, 1.7]) for (const wz of [-wide / 2, wide / 2]) part(new THREE.CylinderGeometry(0.32, 0.32, 0.14, 8).rotateX(Math.PI / 2), mat(BK, true), wx, 0.32, wz);
+      g.rotation.y = Math.PI / 2;
+      const vehicle = { x: x + lane, z: z0, y, speed, length: wide, width: long, type: 'bus', hitCooldown: 0 };
+      g.position.set(x + lane, y + 0.05, z0); scene.add(g); L.meshes.push(g);
+      L.vehicles.push(vehicle);
+      L.animated.push({ mesh: g, update: (t) => { const span = 108; vehicle.z = ((z0 + speed * t + 54) % span + span) % span - 54; g.position.z = vehicle.z; } });
+    };
+    matatu(-40, -2.0, 5.0, RD, OR); matatu(-8, -2.0, 4.4, GR, PK); matatu(24, -2.0, 5.4, BL, OR); matatu(48, -2.0, 4.6, OR, GR);
+    matatu(-16, 2.0, -5.2, PK, BL); matatu(12, 2.0, -4.4, OR, RD); matatu(36, 2.0, -5.6, GR, OR); matatu(-48, 2.0, -4.8, BL, PK);
+    spawn(x, y, -48); spawn(x, y, 48); sniper(x, y, 0); pickup(x, y, -12); pickup(x, y, 22);
+  }
+
+  // ---------------- street furniture ----------------
+  for (const [x, z] of [[-16, -10], [16, -10], [8, 10], [-16, 14], [28, -16], [44, -8]]) lamp(x, z);
+  kiosk(6, -14, BL); crate(4, 10); crate(-16, -16); crate(20, 10);
+  pickup(8, 0.6, 6); pickup(0, 0, -8); pickup(30, 0, -8);
+
+  // ---------------- match spawns ----------------
+  for (const [x, y, z] of [
+    [16, 21.45, 23.4], [24, 24.2, 30.1], [-34, 22.2, 7.0], [-26, 22.2, -14.6],
+    [-22, 7.55, -36], [8, 14.2, -39.5], [4, 16.2, 36.5], [36, 14.2, 34.5],
+    [-44, 7.15, -48], [-44, 7.15, 48], [-54, 0, -36], [-54, 0, 40],
+    [0, 0, -8], [30, 0, -8], [44, 0, -20], [-20, 0, -50],
+  ]) L.arenaSpawns.push(new THREE.Vector3(x, y, z));
+  L.teamSpawns = [
+    [[-36, 0, 2], [16, 20, 18], [-44, 7, -20], [-54, 0, 8]].map(([x, y, z]) => new THREE.Vector3(x, y, z)),
+    [[24, 24, 34], [44, 0, -20], [36, 0, 32], [8, 0, -42]].map(([x, y, z]) => new THREE.Vector3(x, y, z)),
+  ];
+
+  // ---------------- sky: sun, Ngong hills, more-CBD skyline, planes ----------------
+  addGeo(new THREE.SphereGeometry(13, 12, 10).translate(-80, 100, -155), OR);
+  for (let i = 0; i < 12; i++) { const a = (i / 12) * TAU; const g = new THREE.BoxGeometry(6.5, 0.8, 0.8); g.rotateZ(a); g.translate(-80 + Math.cos(a) * 20, 100 + Math.sin(a) * 20, -155); addGeo(g, OR); }
+  // Ngong Hills — three ridges on the far south-west
+  for (const [x, z, w, h] of [[-130, 170, 70, 28], [-70, 190, 90, 36], [-20, 185, 55, 22]]) {
+    addGeo(new THREE.BoxGeometry(w, h, 28).translate(x, h / 2, z), BL);
+    addGeo(new THREE.BoxGeometry(w * 0.55, h * 0.45, 20).translate(x, h + h * 0.2, z), BL);
+  }
+  // distant skyline (Upper Hill / Westlands doodle)
+  for (const [x, z, w, h] of [[-160, -40, 14, 40], [-148, -28, 10, 52], [-136, -48, 12, 34], [140, -80, 16, 46], [154, -68, 10, 58], [168, -90, 14, 38], [40, -200, 18, 44], [58, -188, 12, 60], [74, -210, 10, 36]]) {
+    addGeo(new THREE.BoxGeometry(w, h, 10).translate(x, h / 2, z), BL);
+    addGeo(new THREE.BoxGeometry(w * 0.5, h * 0.2, 8).translate(x, h + h * 0.08, z), BL);
+  }
+  planes(3, 28, 28, { rStep: 8, hStep: 5, scale: 1.35, speed: 0.3, colors: [INK.PINK, INK.ORANGE, INK.GREEN] });
+  crossingPlanes(arena ? 8 : 6, arena ? 56 : 48, 32, { scale: 1.8, speed: 0.16, colors: [INK.BLUE, INK.RED, INK.GREEN, INK.ORANGE] });
+  return B.finish();
+}
+
 export function buildLevel(scene, world, key = 'district', opts = {}) {
   const B = createBuilder(scene, world);
-  return key === 'mexico' ? buildMexico(B, !!opts.arena) : buildDistrict(B, !!opts.arena);
+  if (key === 'mexico') return buildMexico(B, !!opts.arena);
+  if (key === 'nairobi') return buildNairobi(B, !!opts.arena);
+  return buildDistrict(B, !!opts.arena);
 }
