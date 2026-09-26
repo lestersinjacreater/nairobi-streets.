@@ -33,11 +33,23 @@ function setLevel(key, on, force = false) {
   level.animated.length = 0; world.clear();
   level = buildLevel(R.scene, world, key, { arena: on }); nav = new NavGrid(world, level.bounds, 1).build();
   ctx.level = level; ctx.nav = nav; if (window.__game) { window.__game.level = level; window.__game.nav = nav; }
-  audio.setTune(tuneFor(key));
+  audio.setTune(tuneFor(key)); hud.setMinimapBase(level.bounds, footprints());
 }
 const setArena = (on) => setLevel(knownMap(net.active ? (lobby.map || mapKey) : mapKey), on);
 const input = new Input(canvas);
 const hud = new HUD(document.getElementById('hud'));
+// Minimap buildings: colliders standing on the ground, at least head height and bigger than a pillar.
+// Ceilings, invisible lids and walk-through props are skipped.
+function footprints() {
+  const out = [];
+  for (const b of world.boxes) {
+    const w = b.max.x - b.min.x, d = b.max.z - b.min.z;
+    if (b.data.noNav || b.min.y > 1 || b.max.y - b.min.y < 2 || w * d < 3) continue;
+    out.push([b.min.x, b.min.z, b.max.x, b.max.z]);
+  }
+  return out;
+}
+hud.setMinimapBase(level.bounds, footprints());
 const effects = new Effects(R.scene, world);
 const ctx = { scene: R.scene, camera: R.camera, world, level, nav, input, hud, effects, audio, renderer: R };
 
@@ -882,10 +894,8 @@ function step(now) {
     player: { pos: player.body.pos, yaw: player.yaw },
     enemies: enemies.enemies.filter((e) => e.alive).map((e) => ({ x: e.body.pos.x, z: e.body.pos.z })),
     teammates: [...remote.values()].filter((r) => r.alive && r.root && r.root.visible).map((r) => ({ x: r.body.pos.x, z: r.body.pos.z })),
-    objects: [
-      ...level.rings.map((pos) => ({ kind: 'grapple', pos })),
-      ...pickups.filter((p) => p.mesh && p.mesh.visible).map((p) => ({ kind: 'pickup', pos: p.mesh.position }))
-    ]
+    // only what you act on: you, enemies, other players and pickups (buildings are drawn underneath)
+    objects: pickups.filter((p) => p.mesh && p.mesh.visible).map((p) => ({ kind: 'pickup', pos: p.mesh.position })),
   });
   if (online()) hud.setFocusMeter(playing, player.grapStam, false, 'GRAPPLE');
   else hud.setFocusMeter(playing && (w.kind === 'katana' || game.katanaStreak > 0 || game.focus.active), game.focus.active ? 1 : clamp(game.katanaStreak / KATANA_CHARGE_KILLS, 0, 1), game.focus.active, 'KATANA');

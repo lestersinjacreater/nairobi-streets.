@@ -11,7 +11,7 @@ export class HUD {
       <div class="hitmarker" id="hitmarker"><i></i><i></i></div>
       <div class="dmg-ind" id="dmg"></div>
       <div class="hud-tl"><div class="score">SCORE <b id="score">0</b></div><div class="combo" id="combo"></div></div>
-      <div class="minimap" id="minimap" aria-label="Map"><div class="minimap-grid"></div><div class="minimap-label">MAP</div><div class="minimap-dots" id="minimapDots"></div><div class="minimap-player" id="minimapPlayer"></div></div>
+      <div class="minimap" id="minimap" aria-label="Map"><svg class="minimap-base" id="minimapBase" preserveAspectRatio="none" aria-hidden="true"></svg><div class="minimap-grid"></div><div class="minimap-label">MAP</div><div class="minimap-dots" id="minimapDots"></div><div class="minimap-player" id="minimapPlayer"></div></div>
       <div class="hud-tr"><div class="wave">WAVE <b id="wave">1</b></div><div class="modifier" id="modifier"></div><div class="left"><b id="left">0</b> enemies left</div><div class="timer" id="timer"></div><div class="pvpscore" id="pvpscore" hidden></div></div><div class="board" id="board" hidden></div>
       <div class="bossbar" id="bossbar"><div class="bossname" id="bossname"></div><div class="bar big"><div class="fill red" id="bossfill"></div></div></div>
       <div class="hud-bl">
@@ -26,7 +26,7 @@ export class HUD {
       <div class="maplabels" id="maplabels" hidden></div>
       <div class="screen" id="screen"><div class="panel" id="panel"></div></div>`;
     const q = (id) => root.querySelector('#' + id);
-    this.el = { crosshair: q('crosshair'), gret: q('gret'), hitmarker: q('hitmarker'), dmg: q('dmg'), score: q('score'), combo: q('combo'), wave: q('wave'), modifier: q('modifier'), left: q('left'), timer: q('timer'), hpfill: q('hpfill'), hpnum: q('hpnum'), mag: q('mag'), reserve: q('reserve'), reloading: q('reloading'), tally: q('tally'), weapon: q('weapon'), hint: q('hint'), slots: q('slots'), tip: q('tip'), msg: q('msg'), msgsub: q('msgsub'), killfeed: q('killfeed'), screen: q('screen'), panel: q('panel'), nades: q('nades'), scope: q('scope'), focusmark: q('focusmark'), focusmeter: q('focusmeter'), fmfill: q('fmfill'), bossbar: q('bossbar'), bossname: q('bossname'), bossfill: q('bossfill'), pvpscore: q('pvpscore'), board: q('board'), gstam: q('gstam'), gstamfill: q('gstamfill'), minimap: q('minimap'), minimapDots: q('minimapDots'), minimapPlayer: q('minimapPlayer'), maplabels: q('maplabels') };
+    this.el = { crosshair: q('crosshair'), gret: q('gret'), hitmarker: q('hitmarker'), dmg: q('dmg'), score: q('score'), combo: q('combo'), wave: q('wave'), modifier: q('modifier'), left: q('left'), timer: q('timer'), hpfill: q('hpfill'), hpnum: q('hpnum'), mag: q('mag'), reserve: q('reserve'), reloading: q('reloading'), tally: q('tally'), weapon: q('weapon'), hint: q('hint'), slots: q('slots'), tip: q('tip'), msg: q('msg'), msgsub: q('msgsub'), killfeed: q('killfeed'), screen: q('screen'), panel: q('panel'), nades: q('nades'), scope: q('scope'), focusmark: q('focusmark'), focusmeter: q('focusmeter'), fmfill: q('fmfill'), bossbar: q('bossbar'), bossname: q('bossname'), bossfill: q('bossfill'), pvpscore: q('pvpscore'), board: q('board'), gstam: q('gstam'), gstamfill: q('gstamfill'), minimap: q('minimap'), minimapBase: q('minimapBase'), minimapDots: q('minimapDots'), minimapPlayer: q('minimapPlayer'), maplabels: q('maplabels') };
     this._msgT = 0; this._scope = false; this._nades = -1; this._pad = false; this.onDevice = null; this._fmShow = false; this._fmFrac = -1; this._fmReady = false; this._lastTally = -1; this._lastSlots = ''; this._ads = false; this._mode = ''; this.onScreenClick = null; this._tipT = 0;
     this.el.screen.addEventListener('click', () => { if (this.onScreenClick) this.onScreenClick(); });
   }
@@ -69,6 +69,33 @@ export class HUD {
   setHealth(hp, max) { const f = Math.max(0, hp / max); this.el.hpfill.style.width = (f * 100).toFixed(1) + '%'; this.el.hpnum.textContent = Math.ceil(hp); this.root.classList.toggle('low', f < 0.3); }
   setBoard(html) { const on = !!html; this.el.board.hidden = !on; if (on) this.el.board.innerHTML = html; }
   setPvpScore(html) { const on = !!html; this.el.pvpscore.hidden = !on; if (on) this.el.pvpscore.innerHTML = html; this.el.wave.parentElement.hidden = on; this.el.left.parentElement.hidden = on; }
+  // Building outlines under the minimap, drawn once per map. Footprints are rasterised onto a grid so
+  // boxes that overlap or touch merge into one shape, then only the edges between built and open
+  // cells are traced, which gives each building a single clean outline.
+  setMinimapBase(bounds, rects) {
+    const svg = this.el.minimapBase; if (!svg) return;
+    const w = bounds.maxX - bounds.minX, h = bounds.maxZ - bounds.minZ; const c = Math.max(0.5, Math.max(w, h) / 320);
+    const nx = Math.ceil(w / c), nz = Math.ceil(h / c); const g = new Uint8Array(nx * nz);
+    for (const [x1, z1, x2, z2] of rects) {
+      const i0 = Math.max(0, Math.round((x1 - bounds.minX) / c)), i1 = Math.min(nx, Math.round((x2 - bounds.minX) / c));
+      const j0 = Math.max(0, Math.round((z1 - bounds.minZ) / c)), j1 = Math.min(nz, Math.round((z2 - bounds.minZ) / c));
+      for (let j = j0; j < j1; j++) for (let i = i0; i < i1; i++) g[j * nx + i] = 1;
+    }
+    const at = (i, j) => (i >= 0 && j >= 0 && i < nx && j < nz ? g[j * nx + i] : 0);
+    const X = (i) => +(bounds.minX + i * c).toFixed(2), Z = (j) => +(bounds.minZ + j * c).toFixed(2);
+    let fill = '', edge = '';
+    for (let j = 0; j < nz; j++) {
+      for (let i = 0; i < nx;) { if (!at(i, j)) { i++; continue; } let e = i; while (at(e, j)) e++; fill += `M${X(i)} ${Z(j)}H${X(e)}V${Z(j + 1)}H${X(i)}Z`; i = e; }
+      for (const dj of [0, 1]) { // horizontal edges on the top (dj 0) and bottom (dj 1) of each row
+        for (let i = 0; i < nx;) { const on = (k) => at(k, j) && !at(k, j + (dj ? 1 : -1)); if (!on(i)) { i++; continue; } let e = i; while (on(e)) e++; edge += `M${X(i)} ${Z(j + dj)}H${X(e)}`; i = e; }
+      }
+    }
+    for (let i = 0; i < nx; i++) for (const di of [0, 1]) { // vertical edges, run along each column
+      for (let j = 0; j < nz;) { const on = (k) => at(i, k) && !at(i + (di ? 1 : -1), k); if (!on(j)) { j++; continue; } let e = j; while (on(e)) e++; edge += `M${X(i + di)} ${Z(j)}V${Z(e)}`; j = e; }
+    }
+    svg.setAttribute('viewBox', `${bounds.minX} ${bounds.minZ} ${w} ${h}`);
+    svg.innerHTML = `<path class="mm-fill" d="${fill}"/><path class="mm-edge" d="${edge}" vector-effect="non-scaling-stroke"/>`;
+  }
   setMinimap(data) {
     const { bounds, player, enemies = [], objects = [], teammates = [] } = data;
     const sx = 100 / Math.max(1, bounds.maxX - bounds.minX), sz = 100 / Math.max(1, bounds.maxZ - bounds.minZ);

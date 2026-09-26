@@ -18,7 +18,10 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 .minimap-grid { position: absolute; inset: 14%; border: 1px dashed rgba(26,48,192,.25); border-radius: 50%; }
 .minimap-label { position: absolute; left: 50%; top: 5%; transform: translateX(-50%); font-size: 10px; letter-spacing: 1px; opacity: .7; }
 .minimap-dots, .minimap-player { position: absolute; inset: 0; }
-.map-dot { position: absolute; width: 6px; height: 6px; transform: translate(-50%, -50%); border-radius: 50%; border: 1px solid rgba(250,248,238,.9); }
+.minimap-base { position: absolute; inset: 0; width: 100%; height: 100%; }
+.minimap-base .mm-fill { fill: rgba(26,48,192,.13); }
+.minimap-base .mm-edge { fill: none; stroke: rgba(26,48,192,.75); stroke-width: 1.1px; stroke-linejoin: round; }
+.map-dot { position: absolute; width: 7px; height: 7px; transform: translate(-50%, -50%); border-radius: 50%; border: 1px solid rgba(250,248,238,.9); }
 .map-dot.enemy { background: var(--red); box-shadow: 0 0 0 2px rgba(208,32,48,.16); }
 .map-dot.teammate { background: #2874d0; }
 .map-dot.grapple { width: 5px; height: 5px; border-radius: 0; transform: translate(-50%, -50%) rotate(45deg); background: var(--ink); }
