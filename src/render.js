@@ -3,6 +3,10 @@
 import * as THREE from 'three';
 
 export const INK = { BLUE: 0, RED: 1, BLACK: 2, ORANGE: 3, GREEN: 4, PINK: 5 };
+// Colour rules: blue is the world, red is danger (and nothing else), orange is something you can
+// hook, ride or break, green is pickups and plants. Emphasis is added to an ink id (ink + EMPH)
+// for anything the player must spot: it is drawn with a bold line that never fades with distance.
+export const EMPH = 8;
 export const INK_COLORS = [
   new THREE.Vector3(0.10, 0.19, 0.76), // blue ballpoint
   new THREE.Vector3(0.86, 0.12, 0.20), // red pen
@@ -49,7 +53,7 @@ void main() {
   if (!gl_FrontFacing) n = -n;
   float ndl = dot(n, uLightDir) * 0.5 + 0.5;
   float ink = uInk; float fill = uFill;
-  if (vColorData.a > 0.0) { ink = vColorData.r; fill = vColorData.g; }
+  if (vColorData.a > 0.0) { ink = vColorData.r + (uInk > 7.5 ? 8.0 : 0.0); fill = vColorData.g; }
   float shade = clamp(ndl * uShadeScale + uShadeBias, 0.0, 1.0);
   if (fill > 0.5) shade = -1.0;
   gl_FragColor = vec4(shade, ink, n.x, n.y);
@@ -58,16 +62,16 @@ void main() {
 export function makeInkMaterial(opts = {}) {
   const m = new THREE.ShaderMaterial({
     uniforms: {
-      uInk: { value: opts.ink ?? INK.BLUE }, uFill: { value: opts.fill ? 1 : 0 },
+      uInk: { value: (opts.ink ?? INK.BLUE) + (opts.emphasis ? EMPH : 0) }, uFill: { value: opts.fill ? 1 : 0 },
       uShadeScale: { value: opts.shadeScale ?? 1.0 }, uShadeBias: { value: opts.shadeBias ?? 0.0 },
       uLightDir: shared.uLightDir, uTime: shared.uTime,
     },
     vertexShader: inkVert, fragmentShader: inkFrag, side: opts.side ?? THREE.FrontSide,
   });
-  m.inkId = opts.ink ?? INK.BLUE;
+  m.inkId = opts.ink ?? INK.BLUE; m.emphasis = !!opts.emphasis;
   return m;
 }
-export function setInk(mat, ink) { mat.uniforms.uInk.value = ink; mat.inkId = ink; }
+export function setInk(mat, ink) { mat.uniforms.uInk.value = ink + (mat.emphasis ? EMPH : 0); mat.inkId = ink; }
 export function setFill(mat, fill) { mat.uniforms.uFill.value = fill ? 1 : 0; }
 
 const postVert = /* glsl */`
@@ -102,7 +106,8 @@ float vnoise(vec2 p) {
 }
 float linDepth(float z) { float zn = z * 2.0 - 1.0; return 2.0 * uNear * uFar / (uFar + uNear - zn * (uFar - uNear)); }
 vec3 inkColor(float id) {
-  int i = int(id + 0.5);
+  float k = floor(id + 0.5); if (k > 7.5) k -= 8.0; // strip emphasis
+  int i = int(k);
   if (i <= 0) return uInks[0]; if (i == 1) return uInks[1]; if (i == 2) return uInks[2];
   if (i == 3) return uInks[3]; if (i == 4) return uInks[4]; return uInks[5];
 }
@@ -121,7 +126,11 @@ void main() {
   vec4 s = texture2D(tScene, suv);
   float z = texture2D(tDepth, suv).x;
   float d = linDepth(z);
-  float o = 1.15 * sc;
+  // Line weight: thick close up, thin in the distance; emphasised things always get the bold line.
+  // Widening the sample offset widens the band the edge test fires in, on the near side.
+  bool emphS = s.g > 7.5;
+  float o = sc * mix(2.0, 1.05, smoothstep(3.0, 30.0, d));
+  if (emphS) o = max(o, 2.3 * sc);
   vec2 ox = vec2(o, 0.0) * px, oy = vec2(0.0, o) * px;
   float zl = texture2D(tDepth, suv - ox).x, zr = texture2D(tDepth, suv + ox).x;
   float zu = texture2D(tDepth, suv + oy).x, zd = texture2D(tDepth, suv - oy).x;
@@ -189,8 +198,10 @@ void main() {
       hatch = max(hatch, smoothstep(0.12, 0.0, shade) * 0.9);
     }
   }
-  float fade = mix(1.0, 0.28, smoothstep(14.0, 110.0, d));
-  float fadeE = mix(1.0, 0.45, smoothstep(30.0, 220.0, dFront));
+  // distance: the world's ink thins out towards the paper; emphasised ink never does
+  bool emphE = inkId > 7.5;
+  float fade = emphS ? 1.0 : mix(1.0, 0.22, smoothstep(12.0, 95.0, d));
+  float fadeE = emphE ? 1.0 : mix(1.0, 0.3, smoothstep(22.0, 130.0, dFront));
 
   // paper with grain, ruled lines and a red margin
   vec2 pp = gl_FragCoord.xy;
@@ -206,7 +217,7 @@ void main() {
   vec3 col = paper;
   col = mix(col, inkColor(s.g), hatch * 0.72 * fade);
   float ew = 0.75 + 0.35 * vnoise(pp * 0.35);
-  col = mix(col, inkColor(inkId) * 0.92, clamp(edge * ew, 0.0, 1.0) * fadeE);
+  col = mix(col, inkColor(inkId) * (emphE ? 0.82 : 0.92), clamp(edge * ew * (emphE ? 1.4 : 1.0), 0.0, 1.0) * fadeE);
 
   // hurt: red scribble vignette; low hp: pulsing
   vec2 vc = (vUv - 0.5) * vec2(uAspect, 1.0);

@@ -185,12 +185,13 @@ function checkVehicleImpacts(dt) {
 
 // ---------------- pickups ----------------
 const pickups = []; let pickupId = 1;
-const pmat = { ammo: makeInkMaterial({ ink: INK.BLUE }), health: makeInkMaterial({ ink: INK.GREEN }), cap: makeInkMaterial({ ink: INK.BLACK }), shell: makeInkMaterial({ ink: INK.ORANGE }) };
+// pickups are green (the colour rules in render.js) and emphasised so they read from across the map
+const pmat = { ammo: makeInkMaterial({ ink: INK.GREEN, emphasis: true }), health: makeInkMaterial({ ink: INK.GREEN, emphasis: true }), cap: makeInkMaterial({ ink: INK.BLACK, emphasis: true }), shell: makeInkMaterial({ ink: INK.ORANGE, emphasis: true }) };
 function makePickup(kind) {
   const g = new THREE.Group();
   if (kind === 'ammo') { g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.5, 10), pmat.ammo)); const c = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.16, 8), pmat.cap); c.position.y = 0.33; g.add(c); const l = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.02), pmat.cap); l.position.set(0, 0, 0.24); g.add(l); }
   else if (level.key === 'mexico') { const sh = new THREE.CylinderGeometry(0.42, 0.42, 0.22, 12, 1, false, 0, Math.PI); sh.rotateZ(Math.PI / 2); sh.rotateX(-Math.PI / 2); g.add(new THREE.Mesh(sh, pmat.shell)); const f = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 0.2), pmat.health); f.position.y = 0.02; g.add(f); const m = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.08, 0.14), pmat.cap); m.position.y = 0.1; g.add(m); }
-  else if (level.key === 'nairobi') { const bun = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), pmat.shell); bun.scale.set(1, 0.42, 1); g.add(bun); const bun2 = new THREE.Mesh(new THREE.SphereGeometry(0.26, 8, 6), pmat.health); bun2.scale.set(1, 0.4, 1); bun2.position.set(0.12, 0.1, 0.04); g.add(bun2); }
+  else if (level.key === 'nairobi') { const bun = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), pmat.health); bun.scale.set(1, 0.42, 1); g.add(bun); const bun2 = new THREE.Mesh(new THREE.SphereGeometry(0.26, 8, 6), pmat.shell); bun2.scale.set(1, 0.4, 1); bun2.position.set(0.12, 0.1, 0.04); g.add(bun2); }
   else { g.add(new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.2, 0.2), pmat.health), new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 0.2), pmat.health)); }
   return g;
 }
