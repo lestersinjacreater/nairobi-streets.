@@ -278,3 +278,53 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 	.minimap { left: 2%; top: 12%; width: 112px; }
 	.map-dot { width: 5px; height: 5px; }
 }
+
+/* ---------------- phones and tablets ---------------- */
+html, body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+canvas#c { touch-action: none; }
+/* touch controls: only while playing on a touch screen */
+#touch { position: fixed; inset: 0; z-index: 5; display: none; touch-action: none; user-select: none; -webkit-user-select: none; }
+#touch.on { display: block; }
+.tbtn { position: absolute; display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; box-sizing: border-box;
+  border-radius: 50%; border: 2.5px solid rgba(38,42,54,.72); background: rgba(250,248,238,.5); color: #262a36;
+  font-family: inherit; font-weight: bold; letter-spacing: .5px; touch-action: none; box-shadow: 2px 3px 0 rgba(38,42,54,.14); transition: transform .06s, background .06s; }
+.tbtn.on { background: rgba(38,42,54,.28); transform: scale(.93); }
+.tbtn.fire { border-color: rgba(208,32,48,.85); color: var(--red); border-width: 3.5px; }
+.tbtn.fire.on { background: rgba(208,32,48,.25); }
+.tbtn.hook { border-color: rgba(214,120,20,.9); color: #b0600a; }
+.tbtn.dash { display: none; border-color: var(--red); color: var(--red); animation: blink 1s infinite; }
+body.dash-ready .tbtn.dash { display: flex; }
+.tbtn.tpause { right: 2vmin; top: 2vmin; width: 9vmin; height: 9vmin; font-size: 3.4vmin; border-radius: 30%; }
+#hud.touch .hud-tr { right: 14vmin; }
+.tstick { position: absolute; width: 22vmin; height: 22vmin; margin: -11vmin 0 0 -11vmin; border-radius: 50%; border: 2.5px dashed rgba(38,42,54,.45); background: rgba(250,248,238,.25); display: none; pointer-events: none; }
+.tstick.on { display: block; }
+.tstick i { position: absolute; left: 50%; top: 50%; width: 10vmin; height: 10vmin; border-radius: 50%; background: rgba(38,42,54,.35); border: 2.5px solid rgba(38,42,54,.7); transform: translate(-50%, -50%); }
+
+/* the HUD moves out of the way of the thumbs: health and ammo to the top centre, the weapon name
+   under the wave counter, tips just below the top bar */
+#hud.touch .hud-bl { left: 50%; right: auto; top: 1.5vmin; bottom: auto; transform: translateX(-50%) scale(.72); transform-origin: top center; display: flex; align-items: center; gap: 18px; }
+#hud.touch .hud-bl .health { margin: 0; }
+#hud.touch .tally, #hud.touch .slots, #hud.touch .hint { display: none; }
+#hud.touch .hud-br { top: 11vmin; bottom: auto; right: auto; left: 50%; transform: translateX(-50%); padding: 0 10px; background: none; box-shadow: none; }
+#hud.touch .weapon { font-size: 18px; }
+#hud.touch .tip { left: 20%; right: 20%; top: 19vmin; bottom: auto; text-align: center; font-size: 20px; }
+#hud.touch .killfeed { top: 36%; font-size: 20px; }
+@media (max-height: 520px) {
+  .hud-tl, .hud-tr { font-size: 20px; }
+  .msg-main { font-size: 52px; } .msg-sub { font-size: 20px; }
+  .ammo b { font-size: 40px; } .ammo span { font-size: 20px; }
+  .minimap { width: clamp(84px, 24vh, 130px); }
+  .panel { padding: 14px 18px; } .panel h1 { font-size: 44px; } .panel h2 { font-size: 22px; margin-bottom: 8px; }
+  .mainbtns, .mainbtns:has(.start) { flex-direction: row; justify-content: center; gap: 12px; margin: 8px 0 4px; }
+  .mainbtns button, .mainbtns button.start { width: auto; min-width: 240px; font-size: 24px; padding: 6px 20px; border-width: 3px; } .mainbtns button i, .mainbtns button.start i { font-size: 12px; }
+  .mapsel { margin-top: 6px; padding-top: 6px; } .mapbtn { font-size: 16px; padding: 2px 10px; }
+}
+/* phones are played sideways */
+#rotate { display: none; position: fixed; inset: 0; z-index: 20; background: var(--paper); color: var(--ink, #1a30c0); align-items: center; justify-content: center; text-align: center; font-size: 26px; padding: 24px; }
+#rotate b { display: block; font-size: 64px; margin-bottom: 12px; transform: rotate(90deg); }
+@media (orientation: portrait) and (pointer: coarse) { #rotate { display: flex; } }
+/* controls help: touch screens get the touch column instead of keyboard and controller */
+.touchhelp { display: none; text-align: left; font-size: 18px; line-height: 1.35; }
+.touchhelp b { color: var(--red); }
+@media (pointer: coarse) { .panel .touchhelp { display: block; } .panel .cols { display: none; } }
+body.touch .panel .touchhelp { display: block; } body.touch .panel .cols { display: none; }

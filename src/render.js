@@ -239,7 +239,10 @@ export class InkRenderer {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', stencil: false });
     this.renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
     this.renderer.autoClear = false;
-    this.pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+    // Phones have dense screens but small GPUs, and the ink pass does a lot of work per pixel, so on a
+    // touch screen the scene is drawn at one buffer pixel per CSS pixel; lines stay crisp enough.
+    const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    this.pixelRatio = Math.min(window.devicePixelRatio || 1, coarse ? 1 : 1.5);
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(80, 1, 0.08, 420);
     const depthTexture = new THREE.DepthTexture(2, 2); depthTexture.format = THREE.DepthFormat; depthTexture.type = THREE.FloatType;

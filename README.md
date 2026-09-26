@@ -17,6 +17,18 @@ python3 serve.py 8910
 
 then open http://127.0.0.1:8910. On Vercel (or any static host) just deploy the folder as is.
 
+## On a phone
+
+The game is an installable web app. Put it on any HTTPS host (Vercel, GitHub Pages), open it in
+Chrome on Android and choose **Install app** (or **Add to Home screen**). It then opens full screen and
+sideways with its own icon, and starts offline too (online matches still need a connection). Touch
+controls appear on the first tap: a thumbstick on the left (push it all the way to sprint), drag on
+the right to look, and buttons for fire, aim, hook, jump, slide, slash, reload, grenade and weapon
+swap; DASH appears when the katana gauge is lit. A paired Bluetooth controller works as well.
+
+`sw.js` lists every file the game loads so it can be cached for offline play; after adding a file,
+add it there too (`node --test tools/pwa.test.mjs` checks the list).
+
 ## Modes
 
 - **Solo**: survive the waves. Bosses every fifth wave, checkpoints unlock at wave 5, 10, 15...
