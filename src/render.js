@@ -117,6 +117,20 @@ float stripes(vec2 p, vec2 dir, float spacing, float width) {
   float soft = width * 0.6;
   return 1.0 - smoothstep(width * 0.5 - soft, width * 0.5 + soft, f);
 }
+// Tones, lightest to darkest: tops and the ground get a faint open hatch, walls facing the sun a
+// sparse single hatch, walls in shade cross-hatching, the darkest dense strokes. Only the sky is
+// left as bare paper, so a lit wall never reads as empty space. Unshaded materials (shade exactly
+// 1: the characters) stay clean.
+float tones(vec2 hp, float sp, float w, float shade) {
+  const vec2 d1 = vec2(0.7071, 0.7071);
+  const vec2 d2 = vec2(-0.7071, 0.7071);
+  const vec2 d3 = vec2(0.2588, 0.9659);
+  float h = stripes(hp, d1, sp * 1.7, w) * step(shade, 0.985) * mix(0.5, 0.2, smoothstep(0.74, 0.86, shade));
+  h = max(h, stripes(hp, d1, sp, w) * smoothstep(0.64, 0.5, shade));
+  h = max(h, stripes(hp, d2, sp * 1.15, w) * smoothstep(0.42, 0.32, shade));
+  h = max(h, stripes(hp, d3, sp * 0.7, w) * smoothstep(0.24, 0.14, shade));
+  return max(h, smoothstep(0.12, 0.0, shade) * 0.9);
+}
 void main() {
   vec2 px = 1.0 / uRes;
   float sc = uRes.y / 900.0;
@@ -158,44 +172,33 @@ void main() {
   // Hatching is anchored to the surface itself, not to the screen. The fragment's world position
   // is rebuilt from depth and the strokes are laid out in world units on whichever pair of axes
   // faces away from the surface normal, so the pattern stays put on a wall as you move past it.
-  // Line spacing steps in powers of two with distance, which keeps the on-screen density roughly
-  // constant instead of collapsing into moire on far geometry.
+  // Line spacing doubles in powers of two with distance, which keeps the on-screen density
+  // roughly constant instead of collapsing into moire on far geometry; neighbouring spacings are
+  // cross-faded so there is no visible seam where one hands over to the next.
   float shade = s.r;
   float hatch = 0.0;
   if (!sky) {
     if (shade < 0.0) hatch = 1.0;
-    else {
-      vec2 hp; float sp, w;
-      if (d < 2.0) {
-        // the held weapon rides with the camera, so for it the screen is the stable frame
-        hp = gl_FragCoord.xy + wob * 5.0 * sc;
-        sp = 8.5 * sc; w = 1.5 * sc;
-      } else {
-        vec4 clip = vec4(vUv * 2.0 - 1.0, z * 2.0 - 1.0, 1.0);
-        vec4 vpos = uInvProj * clip; vpos /= vpos.w;
-        vec3 wpos = (uInvView * vec4(vpos.xyz, 1.0)).xyz;
-        vec2 nxy = s.ba;
-        vec3 nView = vec3(nxy, sqrt(max(0.0, 1.0 - dot(nxy, nxy))));
-        vec3 wn = normalize(mat3(uInvView) * nView);
-        vec3 an = abs(wn);
-        // project onto the plane the surface most faces, so strokes lie flat along it
-        hp = an.y > max(an.x, an.z) ? wpos.xz : (an.x > an.z ? wpos.zy : wpos.xy);
-        // pick the world spacing whose projected width is about nine pixels, quantised to powers
-        // of two so the pattern only changes density in steps and never crawls as you walk
-        float lod = exp2(floor(log2(max(1e-4, (0.0165 * d) / 0.16))));
-        sp = 0.16 * lod; w = sp * 0.17;
-        hp += (vnoise(hp * (2.5 / sp)) - 0.5) * sp * 0.4; // hand-drawn waver, fixed to the surface
-      }
-      const vec2 d1 = vec2(0.7071, 0.7071);
-      const vec2 d2 = vec2(-0.7071, 0.7071);
-      const vec2 d3 = vec2(0.2588, 0.9659);
-      float h1 = stripes(hp, d1, sp, w);
-      float h2 = stripes(hp, d2, sp * 1.15, w);
-      float h3 = stripes(hp, d3, sp * 0.7, w);
-      hatch = h1 * smoothstep(0.64, 0.5, shade);
-      hatch = max(hatch, h2 * smoothstep(0.42, 0.32, shade));
-      hatch = max(hatch, h3 * smoothstep(0.24, 0.14, shade));
-      hatch = max(hatch, smoothstep(0.12, 0.0, shade) * 0.9);
+    else if (d < 2.0) {
+      // the held weapon rides with the camera, so for it the screen is the stable frame
+      hatch = tones(gl_FragCoord.xy + wob * 5.0 * sc, 8.5 * sc, 1.5 * sc, shade);
+    } else {
+      vec4 clip = vec4(vUv * 2.0 - 1.0, z * 2.0 - 1.0, 1.0);
+      vec4 vpos = uInvProj * clip; vpos /= vpos.w;
+      vec3 wpos = (uInvView * vec4(vpos.xyz, 1.0)).xyz;
+      vec2 nxy = s.ba;
+      vec3 nView = vec3(nxy, sqrt(max(0.0, 1.0 - dot(nxy, nxy))));
+      vec3 wn = normalize(mat3(uInvView) * nView);
+      vec3 an = abs(wn);
+      // project onto the plane the surface most faces, so strokes lie flat along it
+      vec2 hp = an.y > max(an.x, an.z) ? wpos.xz : (an.x > an.z ? wpos.zy : wpos.xy);
+      // the world spacing whose projected width is about nine pixels, split into two powers of two
+      float lf = log2(max(1e-4, (0.0165 * d) / 0.16));
+      float l0 = floor(lf);
+      float sp0 = 0.16 * exp2(l0), sp1 = sp0 * 2.0;
+      vec2 hp0 = hp + (vnoise(hp * (2.5 / sp0)) - 0.5) * sp0 * 0.4; // hand-drawn waver, fixed to the surface
+      vec2 hp1 = hp + (vnoise(hp * (2.5 / sp1)) - 0.5) * sp1 * 0.4;
+      hatch = mix(tones(hp0, sp0, sp0 * 0.17, shade), tones(hp1, sp1, sp1 * 0.17, shade), smoothstep(0.0, 1.0, lf - l0));
     }
   }
   // distance: the world's ink thins out towards the paper; emphasised ink never does
