@@ -2,7 +2,13 @@
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--paper); font-family: 'Comic Sans MS', 'Marker Felt', 'Segoe Print', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
 canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
 #hud { position: fixed; inset: 0; pointer-events: none; color: var(--ink); user-select: none; overflow: hidden; }
-.hud-tl, .hud-tr, .hud-bl, .hud-br, .crosshair, .grapple-ret, .hitmarker, .dmg-ind, .message, .killfeed { mix-blend-mode: multiply; }
+.crosshair, .grapple-ret, .hitmarker, .dmg-ind { mix-blend-mode: multiply; }
+/* The in-game HUD is written in graphite, not the blue of the world, and sits on a thin paper halo
+   instead of multiplying into the scene, so it stays readable over hatching and the held weapon.
+   Menus and map labels keep the blue pen. */
+#hud { --ink: #262a36; }
+#hud .screen, #hud .maplabels { --ink: #1a30c0; color: var(--ink); }
+.hud-tl, .hud-tr, .hud-bl, .hud-br, .message, .killfeed, .tip, .bossbar, .focus-meter { filter: drop-shadow(0 0 1px rgba(250,248,238,.95)) drop-shadow(0 0 3px rgba(250,248,238,.85)); }
 #hud.nogame .hud-tl, #hud.nogame .hud-tr, #hud.nogame .hud-bl, #hud.nogame .hud-br, #hud.nogame .crosshair, #hud.nogame .grapple-ret, #hud.nogame .killfeed { display: none; }
 .hud-tl { position: absolute; left: 9%; top: 3%; font-size: 30px; transform: rotate(-1.5deg); }
 .minimap { position: absolute; left: 2.2%; top: 11%; width: clamp(118px, 15vw, 190px); aspect-ratio: 1; border: 2px solid rgba(26,48,192,.78); border-radius: 50%; overflow: hidden; background: rgba(250,248,238,.58); box-shadow: inset 0 0 0 5px rgba(250,248,238,.2), 3px 3px 0 rgba(26,48,192,.12); pointer-events: none; mix-blend-mode: multiply; }
@@ -21,7 +27,8 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 #hud.nogame .minimap { display: none; }
 .hud-tr { position: absolute; right: 4%; top: 3%; text-align: right; font-size: 30px; transform: rotate(1deg); }
 .hud-bl { position: absolute; left: 9%; bottom: 5%; }
-.hud-br { position: absolute; right: 4%; bottom: 5%; text-align: right; }
+/* the weapon list sits over the held gun, so it gets a scrap of paper to stand on */
+.hud-br { position: absolute; right: 3%; bottom: 4%; text-align: right; padding: 6px 12px 4px; background: rgba(250,248,238,.82); border-radius: 10px 14px 8px 12px / 12px 8px 14px 10px; box-shadow: 2px 3px 0 rgba(38,42,54,.12); transform: rotate(-0.8deg); }
 .ammo b { font-size: 58px; } .ammo span { font-size: 28px; opacity: .8; } .reloading { font-size: 22px !important; color: var(--red); }
 .tally { display: flex; flex-wrap: wrap; width: 240px; gap: 3px; margin-top: -8px; align-items: flex-end; }
 .tally i { display: block; width: 4px; height: 20px; background: var(--ink); transform: rotate(4deg); border-radius: 2px; opacity: .9; }
@@ -69,24 +76,25 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 .panel .go { font-size: 34px; margin-top: 18px; animation: blink 1.2s infinite; } @keyframes blink { 50% { opacity: .35; } }
 .panel .stats { font-size: 30px; line-height: 1.4; } .panel .stats b { color: var(--red); }
 .panel .tip { font-size: 21px; opacity: .8; margin-top: 8px; }
-.weapon { font-size: 36px; } .hint { font-size: 20px; opacity: .8; }
+.weapon { font-size: 34px; line-height: 1.05; } .hint { font-size: 18px; opacity: 0; max-height: 0; transition: opacity .35s, max-height .35s; } .hint.show { opacity: .85; max-height: 48px; }
 .combo { font-size: 26px; color: var(--red); min-height: 30px; }
 .timer { font-size: 24px; color: var(--red); }
 @media (max-width: 900px) { .panel h1 { font-size: 56px; } .panel .cols { flex-direction: column; gap: 10px; font-size: 18px; } .msg-main { font-size: 56px; } }
 /* v2 additions */
 .crosshair.ads { opacity: 0; }
 .slots { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; margin-bottom: 6px; font-size: 20px; opacity: .85; }
-.slot { display: flex; gap: 8px; align-items: baseline; opacity: .55; transform: rotate(1deg); }
+.slot { display: flex; gap: 8px; align-items: baseline; opacity: .62; transform: rotate(1deg); }
 .slot.active { opacity: 1; font-size: 24px; border-bottom: 2px solid var(--ink); }
 .slot.empty { color: var(--red); }
 .slot .num { font-size: 15px; opacity: .8; border: 1.5px solid var(--ink); border-radius: 4px 6px 4px 5px; padding: 0 4px; }
 .slot .sammo { font-size: 16px; opacity: .8; min-width: 54px; text-align: right; }
 .modifier { font-size: 22px; color: var(--red); min-height: 26px; }
 .bossbar { position: absolute; left: 50%; top: 6%; width: 420px; margin-left: -210px; text-align: center; font-size: 26px; display: none; }
-.bossbar.show { display: block; mix-blend-mode: multiply; }
+.bossbar.show { display: block; }
 .bar.big { width: 420px; height: 20px; margin-top: 4px; }
 .fill.red { background: repeating-linear-gradient(-55deg, var(--red) 0 3px, transparent 3px 7px); }
-.tip { position: absolute; left: 0; right: 0; bottom: 17%; text-align: center; font-size: 26px; color: var(--ink); opacity: 0; transition: opacity .4s; mix-blend-mode: multiply; }
+/* tips sit above the health block, lined up with it, and wrap before they reach the held weapon */
+.tip { position: absolute; left: 9%; right: 44%; bottom: 27%; text-align: left; font-size: 24px; line-height: 1.2; color: var(--ink); opacity: 0; transition: opacity .4s; }
 .tip.show { opacity: .9; }
 .tip b { color: var(--red); }
 #hud.nogame .tip, #hud.nogame .bossbar { display: none; }
@@ -116,7 +124,7 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 @keyframes fm { from { transform: scale(1); } to { transform: scale(1.18); } }
 #hud.nogame .scope, #hud.nogame .focus-mark { display: none; }
 /* katana focus gauge */
-.focus-meter { position: absolute; left: 4.5%; top: 50%; transform: translateY(-50%) rotate(-1.5deg); opacity: 0; transition: opacity .25s; text-align: center; mix-blend-mode: multiply; }
+.focus-meter { position: absolute; left: 4.5%; top: 50%; transform: translateY(-50%) rotate(-1.5deg); opacity: 0; transition: opacity .25s; text-align: center; }
 .focus-meter.on { opacity: 1; }
 .fm-label { font-size: 17px; letter-spacing: 2px; color: var(--ink); opacity: .8; margin-bottom: 4px; }
 .fm-tube { position: relative; width: 26px; height: 168px; border: 3px solid var(--ink); border-radius: 8px 11px 7px 10px / 11px 7px 10px 8px; overflow: hidden; }

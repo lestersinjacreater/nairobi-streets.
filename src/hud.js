@@ -84,7 +84,11 @@ export class HUD {
   setModifier(text) { this.el.modifier.textContent = text || ''; }
   setTimer(text) { this.el.timer.textContent = text || ''; }
   setScore(score, combo) { this.el.score.textContent = score; this.el.combo.textContent = combo > 1 ? 'combo x' + combo : ''; }
-  setWeapon(name, hint) { this.el.weapon.textContent = name; this.el.hint.textContent = hint || ''; }
+  // the how-to line under the weapon shows for a few seconds after a switch, then gets out of the way
+  setWeapon(name, hint) {
+    const changed = name !== this._wName; this._wName = name; this.el.weapon.textContent = name; this.el.hint.textContent = hint || '';
+    if (changed && hint) { this.el.hint.classList.add('show'); this._hintT = 4; }
+  }
   setBoss(name, frac) { if (frac == null) { this.el.bossbar.classList.remove('show'); return; } this.el.bossbar.classList.add('show'); this.el.bossname.textContent = name; this.el.bossfill.style.width = (Math.max(0, frac) * 100).toFixed(1) + '%'; }
   tip(text, dur = 5) { this.el.tip.innerHTML = text; this.el.tip.classList.add('show'); this._tipT = dur; }
   message(main, sub = '', dur = 2.2) { const m = this.el.msg; m.textContent = main; m.classList.remove('show'); void m.offsetWidth; m.classList.add('show'); this.el.msgsub.textContent = sub; this._msgT = dur; }
@@ -109,6 +113,7 @@ export class HUD {
   update(dt) {
     if (this._msgT > 0) { this._msgT -= dt; if (this._msgT <= 0) { this.el.msg.classList.remove('show'); this.el.msgsub.textContent = ''; } }
     if (this._tipT > 0) { this._tipT -= dt; if (this._tipT <= 0) this.el.tip.classList.remove('show'); }
+    if (this._hintT > 0) { this._hintT -= dt; if (this._hintT <= 0) this.el.hint.classList.remove('show'); }
   }
 }
 
