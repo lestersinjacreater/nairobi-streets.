@@ -109,14 +109,15 @@ export class Player {
     this.eye.copy(c.position); this.center.copy(c.position); c.getWorldDirection(this.forward); this.right.set(this.forward.z, 0, -this.forward.x).normalize();
     if (Math.abs(c.fov - 70) > 0.01) { c.fov = 70; c.updateProjectionMatrix(); }
   }
-  resetOverview() { this._ov = { x: 0, z: 6, h: 128, tilt: 0.16 }; }
+  // bird's eye: starts high enough to see the whole map, pans within its bounds
+  resetOverview() { const B = this.ctx.level.bounds; this._ov = { x: 0, z: 0, h: Math.max(128, (B.maxX - B.minX) * 1.15), tilt: 0.16 }; }
   overviewCam(dt, inp) {
-    const o = this._ov || (this._ov = { x: 0, z: 6, h: 128, tilt: 0.16 });
+    if (!this._ov) this.resetOverview(); const o = this._ov; const B = this.ctx.level.bounds;
     const sp = o.h * 0.55;
-    o.x = clamp(o.x + inp.move.x * sp * dt, -50, 50);
-    o.z = clamp(o.z - inp.move.y * sp * dt, -50, 50);
-    if (inp.pressed('nextWeapon')) o.h = clamp(o.h + 16, 52, 220);
-    if (inp.pressed('prevWeapon')) o.h = clamp(o.h - 16, 52, 220);
+    o.x = clamp(o.x + inp.move.x * sp * dt, B.minX, B.maxX);
+    o.z = clamp(o.z - inp.move.y * sp * dt, B.minZ, B.maxZ);
+    if (inp.pressed('nextWeapon')) o.h = clamp(o.h + 16, 52, 300);
+    if (inp.pressed('prevWeapon')) o.h = clamp(o.h - 16, 52, 300);
     const c = this.camera, back = o.h * o.tilt;
     c.position.set(o.x, o.h, o.z + back); c.lookAt(o.x, 0, o.z);
     this.rig.visible = false; this.avatar.visible = false;

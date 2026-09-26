@@ -659,7 +659,7 @@ function mapViewHTML() {
       <div><b>NORTH</b> City Market · Jeevanjee Gardens</div>
       <div><b>SOUTH</b> Times Tower · Haile Selassie Avenue</div>
       <div><b>EAST</b> Moi Avenue · Tom Mboya Street</div>
-      <div class="hint">Streets and landmarks from OpenStreetMap, snapped onto the notebook grid</div>
+      <div class="hint">${level.osm ? `Every street and building from OpenStreetMap, turned ${Math.abs(level.osm.angleDeg).toFixed(0)}° so the grid runs along the page · 1 square ≈ ${level.osm.metersPerUnit} m · ${level.osm.attribution}` : 'Streets and landmarks from OpenStreetMap, snapped onto the notebook grid'}</div>
     </div>` : ''}
     <div class="hint">WASD pan · mouse wheel zoom · Esc to leave</div>
     <div class="row"><button type="button" class="alt" id="mapBack">BACK</button></div>`;
@@ -719,6 +719,16 @@ function wireOnline() {
 }
 function lockButtons(box) { for (const b of box.querySelectorAll('button')) if (b.id !== 'backBtn') b.disabled = true; }
 function unlockButtons() { const box = hud.el.panel.querySelector('#online'); if (box) for (const b of box.querySelectorAll('button')) b.disabled = false; }
+// street and landmark names over the bird's eye view
+const _lab = new THREE.Vector3();
+function projectMapLabels() {
+  const items = []; const w = canvas.clientWidth, h = canvas.clientHeight;
+  for (const l of level.labels || []) {
+    _lab.set(l.x, l.y, l.z).project(R.camera); if (_lab.z > 1 || Math.abs(_lab.x) > 1 || Math.abs(_lab.y) > 1) continue;
+    items.push({ name: l.name, x: (_lab.x * 0.5 + 0.5) * w, y: (0.5 - _lab.y * 0.5) * h });
+  }
+  hud.setMapLabels(items);
+}
 function renderLobby() { if (game.state === 'lobby') showStart(); }
 function showStart() {
   hud.setGameplayVisible(false);
@@ -858,7 +868,7 @@ function step(now) {
       else if (game.deathT > 1.7) { game.state = 'dead'; showDead(); input.exitLock(); }
     }
   } else {
-    game.time += dt; if (st === 'start' || st === 'dead' || st === 'lobby' || st === 'over') player.idleCam(game.time); effects.update(dt); if (net.active) netUpdate(dt);
+    game.time += dt; if (st === 'start' && screen === 'mapview') { player.overviewCam(dt, input); projectMapLabels(); } else if (st === 'start' || st === 'dead' || st === 'lobby' || st === 'over') player.idleCam(game.time); effects.update(dt); if (net.active) netUpdate(dt);
     if (st === 'over') { game.overT += dt; if (net.isHost && game.overT > 8) { net.send('backtolobby', {}); toLobbyScreen(); } else if (!net.isHost && game.overT > 15) { toLobbyScreen(); } }
   }
   for (const a of level.animated) a.update(game.time);

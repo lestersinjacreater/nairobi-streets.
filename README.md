@@ -73,6 +73,27 @@ slashes and turns some bullets aside, and the guns use their own damage table; t
 Pick the map on the main menu for solo; the host picks it in the lobby for a match, and everyone
 starts in a different spot.
 
+### Doodle Nairobi from OpenStreetMap
+
+The Nairobi map can be generated from real OpenStreetMap data for the CBD (Node 18+ and curl):
+
+```bash
+node tools/osm/fetch.mjs     # downloads the CBD from the Overpass API into tools/osm/nairobi-cbd.osm.json
+node tools/osm/build.mjs     # writes src/nairobi-data.js
+node --test tools/osm/pipeline.test.mjs
+```
+
+The game only collides axis-aligned boxes, so the build finds the angle of the street grid and turns
+the city until the streets run along the page. Nearly straight streets are snapped into single
+strips, diagonal ones (Uhuru Highway) become chunky steps, and each building footprint is cut into a
+few boxes at its real height (from `height` or `building:levels`). The city is compressed to about
+8 m per square across and 3.5 m per square up, and streets are widened so there is room to fight.
+Landmarks recognised by name (KICC, Jamia Mosque, City Market, the Kenyatta statue) get their own
+drawings; spawns, snipers, grapple rings, pickups and matatus are placed from the geometry. The
+settings are at the top of `tools/osm/pipeline.mjs`, and `--angle <deg>` overrides the grid angle.
+While `src/nairobi-data.js` exports `null` the game uses the older hand-placed layout. VIEW MAP on
+the main menu shows the result from above with street names. Map data © OpenStreetMap contributors, ODbL.
+
 ## Enemies
 
 Grunts, rushers, bombers, snipers with dodgeable lasers, flyers, heavies and shield bearers. Bosses
