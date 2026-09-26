@@ -2,7 +2,7 @@
 // axis-aligned box colliders, which is what the navigation grid is generated from.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { makeInkMaterial, INK } from './render.js';
+import { makeInkMaterial, INK, EMPH } from './render.js';
 import { rand, choose, TAU } from './util.js';
 import { buildHumanoid } from './enemies.js';
 import NAIROBI_OSM from './nairobi-data.js';
@@ -74,7 +74,7 @@ function createBuilder(scene, world) {
   function ring(x, y, z, axis = 'z') {
     const g = new THREE.TorusGeometry(0.6, 0.1, 8, 20);
     if (axis === 'x') g.rotateY(Math.PI / 2); else if (axis === 'y') g.rotateX(Math.PI / 2);
-    g.translate(x, y, z); addGeo(g, INK.ORANGE);
+    g.translate(x, y, z); addGeo(g, INK.ORANGE + EMPH); // grapple rings must read from anywhere
     L.rings.push(new THREE.Vector3(x, y, z));
   }
   const spawn = (x, y, z) => L.spawns.push(new THREE.Vector3(x, y, z));
@@ -113,12 +113,12 @@ function createBuilder(scene, world) {
     }
     return g;
   }
-  // Aircraft follow looping routes at varied altitudes, purely decorative.
+  // Aircraft follow looping routes at varied altitudes. You can hook and ride them, so they are all orange.
   function planes(n, baseR, baseH, o = {}) {
     const sc = o.scale || 1;
     for (let i = 0; i < n; i++) {
       const r = baseR + i * (o.rStep ?? 12), h = baseH + i * (o.hStep ?? 6), ph = i * 2.1, sp = (o.speed ?? 0.11) + i * 0.01;
-      const m = aircraft(i % 3 === 0 ? 'prop' : 'paper', sc, o.colors?.[i % o.colors.length] ?? o.ink ?? INK.BLUE); scene.add(m); L.meshes.push(m);
+      const m = aircraft(i % 3 === 0 ? 'prop' : 'paper', sc, INK.ORANGE); scene.add(m); L.meshes.push(m);
       L.grappleMovers.push({ mesh: m, radius: 2.2 * sc });
       L.animated.push({ mesh: m, update: (t) => { const a = t * sp + ph; m.position.set(Math.cos(a) * r, h + Math.sin(a * 2.3) * 3, Math.sin(a) * r * 0.7); m.lookAt(Math.cos(a + 0.05) * r, h + Math.sin((a + 0.05) * 2.3) * 3, Math.sin(a + 0.05) * r * 0.7); m.rotateZ(Math.sin(a * 3) * 0.6); } });
     }
@@ -126,7 +126,7 @@ function createBuilder(scene, world) {
   function crossingPlanes(n, span, baseH, o = {}) {
     for (let i = 0; i < n; i++) {
       const scale = o.scale ?? 2.2, diagonal = i % 2 === 0, phase = i / n, height = baseH + (i % 4) * 4;
-      const m = aircraft(i % 3 === 0 ? 'prop' : 'jet', scale, o.colors?.[i % o.colors.length] ?? o.ink ?? INK.BLUE); scene.add(m); L.meshes.push(m); L.grappleMovers.push({ mesh: m, radius: 2.2 * scale });
+      const m = aircraft(i % 3 === 0 ? 'prop' : 'jet', scale, INK.ORANGE); scene.add(m); L.meshes.push(m); L.grappleMovers.push({ mesh: m, radius: 2.2 * scale });
       const speed = (o.speed ?? 0.07) * (i % 3 === 0 ? 1 : 0.82);
       L.animated.push({ mesh: m, update: (t) => {
         const u = ((((t * speed + phase) % 1) + 1) % 1) * 2 - 1, next = Math.min(1, u + 0.025);
@@ -176,7 +176,7 @@ function buildDistrict(B, arena = false) {
     const R = 120, C = -30; const domeY = (x, z) => Math.sqrt(Math.max(1, R * R - x * x - z * z)) + C;
     for (let k = 0; k < 8; k++) { const g = new THREE.TorusGeometry(R, 0.6, 5, 96, Math.PI); g.rotateY(k * Math.PI / 8); g.translate(0, C, 0); addGeo(g, INK.BLUE); }
     for (const h of [38, 54, 68, 80, 88]) { const r = Math.sqrt(R * R - (h - C) * (h - C)); const g = new THREE.TorusGeometry(r, 0.5, 5, 128); g.rotateX(Math.PI / 2); g.translate(0, h, 0); addGeo(g, INK.BLUE); }
-    addGeo(new THREE.SphereGeometry(2.4, 10, 8).translate(0, R + C, 0), INK.RED);
+    addGeo(new THREE.SphereGeometry(2.4, 10, 8).translate(0, R + C, 0), INK.PINK);
     const NG = { noNav: true, noGrapple: true };
     collider(0, 88, 0, 300, 10, 300, NG);
     for (let y0 = PH; y0 < 88; y0 += 4) { const inner = Math.sqrt(Math.max(0, R * R - (y0 + 4 - C) ** 2)); if (inner > P + T) continue; const o = inner + 80; collider(0, y0, -o, 320, 4, 160, NG); collider(0, y0, o, 320, 4, 160, NG); collider(-o, y0, 0, 160, 4, 320, NG); collider(o, y0, 0, 160, 4, 320, NG); }
@@ -185,7 +185,7 @@ function buildDistrict(B, arena = false) {
     const pad = (x, y, z, w, d) => { box(x, y, z, w, 0.5, d, { noNav: true }); cable(x, y + 0.5, z); ring(x, y - 1.3, z, 'y'); };
     for (const [x, y, z, w, d] of [[0, 24, 0, 8, 8], [-42, 18, -24, 6, 6], [44, 21, 30, 6, 6], [28, 27, -46, 5, 5], [-30, 30, 44, 5, 5]]) pad(x, y, z, w, d);
     // paper planes big enough to hook: they loop around the map at different heights
-    planes(4, 30, 26, { scale: 1.7, rStep: 9, hStep: 6, speed: 0.28, colors: [INK.BLUE, INK.RED, INK.ORANGE, INK.GREEN] });
+    planes(4, 30, 26, { scale: 1.7, rStep: 9, hStep: 6, speed: 0.28 });
   }
 
   // ---------------- central tower (solo only: a match wants the field open) ----------------
@@ -290,14 +290,14 @@ function buildDistrict(B, arena = false) {
       const part = (geo, mat, px, py, pz) => { const m = new THREE.Mesh(geo, mat); m.position.set(px, py, pz); g.add(m); };
       const long = type === 'bus' ? 6.5 : type === 'truck' ? 5.6 : 3.8, wide = type === 'bus' ? 1.7 : 1.45;
       part(new THREE.BoxGeometry(long, type === 'bus' ? 1.35 : 0.55, wide), body, 0, type === 'bus' ? 0.8 : 0.45, 0);
-      if (type === 'bus') { part(new THREE.BoxGeometry(5.3, 0.8, 1.48), dark, 0.25, 1.65, 0); part(new THREE.BoxGeometry(0.16, 0.9, 1.5), makeInkMaterial({ ink: INK.ORANGE, fill: true }), -2.8, 1.45, 0); }
+      if (type === 'bus') { part(new THREE.BoxGeometry(5.3, 0.8, 1.48), dark, 0.25, 1.65, 0); part(new THREE.BoxGeometry(0.16, 0.9, 1.5), dark, -2.8, 1.45, 0); }
       else if (type === 'truck') { part(new THREE.BoxGeometry(3.5, 1.45, 1.6), body, 0.9, 1.1, 0); part(new THREE.BoxGeometry(1.55, 0.7, 1.55), dark, -1.6, 0.82, 0); }
       else { part(new THREE.BoxGeometry(2.0, 0.55, 1.2), body, 0.15, 0.93, 0); part(new THREE.BoxGeometry(1.45, 0.38, 1.22), dark, 0.15, 0.96, 0); }
       const wheelX = type === 'bus' ? [-2.35, 2.35] : type === 'truck' ? [-1.7, 1.7] : [-1.35, 1.35];
       for (const wx of wheelX) for (const wz of [-wide / 2, wide / 2]) part(new THREE.CylinderGeometry(type === 'bus' ? 0.34 : 0.27, type === 'bus' ? 0.34 : 0.27, 0.12, 8).rotateX(Math.PI / 2), dark, wx, 0.25, wz);
       part(new THREE.BoxGeometry(0.12, 0.12, 0.3), makeInkMaterial({ ink: INK.ORANGE, fill: true }), long / 2, 0.5, -0.42);
       part(new THREE.BoxGeometry(0.12, 0.12, 0.3), makeInkMaterial({ ink: INK.ORANGE, fill: true }), long / 2, 0.5, 0.42);
-      if (taxi) part(new THREE.BoxGeometry(0.65, 0.1, 0.7), makeInkMaterial({ ink: INK.RED, fill: true }), -0.15, type === 'bus' ? 2.2 : 1.25, 0);
+      if (taxi) part(new THREE.BoxGeometry(0.65, 0.1, 0.7), dark, -0.15, type === 'bus' ? 2.2 : 1.25, 0);
       const vehicle = { x, z: z + lane, y, speed, length: long, width: wide, type, hitCooldown: 0 };
       g.position.set(x, y + 0.05, z + lane); scene.add(g); L.meshes.push(g);
       L.vehicles.push(vehicle); L.animated.push({ mesh: g, update: (t) => { const span = 108; vehicle.x = ((x + speed * t + 54) % span + span) % span - 54; g.position.x = vehicle.x; } });
@@ -310,8 +310,8 @@ function buildDistrict(B, arena = false) {
     
     // road markings
     for (let x = -50; x < 50; x += 4) box(x + 1, y, z, 2, 0.02, 0.2, { noCollide: true, ink: INK.BLACK });
-    car(-42, -2.1, 4.8, INK.RED, true); car(-14, -2.1, 4.2, INK.GREEN); car(18, -2.1, 5.2, INK.PINK); car(46, -2.1, 4.5, INK.ORANGE, false, 'bus');
-    car(-8, 2.1, -5.0, INK.BLUE); car(24, 2.1, -4.2, INK.ORANGE, true); car(50, 2.1, -5.6, INK.GREEN, false, 'truck'); car(-40, 2.1, -4.6, INK.RED, false, 'bus');
+    car(-42, -2.1, 4.8, INK.PINK, true); car(-14, -2.1, 4.2, INK.GREEN); car(18, -2.1, 5.2, INK.PINK); car(46, -2.1, 4.5, INK.GREEN, false, 'bus');
+    car(-8, 2.1, -5.0, INK.BLUE); car(24, 2.1, -4.2, INK.BLACK, true); car(50, 2.1, -5.6, INK.GREEN, false, 'truck'); car(-40, 2.1, -4.6, INK.BLUE, false, 'bus');
     spawn(-48, y, z); spawn(48, y, z); sniper(0, y, z); pickup(-10, y, z); pickup(24, y, z);
   }
 
@@ -335,7 +335,7 @@ function buildDistrict(B, arena = false) {
 
   // ---------------- south plaza: containers, crates, bus, doodle props (solo only) ----------------
   if (!arena) {
-    box(-14, 0, 34, 2.5, 2.6, 6.2, { ink: INK.GREEN }); box(-14, 2.6, 34, 2.5, 2.6, 6.2, { ink: INK.ORANGE });
+    box(-14, 0, 34, 2.5, 2.6, 6.2, { ink: INK.GREEN }); box(-14, 2.6, 34, 2.5, 2.6, 6.2, { ink: INK.PINK });
     box(14, 0, 36, 6.2, 2.6, 2.5); box(17, 2.6, 36, 3, 2.6, 2.5, { ink: INK.GREEN });
     box(-6, 0, 28, 1.4, 1.4, 1.4); box(-4.5, 0, 28.5, 1.2, 1.2, 1.2); box(-5.3, 1.4, 28.2, 1.0, 1.0, 1.0);
     box(8, 0, 26, 1.6, 1.6, 1.6); box(9.6, 0, 26.4, 1.2, 1.2, 1.2);
@@ -354,7 +354,7 @@ function buildDistrict(B, arena = false) {
     pickup(-6, 0, 36); pickup(6, 0, 36); pickup(-30, 1.6, 44); pickup(38, 3, 40); pickup(0, 0, 10);
     // scattered cover in the open middle areas
     box(-16, 0, -8, 2.2, 1.2, 2.2); box(18, 0, -10, 2.2, 1.6, 2.2); box(-20, 0, 8, 1.6, 1.0, 3); box(20, 0, -2, 3, 1.0, 1.6);
-    box(-8, 0, -18, 4, 1.1, 1.2); box(8, 0, -18, 4, 1.1, 1.2); box(0, 0, 22, 5, 0.5, 1.4); box(-24, 0, -18, 2.4, 2.6, 2.4, { ink: INK.ORANGE }); box(26, 0, -18, 2.4, 2.6, 2.4, { ink: INK.GREEN });
+    box(-8, 0, -18, 4, 1.1, 1.2); box(8, 0, -18, 4, 1.1, 1.2); box(0, 0, 22, 5, 0.5, 1.4); box(-24, 0, -18, 2.4, 2.6, 2.4, { ink: INK.PINK }); box(26, 0, -18, 2.4, 2.6, 2.4, { ink: INK.GREEN });
   }
 
   // ---------------- sky doodles ----------------
@@ -368,8 +368,8 @@ function buildDistrict(B, arena = false) {
 
   L.teamSpawns = [[-40, 0, 18], [-34, 12, 12], [-48, 7, -30], [-52, 0, 30], [-30, 7, -48]].map(([x, y, z]) => new THREE.Vector3(x, y, z));
   L.teamSpawns = [L.teamSpawns, [[40, 0, 8], [34, 12, 18], [48, 7, -30], [52, 0, 30], [16, 7, -45]].map(([x, y, z]) => new THREE.Vector3(x, y, z))];
-  if (!arena) planes(3, 30, 30, { rStep: 8, hStep: 6, scale: 1.4, speed: 0.32, colors: [INK.PINK, INK.BLUE, INK.ORANGE] });
-  crossingPlanes(arena ? 10 : 8, arena ? 58 : 48, arena ? 34 : 30, { scale: arena ? 2.2 : 1.9, speed: arena ? 0.2 : 0.16, colors: [INK.BLUE, INK.RED, INK.GREEN, INK.ORANGE, INK.PINK] });
+  if (!arena) planes(3, 30, 30, { rStep: 8, hStep: 6, scale: 1.4, speed: 0.32 });
+  crossingPlanes(arena ? 10 : 8, arena ? 58 : 48, arena ? 34 : 30, { scale: arena ? 2.2 : 1.9, speed: arena ? 0.2 : 0.16 });
   return B.finish();
 }
 
@@ -685,9 +685,9 @@ function buildNairobi(B, arena = false) {
     const x = 16, z = 18;
     cyl(x, 0, z, 4.4, 20, { seg: 16 });
     for (const y of [4.2, 8.2, 12.2, 16.2]) addGeo(new THREE.TorusGeometry(4.48, 0.07, 4, 22).rotateX(Math.PI / 2).translate(x, y, z), BK);
-    cyl(x, 20, z, 7.2, 1.35, { ink: OR, seg: 16 });
+    cyl(x, 20, z, 7.2, 1.35, { ink: PK, seg: 16 });
     cyl(x, 21.35, z, 3.0, 2.0, { seg: 12 });
-    sphere(x, 24.0, z, 1.15, { ink: OR, seg: 10 });
+    sphere(x, 24.0, z, 1.15, { ink: PK, seg: 10 });
     ring(x, 23.2, z, 'y'); ring(x + 6.4, 19.6, z, 'y');
     // ledges around the shaft so a swing has somewhere to land
     box(x, 8, z + 5.6, 5.5, 0.4, 2.2); box(x + 5.6, 12, z, 2.2, 0.4, 5.5);
@@ -740,18 +740,18 @@ function buildNairobi(B, arena = false) {
   {
     const x = -22, z = -36;
     box(x, 0, z, 10, 6.0, 10);
-    for (let i = -2; i <= 2; i++) box(x, 6.0, z + i * 1.8, 10, 1.5, 0.9, { ink: OR });
+    for (let i = -2; i <= 2; i++) box(x, 6.0, z + i * 1.8, 10, 1.5, 0.9, { ink: PK });
     stairs(x - 6.2, 0, z + 6.2, '+x', 14, 1.6, { rise: 6 / 14, run: 0.42 });
     ring(x, 9.2, z, 'y');
     const stall = (sx, sz, w, d) => {
       box(sx, 0, sz, w, 0.85, d);
       for (const [ox, oz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) box(sx + ox * (w / 2 - 0.14), 0, sz + oz * (d / 2 - 0.14), 0.12, 2.7, 0.12, { noCollide: true, ink: BK });
-      for (let i = 0; i < 4; i++) addGeo(new THREE.BoxGeometry(w + 0.5, 0.05, (d + 0.5) / 4).translate(sx, 2.78, sz - (d + 0.5) / 2 + (i + 0.5) * (d + 0.5) / 4), i % 2 ? PK : OR);
+      for (let i = 0; i < 4; i++) addGeo(new THREE.BoxGeometry(w + 0.5, 0.05, (d + 0.5) / 4).translate(sx, 2.78, sz - (d + 0.5) / 2 + (i + 0.5) * (d + 0.5) / 4), i % 2 ? PK : GR);
       collider(sx, 2.72, sz, w + 0.5, 0.12, d + 0.5, { noNav: true });
     };
     stall(-28, -44, 4.0, 2.2); stall(-16, -44, 4.0, 2.2); stall(-28, -28, 2.2, 3.6);
-    box(-14, 0, -36, 2.8, 1.2, 1.5, { ink: OR }); box(-14, 1.2, -36, 3.0, 0.7, 1.6, { ink: GR });
-    kiosk(-12, -28, RD); kiosk(-30, -32, GR);
+    box(-14, 0, -36, 2.8, 1.2, 1.5, { ink: GR }); box(-14, 1.2, -36, 3.0, 0.7, 1.6, { ink: PK });
+    kiosk(-12, -28, PK); kiosk(-30, -32, GR);
     crate(-16, -28); crate(-28, -40); crate(-18, -44);
     spawn(x, 7.55, z); sniper(x, 7.55, z); pickup(x, 7.55, z); pickup(-14, 0, -36);
   }
@@ -772,7 +772,7 @@ function buildNairobi(B, arena = false) {
       part(new THREE.BoxGeometry(long, 1.45, wide), mat(ink, true), 0, 1.0, 0);
       part(new THREE.BoxGeometry(long + 0.08, 0.22, wide + 0.04), mat(stripe, true), 0, 1.05, 0);
       part(new THREE.BoxGeometry(1.7, 0.7, wide - 0.1), mat(BK, true), -1.55, 1.75, 0);
-      part(new THREE.BoxGeometry(0.14, 0.8, wide + 0.04), mat(OR, true), -long / 2, 1.35, 0);
+      part(new THREE.BoxGeometry(0.14, 0.8, wide + 0.04), mat(BK, true), -long / 2, 1.35, 0);
       for (const wx of [-1.7, 1.7]) for (const wz of [-wide / 2, wide / 2]) part(new THREE.CylinderGeometry(0.32, 0.32, 0.14, 8).rotateX(Math.PI / 2), mat(BK, true), wx, 0.32, wz);
       g.rotation.y = Math.PI / 2;
       const vehicle = { x: x + lane, z: z0, y, speed, length: wide, width: long, type: 'bus', hitCooldown: 0 };
@@ -780,8 +780,8 @@ function buildNairobi(B, arena = false) {
       L.vehicles.push(vehicle);
       L.animated.push({ mesh: g, update: (t) => { const span = 108; vehicle.z = ((z0 + speed * t + 54) % span + span) % span - 54; g.position.z = vehicle.z; } });
     };
-    matatu(-40, -2.0, 5.0, RD, OR); matatu(-8, -2.0, 4.4, GR, PK); matatu(24, -2.0, 5.4, BL, OR); matatu(48, -2.0, 4.6, OR, GR);
-    matatu(-16, 2.0, -5.2, PK, BL); matatu(12, 2.0, -4.4, OR, RD); matatu(36, 2.0, -5.6, GR, OR); matatu(-48, 2.0, -4.8, BL, PK);
+    matatu(-40, -2.0, 5.0, PK, BK); matatu(-8, -2.0, 4.4, GR, PK); matatu(24, -2.0, 5.4, BL, GR); matatu(48, -2.0, 4.6, BK, GR);
+    matatu(-16, 2.0, -5.2, PK, BL); matatu(12, 2.0, -4.4, GR, BK); matatu(36, 2.0, -5.6, BK, PK); matatu(-48, 2.0, -4.8, BL, PK);
     spawn(x, y, -48); spawn(x, y, 48); sniper(x, y, 0); pickup(x, y, -12); pickup(x, y, 22);
   }
 
@@ -815,8 +815,8 @@ function buildNairobi(B, arena = false) {
     addGeo(new THREE.BoxGeometry(w, h, 10).translate(x, h / 2, z), BL);
     addGeo(new THREE.BoxGeometry(w * 0.5, h * 0.2, 8).translate(x, h + h * 0.08, z), BL);
   }
-  planes(3, 28, 28, { rStep: 8, hStep: 5, scale: 1.35, speed: 0.3, colors: [INK.PINK, INK.ORANGE, INK.GREEN] });
-  crossingPlanes(arena ? 8 : 6, arena ? 56 : 48, 32, { scale: 1.8, speed: 0.16, colors: [INK.BLUE, INK.RED, INK.GREEN, INK.ORANGE] });
+  planes(3, 28, 28, { rStep: 8, hStep: 5, scale: 1.35, speed: 0.3 });
+  crossingPlanes(arena ? 8 : 6, arena ? 56 : 48, 32, { scale: 1.8, speed: 0.16 });
   return B.finish();
 }
 
@@ -864,9 +864,9 @@ function buildNairobiOSM(B, D, arena = false) {
     const r = Math.max(3, h * 0.17), s = h / 24;
     cyl(x, 0, z, r, h, { seg: 16 });
     for (let y = 4 * s; y < h - 1; y += 4 * s) addGeo(new THREE.TorusGeometry(r + 0.08, 0.07, 4, 22).rotateX(Math.PI / 2).translate(x, y, z), BK);
-    cyl(x, h, z, r * 1.64, 1.35 * s, { ink: OR, seg: 16 });
+    cyl(x, h, z, r * 1.64, 1.35 * s, { ink: PK, seg: 16 });
     cyl(x, h + 1.35 * s, z, r * 0.68, 2 * s, { seg: 12 });
-    sphere(x, h + 3.9 * s, z, 1.15 * s, { ink: OR, seg: 10 });
+    sphere(x, h + 3.9 * s, z, 1.15 * s, { ink: PK, seg: 10 });
     ring(x, h + 3.2 * s + 1, z, 'y');
     return h + 1.35 * s;
   }
@@ -885,14 +885,14 @@ function buildNairobiOSM(B, D, arena = false) {
       const [cx, cz] = b.c; const roofY = kicc(cx, cz, b.h);
       roofs.push({ p: V(cx, roofY, cz), h: roofY, b, landmark: true }); continue;
     }
-    const ink = is(b, /mosque|jamia/i) || b.kind === 'mosque' ? GR : b.kind === 'church' || b.kind === 'cathedral' ? RD : BL;
+    const ink = is(b, /mosque|jamia/i) || b.kind === 'mosque' ? GR : b.kind === 'church' || b.kind === 'cathedral' ? PK : BL;
     for (const bx of b.boxes) { const [x, z, w, d] = size(bx); box(x, 0, z, w, b.h, d, { ink }); }
     let roofY = b.h;
     if (is(b, /mosque|jamia/i) || b.kind === 'mosque') {
       sphere(mx, b.h, mz, Math.min(mw, md) * 0.32, { ink: GR, seg: 12 });
       for (const [sx, sz] of [[-1, -1], [1, 1]]) cyl(mx + sx * (mw / 2 - 0.5), 0, mz + sz * (md / 2 - 0.5), 0.35, b.h + 6, { ink: BK, seg: 8 });
     } else if (is(b, /city market/i)) {
-      for (let i = -2; i <= 2; i++) box(mx, b.h, mz + i * md / 5.5, mw, 1.2, md / 11, { ink: OR });
+      for (let i = -2; i <= 2; i++) box(mx, b.h, mz + i * md / 5.5, mw, 1.2, md / 11, { ink: PK });
     } else if (b.h >= 12 && mw >= 4 && md >= 4) { // plant room on the roof, as the hand-drawn offices had
       const ch = Math.min(2.2, Math.max(1.2, b.h * 0.1)); box(mx, b.h, mz, mw * 0.55, ch, md * 0.55); roofY += ch;
     }
@@ -956,7 +956,7 @@ function buildNairobiOSM(B, D, arena = false) {
     g.position.set(vehicle.x, 0.15, vehicle.z); scene.add(g); L.meshes.push(g); L.vehicles.push(vehicle);
     L.animated.push({ mesh: g, update: (t) => { const u = ((t0 + speed * t) % span + span) % span; const v = lo + (speed > 0 ? u : span - u); if (ax) vehicle.x = g.position.x = v; else vehicle.z = g.position.z = v; } });
   };
-  const colors = [[RD, OR], [GR, PK], [BL, OR], [OR, GR], [PK, BL], [OR, RD]];
+  const colors = [[PK, BK], [GR, PK], [BL, GR], [BK, GR], [PK, BL], [GR, BK]]; // never red (danger) or orange (hookable)
   lanes.sort((a, b) => b.len - a.len).slice(0, 4).forEach((lane, i) => {
     const off = lane.wide / 4;
     matatu(lane, -off, i * 9, 4.6 + (i % 3) * 0.4, ...colors[i % colors.length]);
@@ -974,8 +974,8 @@ function buildNairobiOSM(B, D, arena = false) {
   for (let i = -3; i <= 3; i++) for (const [x, z, w, d] of [[i * 26, -S, 18, 8], [i * 26, S, 18, 8], [-S, i * 26, 8, 18], [S, i * 26, 8, 18]]) {
     const h = 16 + ((i + 3) * 7 % 5) * 5; addGeo(new THREE.BoxGeometry(w, h, d).translate(x, h / 2, z), BL);
   }
-  planes(3, P * 0.45, Math.max(28, tallest + 6), { rStep: 10, hStep: 5, scale: 1.35, speed: 0.3, colors: [INK.PINK, INK.ORANGE, INK.GREEN] });
-  crossingPlanes(arena ? 8 : 6, P * 0.8, Math.max(32, tallest + 10), { scale: 1.8, speed: 0.16, colors: [INK.BLUE, INK.RED, INK.GREEN, INK.ORANGE] });
+  planes(3, P * 0.45, Math.max(28, tallest + 6), { rStep: 10, hStep: 5, scale: 1.35, speed: 0.3 });
+  crossingPlanes(arena ? 8 : 6, P * 0.8, Math.max(32, tallest + 10), { scale: 1.8, speed: 0.16 });
   return B.finish();
 }
 

@@ -33,11 +33,23 @@ function setLevel(key, on, force = false) {
   level.animated.length = 0; world.clear();
   level = buildLevel(R.scene, world, key, { arena: on }); nav = new NavGrid(world, level.bounds, 1).build();
   ctx.level = level; ctx.nav = nav; if (window.__game) { window.__game.level = level; window.__game.nav = nav; }
-  audio.setTune(tuneFor(key));
+  audio.setTune(tuneFor(key)); hud.setMinimapBase(level.bounds, footprints());
 }
 const setArena = (on) => setLevel(knownMap(net.active ? (lobby.map || mapKey) : mapKey), on);
 const input = new Input(canvas);
 const hud = new HUD(document.getElementById('hud'));
+// Minimap buildings: colliders standing on the ground, at least head height and bigger than a pillar.
+// Ceilings, invisible lids and walk-through props are skipped.
+function footprints() {
+  const out = [];
+  for (const b of world.boxes) {
+    const w = b.max.x - b.min.x, d = b.max.z - b.min.z;
+    if (b.data.noNav || b.min.y > 1 || b.max.y - b.min.y < 2 || w * d < 3) continue;
+    out.push([b.min.x, b.min.z, b.max.x, b.max.z]);
+  }
+  return out;
+}
+hud.setMinimapBase(level.bounds, footprints());
 const effects = new Effects(R.scene, world);
 const ctx = { scene: R.scene, camera: R.camera, world, level, nav, input, hud, effects, audio, renderer: R };
 
@@ -185,12 +197,13 @@ function checkVehicleImpacts(dt) {
 
 // ---------------- pickups ----------------
 const pickups = []; let pickupId = 1;
-const pmat = { ammo: makeInkMaterial({ ink: INK.BLUE }), health: makeInkMaterial({ ink: INK.GREEN }), cap: makeInkMaterial({ ink: INK.BLACK }), shell: makeInkMaterial({ ink: INK.ORANGE }) };
+// pickups are green (the colour rules in render.js) and emphasised so they read from across the map
+const pmat = { ammo: makeInkMaterial({ ink: INK.GREEN, emphasis: true }), health: makeInkMaterial({ ink: INK.GREEN, emphasis: true }), cap: makeInkMaterial({ ink: INK.BLACK, emphasis: true }), shell: makeInkMaterial({ ink: INK.ORANGE, emphasis: true }) };
 function makePickup(kind) {
   const g = new THREE.Group();
   if (kind === 'ammo') { g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.5, 10), pmat.ammo)); const c = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.16, 8), pmat.cap); c.position.y = 0.33; g.add(c); const l = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.02), pmat.cap); l.position.set(0, 0, 0.24); g.add(l); }
   else if (level.key === 'mexico') { const sh = new THREE.CylinderGeometry(0.42, 0.42, 0.22, 12, 1, false, 0, Math.PI); sh.rotateZ(Math.PI / 2); sh.rotateX(-Math.PI / 2); g.add(new THREE.Mesh(sh, pmat.shell)); const f = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 0.2), pmat.health); f.position.y = 0.02; g.add(f); const m = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.08, 0.14), pmat.cap); m.position.y = 0.1; g.add(m); }
-  else if (level.key === 'nairobi') { const bun = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), pmat.shell); bun.scale.set(1, 0.42, 1); g.add(bun); const bun2 = new THREE.Mesh(new THREE.SphereGeometry(0.26, 8, 6), pmat.health); bun2.scale.set(1, 0.4, 1); bun2.position.set(0.12, 0.1, 0.04); g.add(bun2); }
+  else if (level.key === 'nairobi') { const bun = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), pmat.health); bun.scale.set(1, 0.42, 1); g.add(bun); const bun2 = new THREE.Mesh(new THREE.SphereGeometry(0.26, 8, 6), pmat.shell); bun2.scale.set(1, 0.4, 1); bun2.position.set(0.12, 0.1, 0.04); g.add(bun2); }
   else { g.add(new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.2, 0.2), pmat.health), new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 0.2), pmat.health)); }
   return g;
 }
@@ -881,10 +894,8 @@ function step(now) {
     player: { pos: player.body.pos, yaw: player.yaw },
     enemies: enemies.enemies.filter((e) => e.alive).map((e) => ({ x: e.body.pos.x, z: e.body.pos.z })),
     teammates: [...remote.values()].filter((r) => r.alive && r.root && r.root.visible).map((r) => ({ x: r.body.pos.x, z: r.body.pos.z })),
-    objects: [
-      ...level.rings.map((pos) => ({ kind: 'grapple', pos })),
-      ...pickups.filter((p) => p.mesh && p.mesh.visible).map((p) => ({ kind: 'pickup', pos: p.mesh.position }))
-    ]
+    // only what you act on: you, enemies, other players and pickups (buildings are drawn underneath)
+    objects: pickups.filter((p) => p.mesh && p.mesh.visible).map((p) => ({ kind: 'pickup', pos: p.mesh.position })),
   });
   if (online()) hud.setFocusMeter(playing, player.grapStam, false, 'GRAPPLE');
   else hud.setFocusMeter(playing && (w.kind === 'katana' || game.katanaStreak > 0 || game.focus.active), game.focus.active ? 1 : clamp(game.katanaStreak / KATANA_CHARGE_KILLS, 0, 1), game.focus.active, 'KATANA');

@@ -176,7 +176,7 @@ function buildFlyer(mat, solid, T) {
 class Projectiles {
   constructor(mgr) {
     this.mgr = mgr; this.list = []; this.max = 240; this.onFire = null;
-    this.mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), makeInkMaterial({ ink: INK.RED, fill: true }), this.max);
+    this.mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), makeInkMaterial({ ink: INK.RED, fill: true, emphasis: true }), this.max);
     this.mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(this.max * 3), 3);
     this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); this.mesh.frustumCulled = false; this.mesh.count = 0; mgr.ctx.scene.add(this.mesh);
   }
@@ -264,8 +264,8 @@ export class EnemyManager {
   clear() { for (const e of this.enemies) { this._removeLaser(e); if (!e.rootDetached) this.ctx.scene.remove(e.root); } this.enemies.length = 0; this.alive = 0; this.byId.clear(); this.projectiles.clear(); }
   spawn(type, pos, id = null) {
     const T = TYPES[type]; const ink = T.ink ?? INK.RED;
-    const mat = makeInkMaterial({ ink, shadeScale: 0, shadeBias: 1 });
-    const solid = makeInkMaterial({ ink: T.ink === INK.BLACK ? INK.RED : INK.BLACK, fill: true, side: THREE.DoubleSide });
+    const mat = makeInkMaterial({ ink, shadeScale: 0, shadeBias: 1, emphasis: true });
+    const solid = makeInkMaterial({ ink: T.ink === INK.BLACK ? INK.RED : INK.BLACK, fill: true, side: THREE.DoubleSide, emphasis: true });
     const model = T.model === 'bomber' ? buildBomber(mat, solid, T) : T.model === 'blob' ? buildBomber(mat, solid, T, true) : T.model === 'flyer' ? buildFlyer(mat, solid, T) : buildHumanoid(mat, solid, T);
     const hw = T.flying ? 0.45 : Math.min(0.33 * T.scale, 0.9);
     const e = { type, T, mat, root: model.root, parts: model.parts, J: model.J, tip: model.tip, face: model.face, hit: model.hit, hp: T.hp, maxHp: T.hp, alive: true, state: 'spawn', t: 0,
@@ -752,7 +752,7 @@ export class EnemyManager {
   }
   _showLaser(e, from, to, charge) {
     if (!e.laser) {
-      e.laser = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 5), makeInkMaterial({ ink: INK.RED, fill: true }));
+      e.laser = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 5), makeInkMaterial({ ink: INK.RED, fill: true, emphasis: true }));
       e.laser.frustumCulled = false; this.ctx.scene.add(e.laser);
     }
     e.laser.visible = true;
