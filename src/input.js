@@ -1,4 +1,5 @@
-// Unified keyboard/mouse + gamepad (PS5 DualSense / standard mapping) input.
+// Unified keyboard/mouse, gamepad (PS5 DualSense / standard mapping) and touch input.
+// The active device is 'kb', 'pad' or 'touch'; touch state is written by touch.js.
 import { clamp } from './util.js';
 
 const KEYMAP = {
@@ -24,10 +25,17 @@ export class Input {
     this.pointerLocked = false; this.anyInput = false; this.lastPadButtons = [];
     this.onLockChange = null; this.onAnyInput = null; this.lastActive = performance.now();
     this.invertY = false; this.onDeviceChange = null;
+    this.device = 'kb'; this.usingTouch = false; this.touchSens = 0.0052; this._lastTouchT = -1e9;
+    this.touch = { move: { x: 0, y: 0 }, look: { x: 0, y: 0 }, down: {}, tap: {} };
+    // the first touch anywhere switches to touch controls
+    document.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'touch') return;
+      this._lastTouchT = performance.now(); this.lastActive = this._lastTouchT; this.anyInput = true; this.setDevice('touch');
+    }, true);
 
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
-      this.lastActive = performance.now(); const a = KEYMAP[e.code]; if (a) { this.keys[a] = true; if (this.usingGamepad && this.onDeviceChange) this.onDeviceChange(false); this.usingGamepad = false; }
+      this.lastActive = performance.now(); const a = KEYMAP[e.code]; if (a) { this.keys[a] = true; this.setDevice('kb'); }
       if (!e.shiftKey) this.keys.sprint = false;
       if (['Space', 'Tab', 'ArrowUp', 'ArrowDown'].includes(e.code)) e.preventDefault();
       this.anyInput = true;
@@ -41,12 +49,13 @@ export class Input {
       let dx = e.movementX, dy = e.movementY;
       // guard against pointer-lock spikes
       if (Math.abs(dx) > 400) dx = 0; if (Math.abs(dy) > 400) dy = 0;
-      this.mx += dx; this.my += dy; this.usingGamepad = false; this.lastActive = performance.now();
+      this.mx += dx; this.my += dy; this.setDevice('kb'); this.lastActive = performance.now();
     });
     document.addEventListener('mousedown', (e) => {
+      // phones follow a tap with a fake mouse click; that must not count as a mouse
+      if (performance.now() - this._lastTouchT < 900 || (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents)) return;
       const a = MOUSEMAP[e.button]; if (a) this.mouseBtns[a] = true;
-      if (this.usingGamepad && this.onDeviceChange) this.onDeviceChange(false);
-      this.usingGamepad = false; this.anyInput = true; this.lastActive = performance.now();
+      this.setDevice('kb'); this.anyInput = true; this.lastActive = performance.now();
       if (e.button === 1 || e.button === 3 || e.button === 4) e.preventDefault();
     });
     document.addEventListener('mouseup', (e) => { const a = MOUSEMAP[e.button]; if (a) this.mouseBtns[a] = false; });
@@ -58,6 +67,13 @@ export class Input {
     });
     window.addEventListener('gamepadconnected', (e) => { this.gamepadIndex = e.gamepad.index; });
   }
+
+  setDevice(d) {
+    if (d === this.device) return; this.device = d; this.usingGamepad = d === 'pad'; this.usingTouch = d === 'touch';
+    if (this.onDeviceChange) this.onDeviceChange(d);
+  }
+  // gamepads and touch aim without the mouse, so the game never waits on a pointer lock for them
+  get noLock() { return this.device !== 'kb'; }
 
   // browsers refuse a new pointer lock for about a second after Esc released the last one, so a
   // failed request is retried until it takes or the game stops wanting it
@@ -90,6 +106,12 @@ export class Input {
     let my = (s.forward ? 1 : 0) - (s.back ? 1 : 0);
     // look from mouse
     let lx = -this.mx * this.mouseSens, ly = -this.my * this.mouseSens; this.mx = 0; this.my = 0;
+    // touch: held and just-tapped buttons (a tap shorter than a frame still registers), stick, look drag
+    const t = this.touch;
+    for (const k in t.down) if (t.down[k] > 0) s[k] = true;
+    for (const k in t.tap) s[k] = true; t.tap = {};
+    if (t.move.x || t.move.y) { mx = t.move.x; my = t.move.y; if (Math.hypot(mx, my) > 0.92) s.sprint = true; }
+    lx += -t.look.x * this.touchSens; ly += -t.look.y * this.touchSens; t.look.x = 0; t.look.y = 0;
 
     const pad = this._getPad(); const padS = {};
     if (pad) {
@@ -111,7 +133,7 @@ export class Input {
         const pressed = b.pressed || b.value > 0.35;
         if (pressed) { s[PADMAP[idx]] = true; padS[PADMAP[idx]] = true; padActive = true; }
       }
-      if (padActive) { if (!this.usingGamepad && this.onDeviceChange) this.onDeviceChange(true); this.usingGamepad = true; this.anyInput = true; this.lastActive = performance.now(); }
+      if (padActive) { this.setDevice('pad'); this.anyInput = true; this.lastActive = performance.now(); }
       this._pad = pad;
     } else this._pad = null;
     this.padPrev = this.padState; this.padState = padS;

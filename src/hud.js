@@ -34,16 +34,21 @@ export class HUD {
   setFocusMeter(show, frac, ready, label = 'KATANA') {
     const m = this.el.focusmeter;
     if (show !== this._fmShow) { this._fmShow = show; m.classList.toggle('on', show); }
-    if (!show) return;
+    if (!show) { if (this._fmReady) { this._fmReady = false; m.classList.remove('ready'); document.body.classList.remove('dash-ready'); } return; }
     if (label !== this._fmLabel) { this._fmLabel = label; m.querySelector('.fm-label').textContent = label; }
     const f = Math.max(0, Math.min(1, frac));
     if (Math.abs(f - (this._fmFrac ?? -1)) > 0.005) { this._fmFrac = f; this.el.fmfill.style.height = (f * 100).toFixed(1) + '%'; }
-    if (ready !== this._fmReady) { this._fmReady = ready; m.classList.toggle('ready', ready); }
+    if (ready !== this._fmReady) { this._fmReady = ready; m.classList.toggle('ready', ready); document.body.classList.toggle('dash-ready', ready); }
   }
   setGrenades(n) { if (n === this._nades) return; this._nades = n; let h = ''; for (let i = 0; i < n; i++) h += '<i></i>'; this.el.nades.innerHTML = h; }
   // control labels follow whatever you touched last
-  setDevice(pad) { if (pad === this._pad) return; this._pad = pad; this.root.classList.toggle('pad', pad); if (this.onDevice) this.onDevice(pad); }
-  key(action) { return (this._pad ? PAD_KEYS : KB_KEYS)[action] || action; }
+  // device is 'kb', 'pad' or 'touch' (booleans from older callers mean pad / keyboard)
+  setDevice(device) {
+    const d = device === true ? 'pad' : device === false ? 'kb' : device; if (d === this._device) return; this._device = d;
+    this._pad = d === 'pad'; this.root.classList.toggle('pad', this._pad); this.root.classList.toggle('touch', d === 'touch'); document.body.classList.toggle('touch', d === 'touch');
+    if (this.onDevice) this.onDevice(this._pad);
+  }
+  key(action) { return (this._device === 'touch' ? TOUCH_KEYS : this._pad ? PAD_KEYS : KB_KEYS)[action] || action; }
   setScope(on) { if (on === this._scope) return; this._scope = on; this.el.scope.classList.toggle('on', on); }
   setFocusMark(x, y) {
     const m = this.el.focusmark;
@@ -145,8 +150,16 @@ export class HUD {
 }
 
 export const KB_KEYS = { fire: 'LMB', aim: 'RMB', block: 'RMB', jump: 'Space', sprint: 'Shift', slide: 'C', dash: 'C', grapple: 'Q', melee: 'F', reload: 'R', grenade: 'G', focus: 'both mouse buttons (or X)', next: 'wheel', pause: 'Esc', confirm: 'Space', score: 'Tab' };
+export const TOUCH_KEYS = { fire: 'FIRE', aim: 'AIM', block: 'AIM', jump: 'JUMP', sprint: 'the stick all the way', slide: 'SLIDE', dash: 'SLIDE', grapple: 'HOOK', melee: 'SLASH', reload: 'RELOAD', grenade: 'NADE', focus: 'DASH', next: 'SWAP', pause: 'II', confirm: 'the screen', score: 'the score' };
 export const PAD_KEYS = { fire: 'R2', aim: 'L2', block: 'L2', jump: '✕', sprint: 'L3', slide: '○', dash: '○', grapple: 'L1', melee: 'R1', reload: '□', grenade: 'R3', focus: 'L2 + R2', next: '△', pause: 'Options', confirm: '✕', score: 'Create' };
 export const CONTROLS_HTML = `
+<div class="touchhelp">
+  <div class="colhead">TOUCH</div>
+  <div><b>Left thumb</b> move (push all the way to sprint) &nbsp; <b>Drag right side</b> look</div>
+  <div><b>FIRE</b>, <b>AIM</b> and <b>HOOK</b> also turn the camera while you hold them</div>
+  <div><b>HOOK</b> swing, hold to reel &nbsp; <b>JUMP</b> twice to double jump &nbsp; <b>SLIDE</b> slide / air dash</div>
+  <div><b>SWAP</b> next weapon &nbsp; <b>NADE</b> hold to throw further &nbsp; <b>DASH</b> appears when the katana gauge is lit</div>
+</div>
 <div class="cols">
   <div><div class="colhead">MOUSE + KEYBOARD</div>
     <div><b>WASD</b> move &nbsp; <b>Mouse</b> look &nbsp; <b>Shift</b> sprint</div>
