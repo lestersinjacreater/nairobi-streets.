@@ -71,6 +71,8 @@ slashes and turns some bullets aside, and the guns use their own damage table; t
 
 ## Maps
 
+- **Doodle Depot**: a compact container yard in the spirit of fast mobile shooters. Mirrored so both ends are fair,
+  with three lanes, a central tower, two warehouses with climbable roofs, stacked containers and gantry cranes to hook.
 - **Doodle District**: streets, rooftops and fire escapes, with grapple rings on the high spots. Solo
   plays the tight original block. A match opens it up: a ring of empty street, walls, a ribbed dome
   that cannot be hooked, an open field in the middle crossed by a ruler bridge, a few pads hung from

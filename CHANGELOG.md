@@ -2,6 +2,14 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (map)
+- **New map: Doodle Depot, a Call of Duty Mobile-inspired container yard** (`src/level.js`, `src/main.js`, `README.md`)
+  - Small, mirrored map so both ends are fair: three lanes, a central tower with stairs on both sides and a roof perch.
+  - Two warehouses open to the middle with side doors and climbable roofs; stacked containers, barriers and crates for cover.
+  - Two gantry cranes and stacked-container tops give the grapple hook plenty to bite.
+  - Match spawns at both ends and on the roofs; solo enemies come from the corners and lane ends.
+  - It is now the first map on the menu and the default. Nairobi, District and the others are still there.
+
 ## 2026-10-14
 - **Sniper scope looks more like a real sniper view** (`style.css`, `src/hud.js`, `src/weapons.js`)
   - Reticle now has mil-dot tick marks along the crosshair.

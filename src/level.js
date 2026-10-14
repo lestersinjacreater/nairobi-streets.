@@ -10,6 +10,7 @@ import NAIROBI_OSM from './nairobi-data.js';
 // Doodle Mexico is built and kept, but off the menu until it is ready; flip this to offer it again
 export const MEXICO_READY = false;
 export const LEVELS = [
+  { key: 'depot', name: 'DOODLE DEPOT', blurb: 'container yard · three lanes, a tower in the middle' },
   { key: 'nairobi', name: 'DOODLE NAIROBI', blurb: 'OSM CBD · Kenyatta Ave, KICC, Uhuru Park' },
   { key: 'district', name: 'DOODLE DISTRICT', blurb: 'streets, rooftops and fire escapes' },
   ...(MEXICO_READY ? [{ key: 'mexico', name: 'DOODLE MEXICO', blurb: 'a sun-baked plaza · pinatas, tacos and mariachi' }] : []),
@@ -523,6 +524,86 @@ function buildMexico(B, arena = false) {
   B.finish(); return L;
 }
 
+// ============================ map: Doodle Depot ============================
+// A compact container yard in the spirit of fast mobile shooters: small, mirrored so both ends are fair,
+// three clear lanes, a central tower, two warehouses with roofs you can climb, and cover every few steps.
+// The hook has plenty to bite: tower roof, warehouse roofs, stacked containers and two gantry cranes.
+function buildDepot(B, arena = false) {
+  const { L, box, slab, wallX, wallZ, stairs, cyl, ring, spawn, sniper, pickup, planes, addGeo, collider } = B;
+  const OR = INK.ORANGE, GR = INK.GREEN, PK = INK.PINK, BK = INK.BLACK, BL = INK.BLUE;
+  L.key = 'depot'; L.playerStart.set(0, 0, 29); const P = 36; L.bounds = { minX: -P, maxX: P, minZ: -P, maxZ: P };
+  // everything is built for one corner or one side and repeated, so the map is the same from both ends
+  const four = (fn) => { for (const sx of [-1, 1]) for (const sz of [-1, 1]) fn(sx, sz); };
+  const two = (fn) => { for (const sx of [-1, 1]) fn(sx); };
+  const container = (x, z, alongZ, y, ink) => {
+    const w = alongZ ? 2.6 : 6, d = alongZ ? 6 : 2.6; box(x, y, z, w, 2.6, d, { ink });
+    for (let i = -2; i <= 2; i++) addGeo(alongZ ? new THREE.BoxGeometry(2.7, 0.08, 0.1).translate(x, y + 2.3, z + i * 1.1) : new THREE.BoxGeometry(0.1, 0.08, 2.7).translate(x + i * 1.1, y + 2.3, z), BK);
+  };
+  const barrier = (x, z, alongZ) => box(x, 0, z, alongZ ? 0.8 : 4.5, 1.1, alongZ ? 4.5 : 0.8, { ink: OR });
+  const crate = (x, z) => box(x, 0, z, 1.3, 1.3, 1.3, { ink: BL });
+
+  // ---------------- ground, outer wall, lid ----------------
+  box(0, -1, 0, 2 * P + 10, 1, 2 * P + 10);
+  box(0, 0, -P - 1, 2 * P + 6, 9, 2); box(0, 0, P + 1, 2 * P + 6, 9, 2); box(-P - 1, 0, 0, 2, 9, 2 * P + 6); box(P + 1, 0, 0, 2, 9, 2 * P + 6);
+  collider(0, 40, 0, 2 * P + 40, 6, 2 * P + 40, { noNav: true, noGrapple: true });
+  // painted lane markings so the three routes read from the air
+  for (let z = -30; z <= 30; z += 6) { addGeo(new THREE.BoxGeometry(0.35, 0.04, 2.6).translate(0, 0.02, z), OR); addGeo(new THREE.BoxGeometry(0.3, 0.04, 2.4).translate(-18, 0.02, z), OR); addGeo(new THREE.BoxGeometry(0.3, 0.04, 2.4).translate(18, 0.02, z), OR); }
+
+  // ---------------- the central tower: stairs up both sides, a roof with a view down every lane ----------------
+  box(0, 0, 0, 8, 3.6, 8);
+  box(0, 3.6, 0, 8.4, 0.3, 8.4, { noNav: true });
+  two((sx) => { stairs(sx * 10, 0, 0, sx > 0 ? '-x' : '+x', 12, 3, { rise: 0.3, run: 0.5 }); });
+  for (const z of [-4.1, 4.1]) { box(0, 3.9, z, 8.4, 0.9, 0.2, { noNav: true, noShoot: false, ink: OR }); }
+  ring(0, 8.2, 0, 'y'); ring(-3, 6.2, -3, 'y'); ring(3, 6.2, 3, 'y');
+  // low walls to fight behind in front of each tower face
+  four((sx, sz) => { box(sx * 7, 0, sz * 8, 0.8, 1.1, 4.5, { ink: OR }); });
+
+  // ---------------- the two warehouses: open to the middle, a door on each side, a climbable roof ----------------
+  two((sx) => {
+    const cx = sx * 27;
+    wallZ(-9, 9, sx * 32, 0, 3.6, 0.6, [], { ink: BL });
+    wallX(cx - 5, cx + 5, -9, 0, 3.6, 0.6, [[cx - 2.5, cx + 2.5, 0, 2.5]], { ink: BL });
+    wallX(cx - 5, cx + 5, 9, 0, 3.6, 0.6, [[cx - 2.5, cx + 2.5, 0, 2.5]], { ink: BL });
+    slab(cx - 5, -9.3, cx + 5, 9.3, 3.6, 0.3, { noNav: true });
+    for (const sz of [-1, 1]) stairs(cx, 0, sz * 15.3, sz > 0 ? '-z' : '+z', 12, 3, { rise: 0.3, run: 0.5 });
+    for (const sz of [-1, 1]) crate(cx - sx * 1.5, sz * 5);
+    box(cx + sx * 2.5, 0, 0, 1.2, 1.2, 4, { ink: OR });
+    ring(cx, 7.6, 0, 'y'); ring(cx, 6.4, -7, 'y'); ring(cx, 6.4, 7, 'y');
+  });
+
+  // ---------------- container rows and stacks between the lanes ----------------
+  four((sx, sz) => {
+    container(sx * 13, sz * 21, true, 0, BL);          // a stack: the top is a hook perch
+    container(sx * 13, sz * 21, true, 2.6, PK);
+    ring(sx * 13, 6.6, sz * 21, 'y');
+    container(sx * 9, sz * 13, false, 0, OR);          // single boxes funnel the lanes
+    container(sx * 31, sz * 24, true, 0, GR);          // outer-lane cover
+    container(sx * 31, sz * 30.5, false, 0, BL);
+    barrier(sx * 4, sz * 25, false); barrier(sx * 20, sz * 28, false); barrier(sx * 18, sz * 6, true);
+    crate(sx * 2, sz * 31); crate(sx * 24, sz * 18); crate(sx * 15, sz * 31.5);
+  });
+  // gantry cranes along each end: tall hookable frames that give the sky some shape
+  for (const sz of [-1, 1]) {
+    two((sx) => { box(sx * 24, 0, sz * 33.5, 1, 12, 1, { noNav: true }); });
+    box(0, 12, sz * 33.5, 49, 1, 1.2, { noNav: true, ink: OR }); ring(-12, 11, sz * 33.5, 'y'); ring(12, 11, sz * 33.5, 'y');
+  }
+  // fuel drums by the spawn ends
+  four((sx, sz) => { cyl(sx * 8, 0, sz * 33, 0.6, 1.2, { ink: OR }); cyl(sx * 9.4, 0, sz * 33, 0.6, 1.2, { ink: OR }); });
+
+  // ---------------- where things are: perches, pickups, match spawns ----------------
+  for (const [x, y, z] of [[0, 3.9, 0], [-27, 3.9, -5], [27, 3.9, 5], [-27, 3.9, 5], [27, 3.9, -5]]) sniper(x, y, z);
+  for (const [x, y, z] of [[0, 3.9, 0], [-27, 0, 0], [27, 0, 0], [-18, 0, 0], [18, 0, 0], [0, 0, -18], [0, 0, 18], [-27, 3.9, 0], [27, 3.9, 0], [-31, 0, -31], [31, 0, 31], [31, 0, -31], [-31, 0, 31]]) pickup(x, y, z);
+  // doodles come from the four corners and the ends of the lanes
+  for (const [x, z] of [[-32, -33], [32, -33], [-32, 33], [32, 33], [-18, -33], [18, -33], [-18, 33], [18, 33], [0, -33], [0, 33], [-34, 0], [34, 0]]) spawn(x, 0, z);
+  // match spawns: both ends, spread across the three lanes, plus the roofs
+  for (const [x, y, z] of [[-18, 0, -32], [0, 0, -32], [18, 0, -32], [-18, 0, 32], [0, 0, 32], [18, 0, 32], [-27, 3.9, -6], [27, 3.9, 6], [0, 3.9, 0], [-34, 0, 0], [34, 0, 0], [-8, 0, -20], [8, 0, 20]]) L.arenaSpawns.push(new THREE.Vector3(x, y, z));
+
+  // ---------------- sky: far cranes and a few paper planes ----------------
+  for (const [x, z, h] of [[-90, -120, 40], [60, -140, 52], [130, 40, 36], [-120, 70, 46], [20, 150, 44]]) { addGeo(new THREE.BoxGeometry(5, h, 5).translate(x, h / 2, z), BL); addGeo(new THREE.BoxGeometry(48, 3, 3).translate(x + 18, h, z), OR); }
+  planes(2, 28, 24, { rStep: 8, hStep: 6, scale: 1.4 });
+  B.finish(); return L;
+}
+
 // ============================ map 3: Doodle Nairobi ============================
 // CBD layout from OpenStreetMap (© OpenStreetMap contributors, ODbL).
 // Real plan, compressed ~10.5× onto the notebook page and snapped to X/Z so the
@@ -981,6 +1062,7 @@ function buildNairobiOSM(B, D, arena = false) {
 
 export function buildLevel(scene, world, key = 'district', opts = {}) {
   const B = createBuilder(scene, world);
+  if (key === 'depot') return buildDepot(B, !!opts.arena);
   if (key === 'mexico') return buildMexico(B, !!opts.arena);
   if (key === 'nairobi') return NAIROBI_OSM ? buildNairobiOSM(B, NAIROBI_OSM, !!opts.arena) : buildNairobi(B, !!opts.arena);
   return buildDistrict(B, !!opts.arena);
