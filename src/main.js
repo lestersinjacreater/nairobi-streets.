@@ -662,7 +662,7 @@ function mainHTML() {
   return `<h1>DOODLE DISTRICT</h1><h2>A ballpoint survival shooter</h2>
     <div class="mainbtns"><button type="button" class="start" id="soloBtn">PLAY SOLO<i>Survive wave after wave</i></button><button type="button" id="onlineBtn">PLAY ONLINE<i>Free-for-all · up to 10 players</i></button></div>
     ${mapHTML(mapKey, true)}
-    <div class="mapsel"><button type="button" class="mapbtn" id="viewMapBtn">VIEW MAP<i>bird's eye · check it against the real CBD</i></button></div>
+    <div class="mapsel"><button type="button" class="mapbtn" id="viewMapBtn">VIEW MAP<i>bird's eye view of the whole map</i></button><a class="mapbtn" id="getAppBtn" href="./install.html">GET THE APP<i>QR code · install on Android</i></a></div>
     ${CONTROLS_HTML}${settingsHTML()}${checkpointHTML()}${best ? `<div class="beststat">BEST SCORE: ${best}</div>` : ''}`;
 }
 function mapViewHTML() {

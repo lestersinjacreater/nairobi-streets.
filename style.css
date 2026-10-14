@@ -153,6 +153,7 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 .mapsel { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 2px solid var(--ink); flex-wrap: wrap; }
 .mapsel > span { font-size: 20px; opacity: .75; }
 .mapbtn { font: inherit; font-size: 20px; color: var(--ink); background: transparent; border: 2.5px solid var(--ink); border-radius: 7px 10px 6px 9px / 10px 6px 9px 7px; padding: 4px 12px; cursor: pointer; opacity: .55; display: flex; flex-direction: column; align-items: center; line-height: 1.1; transform: rotate(-.6deg); }
+a.mapbtn { text-decoration: none; }
 .mapbtn i { font-style: normal; font-size: 14px; opacity: .75; }
 .mapbtn:hover { opacity: .85; }
 .mapbtn.on { opacity: 1; color: var(--paper); background: var(--ink); }

@@ -2,6 +2,11 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (install link)
+- **Main menu now links to the QR install page** (`src/main.js`, `style.css`)
+  - New GET THE APP button next to VIEW MAP opens `install.html`.
+  - VIEW MAP subtitle no longer mentions the real CBD, since District is the only map.
+
 ## 2026-10-14 (install page)
 - **QR code page so people can get the game on Android** (`install.html`, `vendor/qrcode/`, `sw.js`, `README.md`)
   - New `install.html`: a QR code that opens the game, three install steps for Chrome on Android, and an "Install on this phone" button where Chrome offers it.
