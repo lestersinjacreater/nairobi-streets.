@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Get Doodle District</title>
+<meta name="theme-color" content="#1a30c0">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png">
+<style>
+  :root { --ink: #1a30c0; --red: #d02030; --paper: #f6f3e6; --line: #b9c6ea; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); font-family: 'Comic Sans MS', 'Marker Felt', 'Segoe Print', sans-serif; }
+  body { background-image: repeating-linear-gradient(transparent 0 31px, var(--line) 31px 32px); background-position: 0 8px; }
+  body::before { content: ''; position: fixed; left: 56px; top: 0; bottom: 0; width: 2px; background: rgba(208,32,48,.55); }
+  main { max-width: 860px; margin: 0 auto; padding: 28px 20px 40px 76px; display: grid; gap: 28px; grid-template-columns: 1fr; }
+  @media (min-width: 760px) { main { grid-template-columns: 330px 1fr; align-items: start; } }
+  @media (max-width: 520px) { body::before { left: 22px; } main { padding-left: 40px; } }
+  h1 { grid-column: 1 / -1; margin: 0; font-size: clamp(34px, 7vw, 56px); letter-spacing: 1px; line-height: 1; }
+  h1 small { display: block; font-size: 20px; font-weight: normal; margin-top: 8px; opacity: .8; }
+  .card { background: #fff; border: 3px solid var(--ink); border-radius: 14px; padding: 18px; text-align: center; box-shadow: 4px 6px 0 rgba(26,48,192,.15); transform: rotate(-1deg); }
+  #qr svg { width: 100%; height: auto; display: block; }
+  #qr { color: #12185a; }
+  .scan { margin: 12px 0 0; font-size: 20px; }
+  .steps { margin: 0; padding-left: 26px; font-size: 21px; line-height: 1.5; }
+  .steps li { margin-bottom: 8px; }
+  .steps b { color: var(--red); }
+  button, .btn { font: inherit; font-size: 22px; padding: 12px 22px; background: var(--ink); color: #fff; border: 0; border-radius: 10px; cursor: pointer; text-decoration: none; display: inline-block; box-shadow: 3px 4px 0 rgba(0,0,0,.18); }
+  button[hidden] { display: none; }
+  .note { font-size: 17px; opacity: .85; margin-top: 18px; }
+  .warn { background: #fff3cd; color: #6a4a00; border: 2px dashed #b58a00; border-radius: 10px; padding: 10px 14px; font-size: 17px; margin-bottom: 14px; }
+  .warn[hidden] { display: none; }
+  label { display: block; font-size: 16px; margin-top: 18px; opacity: .8; }
+  input { width: 100%; font: inherit; font-size: 17px; padding: 8px 10px; border: 2px solid var(--ink); border-radius: 8px; color: var(--ink); background: #fff; margin-top: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DOODLE DISTRICT<small>Scan to play on your Android phone</small></h1>
+  <section class="card" aria-label="QR code">
+    <div id="qr" role="img" aria-label="QR code that opens the game"></div>
+    <p class="scan">Point your camera here</p>
+  </section>
+  <section>
+    <div class="warn" id="warn" hidden>This page is on your own computer, so a phone cannot open the code. Put the game on a web address first (see the README), or type your computer's network address below.</div>
+    <ol class="steps">
+      <li>Open the <b>camera</b> on your Android phone and scan the code. Tap the link that appears. It opens in Chrome.</li>
+      <li>In Chrome tap the <b>&#8942; menu</b>, then <b>Install app</b> (or <b>Add to Home screen</b>).</li>
+      <li>Open <b>Doodle District</b> from your home screen. It plays full screen, sideways, and starts offline too.</li>
+    </ol>
+    <p><button id="install" hidden type="button">Install on this phone</button></p>
+    <p class="note">It is a web app, so there is no Play Store download and nothing else to install. Online matches need a connection; solo play works without one.</p>
+    <label for="addr">Game address (the code points here)</label>
+    <input id="addr" type="url" inputmode="url" autocomplete="off" spellcheck="false">
+  </section>
+</main>
+<script src="./vendor/qrcode/qrcode.js"></script>
+<script>
+  // the code points at the game itself: the folder this page sits in, unless ?url= says otherwise
+  const defaultUrl = () => new URL('./', location.href).href;
+  const start = new URLSearchParams(location.search).get('url') || defaultUrl();
+  const addr = document.getElementById('addr'), qrBox = document.getElementById('qr'), warn = document.getElementById('warn');
+  function draw() {
+    const url = addr.value.trim() || defaultUrl();
+    const q = qrcode(0, 'M'); q.addData(url); q.make();
+    qrBox.innerHTML = q.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
+    // a phone cannot reach localhost, so say so instead of showing a code that goes nowhere
+    let host = ''; try { host = new URL(url).hostname; } catch (e) { /* ignore */ }
+    warn.hidden = !(host === 'localhost' || host === '127.0.0.1' || host === '::1');
+  }
+  addr.value = start; addr.addEventListener('input', draw); draw();
+  // Chrome on Android can install straight from the page when it offers to
+  let deferred = null; const btn = document.getElementById('install');
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; btn.hidden = false; });
+  btn.addEventListener('click', async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; btn.hidden = true; });
+</script>
+</body>
+</html>
