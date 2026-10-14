@@ -2,6 +2,13 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (grapple bar fix)
+- **The grapple stamina bar (the tall gauge on the left) no longer sits on the left fire button on touch screens** (`style.css`, `src/hud.js`)
+  - That gauge is the "focus meter": it shows grapple stamina in online matches and the katana charge in solo. On phones it overlapped the left FIRE button and the minimap label.
+  - In touch mode it is now a short horizontal bar at the bottom left, next to the boss bar's space. `hud.js` now also sets a `--f` CSS variable with the fill level so the horizontal bar can fill sideways.
+  - The boss bar was narrowed a little (30% of the width) to leave room on very small phones. Checked at 844x390, 960x540 and 640x360: no overlaps with any button or HUD block, with and without the boss bar showing.
+  - Keyboard and controller layouts are unchanged.
+
 ## 2026-10-14 (boss bar fix)
 - **Boss health bar no longer overlaps the HP and ammo readout on touch screens** (`style.css`)
   - On phones the HUD keeps health and ammo across the top, which is where the boss bar used to sit. In touch mode the bar now goes at the bottom centre, between the left fire button and the right-hand buttons.

@@ -37,7 +37,7 @@ export class HUD {
     if (!show) { if (this._fmReady) { this._fmReady = false; m.classList.remove('ready'); document.body.classList.remove('dash-ready'); } return; }
     if (label !== this._fmLabel) { this._fmLabel = label; m.querySelector('.fm-label').textContent = label; }
     const f = Math.max(0, Math.min(1, frac));
-    if (Math.abs(f - (this._fmFrac ?? -1)) > 0.005) { this._fmFrac = f; this.el.fmfill.style.height = (f * 100).toFixed(1) + '%'; }
+    if (Math.abs(f - (this._fmFrac ?? -1)) > 0.005) { this._fmFrac = f; this.el.fmfill.style.height = (f * 100).toFixed(1) + '%'; m.style.setProperty('--f', f.toFixed(3)); }
     if (ready !== this._fmReady) { this._fmReady = ready; m.classList.toggle('ready', ready); document.body.classList.toggle('dash-ready', ready); }
   }
   setGrenades(n) { if (n === this._nades) return; this._nades = n; let h = ''; for (let i = 0; i < n; i++) h += '<i></i>'; this.el.nades.innerHTML = h; }
