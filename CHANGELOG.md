@@ -2,6 +2,12 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (live address)
+- **Play Store files now point at the live site, https://nairobi-streets.vercel.app** (`play/twa-manifest.json`, `docs/PLAY_STORE.md`, `docs/play-store-listing.md`)
+  - Host, icon, manifest and scope addresses in the Android app settings; website and privacy policy lines in the store listing; example addresses in the guide.
+  - Not checked live: this environment cannot reach the site, so open `/privacy.html` and `/.well-known/assetlinks.json` on it yourself.
+  - Still to fill later: the signing key fingerprint in `.well-known/assetlinks.json`, which only exists after the app is built.
+
 ## 2026-10-14 (touch layout audit)
 - **Audit of the whole touch layout, and fixes for what it found** (`style.css`, `src/touch.js`)
   - Method: a script builds the busiest possible screen (score, combo, modifier, timer, kill feed, tip, wave message, boss bar, gauge, scoreboard, ranking list) at 8 phone sizes (640x360 to 1024x600), in solo and online states, and checks every HUD block and button against every other one, plus off-screen items, tap sizes and menu scrolling.

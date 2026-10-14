@@ -7,7 +7,7 @@ no new store release. Google's rules change, so check the current Play Console p
 ## 0. Do this first
 - [ ] Check "Pen & Pin" is free on the Play Store, on social media, and as a web address.
 - [ ] Host the game on a permanent HTTPS address (Vercel, GitHub Pages, your own server). The app is tied to it.
-- [x] The placeholders in `privacy.html` (name, contact email, host) are filled in. Deploy it. Play needs a public privacy policy link, e.g. `https://YOUR-SITE/privacy.html`.
+- [x] The placeholders in `privacy.html` (name, contact email, host) are filled in. Deploy it. Play needs a public privacy policy link, e.g. `https://nairobi-streets.vercel.app/privacy.html`.
 - [ ] Decide the permanent app id (`com.penandpin.game` is a placeholder). It cannot change after publishing.
 - [ ] Create a Google Play developer account (one-time fee, about $25) at https://play.google.com/console.
       New personal accounts must usually run a **closed test with a set number of testers for 14 days** before
@@ -20,10 +20,10 @@ You need Node.js 18+. Bubblewrap can download the Java and Android tools it need
 npm install -g @bubblewrap/cli
 cd play
 # first time: answer the questions (host, name, package id, key). play/twa-manifest.json lists the answers to use.
-bubblewrap init --manifest=https://YOUR-SITE/manifest.webmanifest
+bubblewrap init --manifest=https://nairobi-streets.vercel.app/manifest.webmanifest
 bubblewrap build        # makes app-release-bundle.aab (upload this) and app-release-signed.apk (test this)
 ```
-Before running it, replace `YOUR-SITE.example.com` everywhere in `play/twa-manifest.json` with your real host.
+The address in `play/twa-manifest.json` is already set to `nairobi-streets.vercel.app`.
 If you keep that file as it is, `bubblewrap update` rebuilds the Android project from it.
 
 Easier alternative: https://www.pwabuilder.com, paste your game's address, choose Android, and download the package.
@@ -37,7 +37,7 @@ This is what removes the browser bar. Get the SHA-256 fingerprint of your signin
 keytool -list -v -keystore play/android.keystore -alias penandpin
 ```
 Put it in `.well-known/assetlinks.json` (replace the placeholder), deploy, and check that
-`https://YOUR-SITE/.well-known/assetlinks.json` opens in a browser. If you use **Play App Signing** (the default),
+`https://nairobi-streets.vercel.app/.well-known/assetlinks.json` opens in a browser. If you use **Play App Signing** (the default),
 Google re-signs your app, so also add the SHA-256 shown in Play Console under *Setup > App signing*. Both
 fingerprints can sit in the same list.
 
@@ -49,7 +49,7 @@ Check that online play connects (see `net-config.js`) and that the game starts w
 ## 4. Fill in the Play Console
 - **Store listing:** copy from `docs/play-store-listing.md`. Needs a 512x512 icon, a 1024x500 feature graphic and
   at least two phone screenshots (landscape works).
-- **Privacy policy:** `https://YOUR-SITE/privacy.html`.
+- **Privacy policy:** `https://nairobi-streets.vercel.app/privacy.html`.
 - **Content rating:** answer the IARC questionnaire honestly. It has cartoon-style violence (shooting drawn
   stick figures), no gore, no gambling, no purchases, online play with other players but no chat.
 - **Target audience:** not designed for children; choose 13+ (or older).

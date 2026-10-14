@@ -55,5 +55,5 @@ First release of Pen & Pin: solo waves, online free for all, touch controls and 
 
 ## Contact details for the listing
 - Email: lestetsinjawatosia@gmail.com
-- Website: REPLACE WITH YOUR SITE
-- Privacy policy: https://YOUR-SITE/privacy.html
+- Website: https://nairobi-streets.vercel.app
+- Privacy policy: https://nairobi-streets.vercel.app/privacy.html
