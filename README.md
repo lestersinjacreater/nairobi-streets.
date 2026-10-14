@@ -19,6 +19,8 @@ then open http://127.0.0.1:8910. On Vercel (or any static host) just deploy the 
 
 ## On a phone
 
+The first screen offers **Download for Android** or **Play in browser**. It is skipped once the game is installed, and after you pick an option during a visit (add `#play` to the address to skip it).
+
 Open `install.html` on the hosted site (for example `https://your-site/install.html`) for a QR code and
 Android install steps. Print it, put it on a screen, or share the link. The code points at the game, so
 people scan it, open it in Chrome and choose **Install app**. The page shows a warning if it is opened from

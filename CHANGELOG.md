@@ -2,6 +2,12 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (welcome screen)
+- **Welcome screen is now the first thing people see** (`index.html`)
+  - Two choices: DOWNLOAD FOR ANDROID or PLAY IN BROWSER.
+  - Download: on Chrome for Android it opens the install prompt straight away; otherwise it shows the install steps, plus a QR code when opened on a computer.
+  - Skipped when the game is already installed, or after a choice in the same browser session. `#play` on the address skips it too.
+
 ## 2026-10-14 (install link)
 - **Main menu now links to the QR install page** (`src/main.js`, `style.css`)
   - New GET THE APP button next to VIEW MAP opens `install.html`.
