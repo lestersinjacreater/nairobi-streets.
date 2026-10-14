@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 500" width="1024" height="500">
+  <!-- Pen & Pin Play Store feature graphic, 1024 x 500. Ballpoint ink on ruled notebook paper. -->
+  <defs>
+    <!-- a slight wobble so strokes look drawn by hand -->
+    <filter id="wob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="5"/></filter>
+    <filter id="wob2" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="21" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter>
+    <pattern id="hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="9" stroke="#1a30c0" stroke-width="2" opacity=".55"/></pattern>
+  </defs>
+  <rect width="1024" height="500" fill="#f6f3e6"/>
+  <g stroke="#b9c6ea" stroke-width="2">
+    <line x1="0" y1="40" x2="1024" y2="40"/><line x1="0" y1="80" x2="1024" y2="80"/><line x1="0" y1="120" x2="1024" y2="120"/><line x1="0" y1="160" x2="1024" y2="160"/>
+    <line x1="0" y1="200" x2="1024" y2="200"/><line x1="0" y1="240" x2="1024" y2="240"/><line x1="0" y1="280" x2="1024" y2="280"/><line x1="0" y1="320" x2="1024" y2="320"/>
+    <line x1="0" y1="360" x2="1024" y2="360"/><line x1="0" y1="400" x2="1024" y2="400"/><line x1="0" y1="440" x2="1024" y2="440"/><line x1="0" y1="480" x2="1024" y2="480"/>
+  </g>
+  <line x1="58" y1="0" x2="58" y2="500" stroke="#eb7b8c" stroke-width="3"/>
+
+  <!-- the city: rooftops drawn in ink, hatched on the shaded side -->
+  <g filter="url(#wob)" fill="none" stroke="#1a30c0" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M600 470 V330 H700 V470"/><rect x="600" y="330" width="100" height="140" fill="url(#hatch)" stroke="none" opacity=".6"/>
+    <path d="M700 470 V250 H820 V470"/><path d="M820 470 V300 H900 V470"/><path d="M900 470 V210 H1000 V470"/>
+    <rect x="900" y="210" width="100" height="260" fill="url(#hatch)" stroke="none" opacity=".5"/>
+    <path d="M560 470 H1024"/>
+    <!-- windows -->
+    <g stroke-width="3"><rect x="620" y="352" width="20" height="24"/><rect x="660" y="352" width="20" height="24"/><rect x="620" y="402" width="20" height="24"/>
+      <rect x="725" y="280" width="22" height="26"/><rect x="765" y="280" width="22" height="26"/><rect x="725" y="340" width="22" height="26"/><rect x="765" y="340" width="22" height="26"/>
+      <rect x="840" y="330" width="20" height="24"/><rect x="925" y="240" width="22" height="26"/><rect x="965" y="240" width="22" height="26"/><rect x="925" y="300" width="22" height="26"/></g>
+  </g>
+
+  <!-- grapple rope from a ring on the tall roof to the player, with a swing arc -->
+  <g filter="url(#wob2)" fill="none" stroke-linecap="round">
+    <circle cx="950" cy="190" r="14" stroke="#e07b10" stroke-width="6"/>
+    <path d="M940 200 C880 290 770 250 690 168" stroke="#e07b10" stroke-width="6"/><path d="M940 200 C880 290 770 250 690 168" stroke="#f6f3e6" stroke-width="2" stroke-dasharray="2 10"/>
+    <path d="M590 190 C625 110 660 105 676 128" stroke="#1a30c0" stroke-width="2.5" stroke-dasharray="3 9" opacity=".7"/>
+  </g>
+
+  <!-- the player, mid-swing, firing at an enemy doodle on the middle roof -->
+  <g filter="url(#wob2)" fill="none" stroke="#1a30c0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="690" cy="128" r="17" fill="#f6f3e6"/>
+    <path d="M690 145 L686 200"/><path d="M688 160 L726 172"/><path d="M687 165 L660 190"/>
+    <path d="M686 200 L664 238"/><path d="M686 200 L712 232"/>
+    <!-- rifle -->
+    <path d="M722 168 L778 160" stroke-width="7"/><path d="M742 164 L744 182"/>
+  </g>
+  <!-- muzzle flash and bullet streak -->
+  <g stroke="#e07b10" stroke-width="4" stroke-linecap="round"><line x1="786" y1="158" x2="806" y2="150"/><line x1="786" y1="160" x2="808" y2="162"/><line x1="784" y1="164" x2="800" y2="176"/></g>
+  <path d="M818 158 L880 228" stroke="#1a30c0" stroke-width="2.5" stroke-dasharray="10 8" opacity=".75"/>
+
+  <!-- enemy doodle on the middle roof -->
+  <g filter="url(#wob2)" fill="none" stroke="#1a30c0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="880" cy="236" r="18" fill="#f6f3e6"/><path d="M880 254 L880 290"/><path d="M880 262 L856 276"/><path d="M880 262 L903 274"/><path d="M880 290 L866 322"/><path d="M880 290 L897 322"/>
+    <path d="M872 232 l5 5 m0 -5 l-5 5" stroke-width="3"/><path d="M886 232 l5 5 m0 -5 l-5 5" stroke-width="3"/><path d="M873 244 q7 -6 14 0" stroke-width="3"/>
+  </g>
+  <!-- crosshair on the enemy -->
+  <g stroke="#d02030" stroke-width="5" stroke-linecap="round" fill="none"><circle cx="880" cy="238" r="34"/><line x1="880" y1="190" x2="880" y2="208"/><line x1="880" y1="268" x2="880" y2="286"/><line x1="832" y1="238" x2="850" y2="238"/><line x1="910" y1="238" x2="928" y2="238"/></g>
+  <circle cx="880" cy="238" r="4" fill="#d02030"/>
+
+  <!-- title -->
+  <g filter="url(#wob)">
+    <text x="92" y="212" font-family="'Comic Sans MS','Marker Felt','DejaVu Sans',sans-serif" font-weight="bold" font-size="150" fill="#1a30c0" letter-spacing="2">PEN</text>
+    <text x="92" y="340" font-family="'Comic Sans MS','Marker Felt','DejaVu Sans',sans-serif" font-weight="bold" font-size="150" fill="#1a30c0" letter-spacing="2">&amp; PIN</text>
+  </g>
+  <!-- the pin: a red push pin stuck in the page beside the title -->
+  <g filter="url(#wob2)">
+    <path d="M492 164 L488 206" stroke="#59606e" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="492" cy="158" rx="34" ry="11" fill="#a31625"/>
+    <path d="M470 154 C470 118 514 118 514 154 Z" fill="#d02030" stroke="#a31625" stroke-width="3"/>
+    <ellipse cx="492" cy="126" rx="14" ry="9" fill="#d02030" stroke="#a31625" stroke-width="3"/>
+    <path d="M481 140 C479 132 483 126 489 124" stroke="#f6f3e6" stroke-width="5" fill="none" stroke-linecap="round" opacity=".8"/>
+  </g>
+  <!-- tagline with a pen-stroke underline -->
+  <text x="96" y="398" font-family="'Comic Sans MS','Marker Felt','DejaVu Sans',sans-serif" font-weight="bold" font-size="27" fill="#d02030" letter-spacing="3">THE BALLPOINT SHOOTER</text>
+  <path d="M94 416 C190 408 300 424 420 412 C470 408 500 414 520 410" stroke="#1a30c0" stroke-width="4" fill="none" stroke-linecap="round" filter="url(#wob2)"/>
+</svg>

@@ -2,6 +2,11 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (feature graphic)
+- **Play Store feature graphic** (`docs/feature-graphic.svg`, `docs/feature-graphic-1024x500.png`, `docs/play-store-listing.md`)
+  - 1024 x 500 PNG (no transparency) in the game's ballpoint-on-notebook-paper style: the Pen & Pin title with a red push pin, the tagline, and a rooftop scene with a player swinging on the grapple and lining up an enemy doodle.
+  - The SVG is the editable source. Checklist in the listing doc updated.
+
 ## 2026-10-14 (Play Store prep)
 - **Privacy policy and Play Store packaging files** (`privacy.html`, `play/twa-manifest.json`, `.well-known/assetlinks.json`, `docs/PLAY_STORE.md`, `docs/play-store-listing.md`, `index.html`, `install.html`, `sw.js`, `.gitignore`, `.dockerignore`, `README.md`)
   - `privacy.html`: a plain-language policy written from what the game really does (no accounts, ads or analytics; settings stay on the device; online play shares your display name and network address with other players and uses a matchmaking server, STUN servers and a relay). Three highlighted placeholders to fill in: your name or company, contact email, and web host.
