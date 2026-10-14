@@ -2,6 +2,14 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (tip text fix)
+- **Hint text ("Hold HOOK to reel...") no longer overlaps other HUD on touch screens** (`style.css`)
+  - The tip sat just under the top HUD and just above the big wave message, so it ran into "enemies left", the timer or the "WAVE" message depending on the phone size.
+  - In touch mode it now sits in the quiet strip at the bottom centre, above the boss bar and the grapple gauge, with text that scales to the screen (13 to 18 px).
+  - Also fixed the boss bar from the last fix: its inner bar was wider than its box and ran under the SLIDE button on small phones. It is now sized to its box (28% of the screen width), and the earlier overlap test was changed to measure the bar itself.
+  - Checked at 844x390, 960x540, 932x430 and 640x360, with a tip, the boss bar, the gauge and the wave message all showing: no overlaps with any button or HUD block.
+  - Keyboard and controller layouts are unchanged.
+
 ## 2026-10-14 (grapple bar fix)
 - **The grapple stamina bar (the tall gauge on the left) no longer sits on the left fire button on touch screens** (`style.css`, `src/hud.js`)
   - That gauge is the "focus meter": it shows grapple stamina in online matches and the katana charge in solo. On phones it overlapped the left FIRE button and the minimap label.

@@ -324,10 +324,12 @@ body.dash-ready .tbtn.dash { display: flex; }
 #hud.touch .tally, #hud.touch .slots, #hud.touch .hint { display: none; }
 #hud.touch .hud-br { top: 11vmin; bottom: auto; right: auto; left: 50%; transform: translateX(-50%); padding: 0 10px; background: none; box-shadow: none; }
 #hud.touch .weapon { font-size: 18px; }
-#hud.touch .tip { left: 20%; right: 20%; top: 19vmin; bottom: auto; text-align: center; font-size: 20px; }
+/* tips sit in the quiet strip at the bottom centre: the top is taken by the HUD and the wave message, the sides by the thumbs */
+#hud.touch .tip { left: 31%; right: 35%; top: auto; bottom: 18vmin; text-align: center; font-size: clamp(13px, 4.4vmin, 18px); }
 #hud.touch .killfeed { top: 36%; font-size: 20px; }
 /* the boss bar normally sits at the top, where the touch layout keeps health and ammo; park it at the bottom centre, clear of both thumbs */
-#hud.touch .bossbar { top: auto; bottom: 3vmin; width: 30vw; margin-left: -15vw; font-size: 18px; }
+#hud.touch .bossbar { top: auto; bottom: 3vmin; width: 28vw; margin-left: -14vw; font-size: 18px; }
+#hud.touch .bossbar .bar.big { width: 100%; height: 3.4vmin; box-sizing: border-box; }
 @media (max-height: 520px) {
   .hud-tl, .hud-tr { font-size: 20px; }
   .msg-main { font-size: 52px; } .msg-sub { font-size: 20px; }
