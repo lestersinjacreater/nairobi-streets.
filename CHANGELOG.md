@@ -2,6 +2,16 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (Play Store prep)
+- **Privacy policy and Play Store packaging files** (`privacy.html`, `play/twa-manifest.json`, `.well-known/assetlinks.json`, `docs/PLAY_STORE.md`, `docs/play-store-listing.md`, `index.html`, `install.html`, `sw.js`, `.gitignore`, `.dockerignore`, `README.md`)
+  - `privacy.html`: a plain-language policy written from what the game really does (no accounts, ads or analytics; settings stay on the device; online play shares your display name and network address with other players and uses a matchmaking server, STUN servers and a relay). Three highlighted placeholders to fill in: your name or company, contact email, and web host.
+  - `play/twa-manifest.json`: settings for building the Android app with Bubblewrap (package id `com.penandpin.game` is a placeholder, host needs replacing).
+  - `.well-known/assetlinks.json`: placeholder for the site-to-app link that hides the browser bar; needs the signing key fingerprint.
+  - `docs/PLAY_STORE.md`: step-by-step guide from account to release, with the Data safety and content rating answers.
+  - `docs/play-store-listing.md`: ready-to-paste app name, short and full description, release notes.
+  - Privacy policy linked from the welcome screen and install page; added to the offline cache list.
+  - Signing keys and build output (`*.keystore`, `*.jks`, `*.aab`, `*.apk`) are git-ignored; `play/` and `docs/` are left out of the Docker image.
+
 ## 2026-10-14 (rename)
 - **Game renamed from Doodle District to Pen & Pin; the map is now Pen & Pin Central** (`index.html`, `install.html`, `manifest.webmanifest`, `sw.js`, `src/main.js`, `src/level.js`, `src/net.js`, `README.md`, `Dockerfile`, `icons/icon.svg`)
   - New name on the welcome screen, main menu, page titles, install page, installed app name, README, Dockerfile comment and icon comment.

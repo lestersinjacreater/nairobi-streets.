@@ -4,3 +4,12 @@ node_modules/
 
 # raw OpenStreetMap downloads (regenerate with tools/osm/fetch.mjs)
 tools/osm/*.osm.json
+
+# Play Store packaging: never commit signing keys or build output
+*.keystore
+*.jks
+signing-key.*
+play/*.aab
+play/*.apk
+play/build/
+play/app/

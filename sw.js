@@ -4,7 +4,7 @@
 // Every file the game loads must be listed in SHELL; tools/pwa.test.mjs checks that.
 const CACHE = 'pen-and-pin-v1';
 const SHELL = [
-  './', './index.html', './install.html', './net-config.js', './style.css', './manifest.webmanifest',
+  './', './index.html', './install.html', './privacy.html', './net-config.js', './style.css', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',
   './vendor/three/three.module.js', './vendor/three/addons/utils/BufferGeometryUtils.js', './vendor/peerjs/peerjs.min.js', './vendor/qrcode/qrcode.js',
   './src/audio.js', './src/effects.js', './src/enemies.js', './src/hud.js', './src/input.js', './src/level.js', './src/main.js',

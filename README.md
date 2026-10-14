@@ -37,6 +37,11 @@ swap; DASH appears when the katana gauge is lit. A paired Bluetooth controller w
 `sw.js` lists every file the game loads so it can be cached for offline play; after adding a file,
 add it there too (`node --test tools/pwa.test.mjs` checks the list).
 
+## Play Store
+
+See `docs/PLAY_STORE.md` for turning the game into an Android app for the Google Play Store, and
+`docs/play-store-listing.md` for the store text. `privacy.html` is the privacy policy page Play requires.
+
 ## Modes
 
 - **Solo**: survive the waves. Bosses every fifth wave, checkpoints unlock at wave 5, 10, 15...
