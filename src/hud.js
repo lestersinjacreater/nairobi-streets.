@@ -156,7 +156,8 @@ export const CONTROLS_HTML = `
 <div class="touchhelp">
   <div class="colhead">TOUCH</div>
   <div><b>Left thumb</b> move (push all the way to sprint) &nbsp; <b>Drag right side</b> look</div>
-  <div><b>FIRE</b>, <b>AIM</b> and <b>HOOK</b> also turn the camera while you hold them</div>
+  <div><b>FIRE</b> (big one on the right, small one above the stick) <b>SCOPE</b> tap to aim, tap again to let go</div>
+  <div><b>FIRE</b>, <b>SCOPE</b> and <b>HOOK</b> also turn the camera while you hold them</div>
   <div><b>HOOK</b> swing, hold to reel &nbsp; <b>JUMP</b> twice to double jump &nbsp; <b>SLIDE</b> slide / air dash</div>
   <div><b>SWAP</b> next weapon &nbsp; <b>NADE</b> hold to throw further &nbsp; <b>DASH</b> appears when the katana gauge is lit</div>
 </div>

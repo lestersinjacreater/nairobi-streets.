@@ -291,6 +291,8 @@ canvas#c { touch-action: none; }
 .tbtn.on { background: rgba(38,42,54,.28); transform: scale(.93); }
 .tbtn.fire { border-color: rgba(208,32,48,.85); color: var(--red); border-width: 3.5px; }
 .tbtn.fire.on { background: rgba(208,32,48,.25); }
+.tbtn.fire.small { border-width: 3px; }
+.tbtn.ads { border-style: double; border-width: 5px; }
 .tbtn.hook { border-color: rgba(214,120,20,.9); color: #b0600a; }
 .tbtn.dash { display: none; border-color: var(--red); color: var(--red); animation: blink 1s infinite; }
 body.dash-ready .tbtn.dash { display: flex; }
