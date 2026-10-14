@@ -2,6 +2,11 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (privacy details)
+- **Privacy policy filled in** (`privacy.html`, `docs/play-store-listing.md`, `docs/PLAY_STORE.md`)
+  - Maker name, contact email and host (Vercel) added to the privacy page; the contact email is also in the listing doc. The email is now public on the page.
+  - Still to fill later: the website and final privacy policy address in the listing doc, once the game has a live address.
+
 ## 2026-10-14 (feature graphic)
 - **Play Store feature graphic** (`docs/feature-graphic.svg`, `docs/feature-graphic-1024x500.png`, `docs/play-store-listing.md`)
   - 1024 x 500 PNG (no transparency) in the game's ballpoint-on-notebook-paper style: the Pen & Pin title with a red push pin, the tagline, and a rooftop scene with a player swinging on the grapple and lining up an enemy doodle.

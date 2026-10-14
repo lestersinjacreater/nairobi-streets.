@@ -54,6 +54,6 @@ First release of Pen & Pin: solo waves, online free for all, touch controls and 
 - [ ] At least 2 phone screenshots, landscape: take them from the game on a phone (menu, a fight, the scope)
 
 ## Contact details for the listing
-- Email: REPLACE WITH YOUR CONTACT EMAIL
+- Email: lestetsinjawatosia@gmail.com
 - Website: REPLACE WITH YOUR SITE
 - Privacy policy: https://YOUR-SITE/privacy.html

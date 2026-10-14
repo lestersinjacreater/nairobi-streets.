@@ -7,8 +7,7 @@ no new store release. Google's rules change, so check the current Play Console p
 ## 0. Do this first
 - [ ] Check "Pen & Pin" is free on the Play Store, on social media, and as a web address.
 - [ ] Host the game on a permanent HTTPS address (Vercel, GitHub Pages, your own server). The app is tied to it.
-- [ ] Fill in the three highlighted placeholders in `privacy.html` (your name, your contact email, your host) and
-      deploy. Play needs a public privacy policy link, e.g. `https://YOUR-SITE/privacy.html`.
+- [x] The placeholders in `privacy.html` (name, contact email, host) are filled in. Deploy it. Play needs a public privacy policy link, e.g. `https://YOUR-SITE/privacy.html`.
 - [ ] Decide the permanent app id (`com.penandpin.game` is a placeholder). It cannot change after publishing.
 - [ ] Create a Google Play developer account (one-time fee, about $25) at https://play.google.com/console.
       New personal accounts must usually run a **closed test with a set number of testers for 14 days** before
