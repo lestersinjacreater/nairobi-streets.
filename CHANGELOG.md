@@ -3,6 +3,10 @@
 Every code change, newest first. Add an entry here with each change.
 
 ## 2026-10-14
+- **Sniper scope looks more like a real sniper view** (`style.css`, `src/hud.js`, `src/weapons.js`)
+  - Reticle now has mil-dot tick marks along the crosshair.
+  - Darker blue vignette around the edge of the lens.
+  - Firing the sniper while scoped jolts the sight picture down and then settles it (`scopeKick()` in the HUD).
 - **Touch controls reworked to a mobile-shooter layout** (`src/touch.js`, `style.css`, `src/hud.js`)
   - Big FIRE button under the right thumb; a second, smaller FIRE button on the left above the thumbstick.
   - AIM is now a SCOPE button that toggles: tap to aim, tap again to let go (it used to be hold).

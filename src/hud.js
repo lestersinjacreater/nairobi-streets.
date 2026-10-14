@@ -3,7 +3,7 @@ export class HUD {
   constructor(root) {
     this.root = root;
     root.innerHTML = `
-      <div class="scope" id="scope"><div class="mask"></div><div class="ring"></div><div class="cx"></div><div class="cy"></div><div class="dot"></div></div>
+      <div class="scope" id="scope"><div class="mask"></div><div class="ring"></div><div class="cx"></div><div class="cy"></div><div class="dot"></div><div class="mil"></div><div class="vig"></div></div>
       <div class="focus-meter" id="focusmeter"><div class="fm-label">KATANA</div><div class="fm-tube"><div class="fm-fill" id="fmfill"></div><i class="fm-f1"></i><i class="fm-f2"></i><i class="fm-f3"></i></div><div class="fm-ready" id="fmready">SLASH READY</div></div>
       <div class="focus-mark" id="focusmark"><i></i><i></i><i></i><i></i></div>
       <div class="crosshair" id="crosshair"><i class="ch-t"></i><i class="ch-b"></i><i class="ch-l"></i><i class="ch-r"></i><i class="ch-dot"></i></div>
@@ -49,6 +49,8 @@ export class HUD {
     if (this.onDevice) this.onDevice(this._pad);
   }
   key(action) { return (this._device === 'touch' ? TOUCH_KEYS : this._pad ? PAD_KEYS : KB_KEYS)[action] || action; }
+  // a sniper shot jolts the sight picture, then it settles (restarting the animation each time)
+  scopeKick() { const e = this.el.scope; e.classList.remove('kick'); void e.offsetWidth; e.classList.add('kick'); }
   setScope(on) { if (on === this._scope) return; this._scope = on; this.el.scope.classList.toggle('on', on); }
   setFocusMark(x, y) {
     const m = this.el.focusmark;
