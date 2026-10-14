@@ -116,6 +116,13 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 .scope .cx { position: absolute; left: 50%; top: 50%; width: 60vh; height: 2.5px; margin: -1px -30vh; background: repeating-linear-gradient(90deg, var(--ink) 0 14px, transparent 14px 17px); }
 .scope .cy { position: absolute; left: 50%; top: 50%; width: 2.5px; height: 60vh; margin: -30vh -1px; background: repeating-linear-gradient(180deg, var(--ink) 0 14px, transparent 14px 17px); }
 .scope .dot { position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; margin: -2.5px; background: var(--red); border-radius: 50%; }
+/* sniper look: dark lens edge, mil-dot ticks along the crosshair, and a jolt when the shot goes off */
+.scope .vig { position: absolute; left: 50%; top: 50%; width: 60vh; height: 60vh; margin: -30vh; border-radius: 50%; background: radial-gradient(circle, transparent 62%, rgba(26,48,192,.10) 82%, rgba(26,48,192,.34) 100%); }
+.scope .mil { position: absolute; left: 50%; top: 50%; width: 60vh; height: 60vh; margin: -30vh; background:
+  repeating-linear-gradient(90deg, transparent 0 calc(5vh - 1.5px), var(--ink) calc(5vh - 1.5px) calc(5vh + 1.5px)) center / 100% 14px no-repeat,
+  repeating-linear-gradient(180deg, transparent 0 calc(5vh - 1.5px), var(--ink) calc(5vh - 1.5px) calc(5vh + 1.5px)) center / 14px 100% no-repeat; opacity: .75; }
+.scope.kick { animation: scopekick .38s cubic-bezier(.2,.8,.3,1); }
+@keyframes scopekick { 0% { transform: translateY(5vh) scale(1.06); } 30% { transform: translateY(-1.2vh) scale(1.015); } 100% { transform: none; } }
 /* focus-slash target marker */
 .focus-mark { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; transition: opacity .1s; }
 .focus-mark.on { opacity: 1; animation: fm .5s ease-in-out infinite alternate; }
@@ -291,6 +298,8 @@ canvas#c { touch-action: none; }
 .tbtn.on { background: rgba(38,42,54,.28); transform: scale(.93); }
 .tbtn.fire { border-color: rgba(208,32,48,.85); color: var(--red); border-width: 3.5px; }
 .tbtn.fire.on { background: rgba(208,32,48,.25); }
+.tbtn.fire.small { border-width: 3px; }
+.tbtn.ads { border-style: double; border-width: 5px; }
 .tbtn.hook { border-color: rgba(214,120,20,.9); color: #b0600a; }
 .tbtn.dash { display: none; border-color: var(--red); color: var(--red); animation: blink 1s infinite; }
 body.dash-ready .tbtn.dash { display: flex; }
