@@ -2,6 +2,12 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (asset links)
+- **Site-to-app link filled in** (`.well-known/assetlinks.json`, `play/twa-manifest.json`, `docs/PLAY_STORE.md`)
+  - `assetlinks.json` now holds the app's package name, `app.vercel.nairobi_streets.twa`, and the SHA-256 fingerprint of the signing key PWABuilder generated. This is what lets the installed app open the game full screen without an address bar.
+  - `play/twa-manifest.json` uses the same package name so the files agree.
+  - Still to add after the first upload to Google Play: the second fingerprint from Play Console under Setup > App signing, in the same list.
+
 ## 2026-10-14 (live address)
 - **Play Store files now point at the live site, https://nairobi-streets.vercel.app** (`play/twa-manifest.json`, `docs/PLAY_STORE.md`, `docs/play-store-listing.md`)
   - Host, icon, manifest and scope addresses in the Android app settings; website and privacy policy lines in the store listing; example addresses in the guide.

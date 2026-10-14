@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.penandpin.game",
+      "package_name": "app.vercel.nairobi_streets.twa",
       "sha256_cert_fingerprints": [
-        "REPLACE_WITH_SHA256_FINGERPRINT_FROM_YOUR_SIGNING_KEY"
+        "FB:EA:49:D1:CB:39:16:EE:A7:88:0D:A4:30:F6:D3:A1:D1:88:83:E5:9D:F0:D4:C4:4A:7E:E2:D3:91:27:EA:EE"
       ]
     }
   }
