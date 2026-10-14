@@ -4,9 +4,9 @@
 // Every file the game loads must be listed in SHELL; tools/pwa.test.mjs checks that.
 const CACHE = 'doodle-district-v1';
 const SHELL = [
-  './', './index.html', './style.css', './manifest.webmanifest',
+  './', './index.html', './install.html', './style.css', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',
-  './vendor/three/three.module.js', './vendor/three/addons/utils/BufferGeometryUtils.js', './vendor/peerjs/peerjs.min.js',
+  './vendor/three/three.module.js', './vendor/three/addons/utils/BufferGeometryUtils.js', './vendor/peerjs/peerjs.min.js', './vendor/qrcode/qrcode.js',
   './src/audio.js', './src/effects.js', './src/enemies.js', './src/hud.js', './src/input.js', './src/level.js', './src/main.js',
   './src/nairobi-data.js', './src/nav.js', './src/net.js', './src/physics.js', './src/player.js', './src/players.js',
   './src/render.js', './src/touch.js', './src/util.js', './src/weapons.js',

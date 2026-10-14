@@ -19,6 +19,12 @@ then open http://127.0.0.1:8910. On Vercel (or any static host) just deploy the 
 
 ## On a phone
 
+Open `install.html` on the hosted site (for example `https://your-site/install.html`) for a QR code and
+Android install steps. Print it, put it on a screen, or share the link. The code points at the game, so
+people scan it, open it in Chrome and choose **Install app**. The page shows a warning if it is opened from
+`localhost`, because a phone cannot reach that. `install.html?url=<address>` makes the code point somewhere else.
+The QR code is drawn in the browser by `vendor/qrcode/qrcode.js` (qrcode-generator, MIT).
+
 The game is an installable web app. Put it on any HTTPS host (Vercel, GitHub Pages), open it in
 Chrome on Android and choose **Install app** (or **Add to Home screen**). It then opens full screen and
 sideways with its own icon, and starts offline too (online matches still need a connection). Touch

@@ -2,6 +2,13 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (install page)
+- **QR code page so people can get the game on Android** (`install.html`, `vendor/qrcode/`, `sw.js`, `README.md`)
+  - New `install.html`: a QR code that opens the game, three install steps for Chrome on Android, and an "Install on this phone" button where Chrome offers it.
+  - The code points at the folder the page is served from; the address can be edited on the page or set with `?url=`.
+  - Warns when opened from localhost, since a phone cannot reach that.
+  - Added the qrcode-generator library (MIT, v1.4.4) under `vendor/qrcode/`, and both new files to the offline cache list.
+
 ## 2026-10-14 (District upgrade)
 - **Doodle District is now the one map, with mobile-shooter-style cover** (`src/level.js`, `src/main.js`)
   - Menu offers only Doodle District and it is the default. Nairobi, Mexico and the Depot map are still in the code, just off the menu.
