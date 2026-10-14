@@ -51,7 +51,7 @@ First release of Pen & Pin: solo waves, online free for all, touch controls and 
 ## Graphics checklist
 - [ ] App icon, 512 x 512 PNG: `icons/icon-512.png`
 - [x] Feature graphic, 1024 x 500 PNG: `docs/feature-graphic-1024x500.png` (source: `docs/feature-graphic.svg`)
-- [ ] At least 2 phone screenshots, landscape: take them from the game on a phone (menu, a fight, the scope)
+- [x] Phone screenshots, 1920 x 1080 landscape PNG, in `docs/screenshots/`: firefight, sniper scope, rooftop fight, online lobby. Taken in a desktop browser at phone size with the touch controls showing; re-take them on a real phone if you prefer.
 
 ## Contact details for the listing
 - Email: lestetsinjawatosia@gmail.com

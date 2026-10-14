@@ -2,6 +2,11 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (store screenshots)
+- **Play Store screenshots** (`docs/screenshots/`, `docs/play-store-listing.md`)
+  - Four 1920 x 1080 PNGs (no transparency, under 3 MB each) from the real game with touch controls showing: `01-firefight`, `02-sniper-scope`, `03-rooftop-fight`, `04-online-lobby`.
+  - Taken in a headless browser at phone size; the online lobby uses two test browsers.
+
 ## 2026-10-14 (privacy details)
 - **Privacy policy filled in** (`privacy.html`, `docs/play-store-listing.md`, `docs/PLAY_STORE.md`)
   - Maker name, contact email and host (Vercel) added to the privacy page; the contact email is also in the listing doc. The email is now public on the page.
