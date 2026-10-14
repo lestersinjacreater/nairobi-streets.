@@ -2,6 +2,20 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (touch layout audit)
+- **Audit of the whole touch layout, and fixes for what it found** (`style.css`, `src/touch.js`)
+  - Method: a script builds the busiest possible screen (score, combo, modifier, timer, kill feed, tip, wave message, boss bar, gauge, scoreboard, ranking list) at 8 phone sizes (640x360 to 1024x600), in solo and online states, and checks every HUD block and button against every other one, plus off-screen items, tap sizes and menu scrolling.
+  - Kill feed: it ran under the HOOK, SLASH and NADE buttons. Now it sits just left of the buttons, three lines at most.
+  - Combo text: it landed on the minimap. Now it sits just right of the minimap, under the score, and shrinks on small screens.
+  - Tap sizes: 8 buttons were under 44 px (pause 32, reload and swap 36, grenade and slash 38, slide 40). Every touch button is now at least 44 px.
+  - Pause button: the bigger size touched the wave readout, so the top-right readout now keeps clear of it.
+  - Timer: the long "TIMER STARTS WHEN A PLAYER JOINS" line ran across the health bar. It now wraps into a narrow column on touch.
+  - Scoreboard: ten players ran off the bottom of the screen and sat under the buttons. It now sits between the left and right thumbs, is smaller, and scrolls if needed.
+  - Weapon name: moved slightly down so it no longer touches the health bar.
+  - Online ranking list: slightly smaller text so four rows clear the buttons.
+  - Notches: touch controls and HUD now respect the device safe area (`env(safe-area-inset-*)`), so nothing sits under a camera cutout or rounded corner.
+  - Result: at 844x390 and 640x360, solo and online, no HUD block overlaps a button, nothing is off-screen and no tap target is under 44 px. Menus were checked and scroll on phones. Remaining overlaps are tiny line-box touches between stacked text lines (for example wave and modifier). Keyboard and controller layouts are unchanged.
+
 ## 2026-10-14 (tip text fix)
 - **Hint text ("Hold HOOK to reel...") no longer overlaps other HUD on touch screens** (`style.css`)
   - The tip sat just under the top HUD and just above the big wave message, so it ran into "enemies left", the timer or the "WAVE" message depending on the phone size.

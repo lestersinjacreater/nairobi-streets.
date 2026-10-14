@@ -33,7 +33,7 @@ export class TouchControls {
     const el = this.el = document.createElement('div'); el.id = 'touch'; el.setAttribute('aria-hidden', 'true');
     el.innerHTML = `<div class="tstick"><i></i></div>
       <button type="button" class="tbtn tpause" data-a="pause">II</button>
-      ${BUTTONS.map((b) => `<button type="button" class="tbtn ${b.cls || ''}" data-a="${b.a}" data-look="${b.look ? 1 : 0}" data-toggle="${b.toggle ? 1 : 0}" style="${b.l != null ? 'left:' + b.l : 'right:' + b.r}vmin;bottom:${b.b}vmin;width:${b.s}vmin;height:${b.s}vmin;font-size:${(b.s * 0.24).toFixed(2)}vmin">${b.label}</button>`).join('')}`;
+      ${BUTTONS.map((b) => `<button type="button" class="tbtn ${b.cls || ''}" data-a="${b.a}" data-look="${b.look ? 1 : 0}" data-toggle="${b.toggle ? 1 : 0}" style="${b.l != null ? 'left:' + b.l : 'right:' + b.r}vmin;bottom:${b.b}vmin;width:max(${b.s}vmin,44px);height:max(${b.s}vmin,44px);font-size:${(b.s * 0.24).toFixed(2)}vmin">${b.label}</button>`).join('')}`;
     document.body.appendChild(el);
     this.stick = el.querySelector('.tstick'); this.knob = this.stick.querySelector('i');
     this.ptrs = new Map();

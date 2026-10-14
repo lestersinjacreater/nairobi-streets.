@@ -311,8 +311,11 @@ canvas#c { touch-action: none; }
 .tbtn.hook { border-color: rgba(214,120,20,.9); color: #b0600a; }
 .tbtn.dash { display: none; border-color: var(--red); color: var(--red); animation: blink 1s infinite; }
 body.dash-ready .tbtn.dash { display: flex; }
-.tbtn.tpause { right: 2vmin; top: 2vmin; width: 9vmin; height: 9vmin; font-size: 3.4vmin; border-radius: 30%; }
-#hud.touch .hud-tr { right: 14vmin; }
+.tbtn.tpause { right: 2vmin; top: 2vmin; width: max(9vmin, 44px); height: max(9vmin, 44px); font-size: 3.4vmin; border-radius: 30%; }
+#hud.touch .hud-tr { right: max(14vmin, 60px); }
+/* the long 'timer starts when a player joins' line ran across the health bar: wrap it into a narrow column */
+#hud.touch .pvpscore { font-size: 16px; } #hud.touch .pvpscore .target { font-size: 12px; }
+#hud.touch .timer { font-size: 16px; max-width: 26vw; margin-left: auto; line-height: 1.1; }
 .tstick { position: absolute; width: 22vmin; height: 22vmin; margin: -11vmin 0 0 -11vmin; border-radius: 50%; border: 2.5px dashed rgba(38,42,54,.45); background: rgba(250,248,238,.25); display: none; pointer-events: none; }
 .tstick.on { display: block; }
 .tstick i { position: absolute; left: 50%; top: 50%; width: 10vmin; height: 10vmin; border-radius: 50%; background: rgba(38,42,54,.35); border: 2.5px solid rgba(38,42,54,.7); transform: translate(-50%, -50%); }
@@ -326,7 +329,18 @@ body.dash-ready .tbtn.dash { display: flex; }
 #hud.touch .weapon { font-size: 18px; }
 /* tips sit in the quiet strip at the bottom centre: the top is taken by the HUD and the wave message, the sides by the thumbs */
 #hud.touch .tip { left: 31%; right: 35%; top: auto; bottom: 18vmin; text-align: center; font-size: clamp(13px, 4.4vmin, 18px); }
-#hud.touch .killfeed { top: 36%; font-size: 20px; }
+/* kill feed: it used to run under the right-hand buttons. Now it sits just left of them, three lines at most, newest at the bottom */
+#hud.touch .killfeed { top: auto; bottom: 58vmin; right: 66vmin; font-size: 18px; max-height: 3.6em; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; }
+/* the combo text used to land on the minimap; park it just right of the minimap, under the score */
+#hud.touch .hud-tl .combo { position: absolute; top: 100%; left: calc(2.2vw + clamp(118px, 15vw, 190px) + 8px - 9vw); white-space: nowrap; font-size: clamp(14px, 2.4vw, 22px); }
+/* the weapon name sat on the health bar */
+#hud.touch .hud-br { top: 13vmin; }
+/* scoreboard: ten players did not fit; keep it between the left and right thumbs and let it scroll if it must */
+#hud.touch .board { top: 3vmin; left: 37vmin; right: 56vmin; width: auto; transform: none; min-width: 0; max-height: 94%; overflow-y: auto; box-sizing: border-box; padding: 6px 12px; font-size: 16px; }
+#hud.touch .board h3 { font-size: 20px; margin-bottom: 2px; }
+#hud.touch .board div { gap: 10px; padding: 1px 6px; }
+/* notches and rounded corners: keep every control inside the safe area */
+#hud.touch, #touch { inset: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
 /* the boss bar normally sits at the top, where the touch layout keeps health and ammo; park it at the bottom centre, clear of both thumbs */
 #hud.touch .bossbar { top: auto; bottom: 3vmin; width: 28vw; margin-left: -14vw; font-size: 18px; }
 #hud.touch .bossbar .bar.big { width: 100%; height: 3.4vmin; box-sizing: border-box; }
