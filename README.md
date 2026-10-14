@@ -44,7 +44,9 @@ add it there too (`node --test tools/pwa.test.mjs` checks the list).
   regenerates after a few seconds out of combat (not while sprinting), so only ammo drops in.
 
 Multiplayer is peer-to-peer over WebRTC (PeerJS), so it works from a static host with no game
-server. Under PLAY ONLINE you can Quick Play (joins an open public lobby, or opens one for you),
+server. Players on mobile data or strict wifi can only reach each other through a relay (TURN), and the
+shared PeerJS matchmaking server is sometimes slow: both are set in `net-config.js`, which has notes on
+getting your own free relay credentials and running your own matchmaking server. Under PLAY ONLINE you can Quick Play (joins an open public lobby, or opens one for you),
 create a public or private lobby, or join a friend's lobby with their five letter code. People can
 join a match already in progress. The host's browser keeps score; each player runs their own body.
 

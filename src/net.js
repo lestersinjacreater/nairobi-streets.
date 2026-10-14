@@ -13,8 +13,11 @@ const PREFIX = LOCAL ? 'doodledev-' : 'doodledistrict-';
 const PUBLIC_SLOTS = 16;
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const makeCode = () => Array.from({ length: 5 }, () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]).join('');
-const PEER_OPTS = { debug: 0, config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }] } };
-const JOIN_TIMEOUT = 14000, QUICK_TIMEOUT = 11000, SIGNAL_TIMEOUT = 12000;
+// relay (TURN) and matchmaking server settings come from net-config.js, so they can change without touching code
+const CFG = (typeof window !== 'undefined' && window.DOODLE_NET) || {};
+const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }, ...(CFG.turn || [])];
+const PEER_OPTS = { debug: 0, ...(CFG.signalling || {}), config: { iceServers: ICE_SERVERS } };
+const JOIN_TIMEOUT = 20000, QUICK_TIMEOUT = 14000, SIGNAL_TIMEOUT = 12000;
 
 function peerAvailable() { return typeof window !== 'undefined' && typeof window.Peer === 'function'; }
 const idFromError = (err) => { const m = /peer\s+(\S+)/.exec(String(err && err.message || '')); return m ? m[1] : null; };

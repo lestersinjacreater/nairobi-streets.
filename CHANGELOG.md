@@ -2,6 +2,13 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (online play fix)
+- **Online connections now work across mobile data and strict networks** (`net-config.js`, `src/net.js`, `index.html`, `sw.js`, `README.md`)
+  - Found: lobby, join and match start all work (tested with two browsers on a local PeerJS server), but players were only given STUN, with no relay. Behind mobile carrier or strict wifi NAT, WebRTC cannot connect without a relay, so joins failed.
+  - New `net-config.js` holds relay (TURN) servers, defaulting to the free public Open Relay demo servers, and an optional own matchmaking server.
+  - Join and quick-play waits are a little longer, since a relayed connection takes longer to set up.
+  - `net-config.js` added to the offline cache list.
+
 ## 2026-10-14 (welcome screen)
 - **Welcome screen is now the first thing people see** (`index.html`)
   - Two choices: DOWNLOAD FOR ANDROID or PLAY IN BROWSER.
