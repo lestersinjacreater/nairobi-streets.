@@ -2,6 +2,14 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-14 (rename)
+- **Game renamed from Doodle District to Pen & Pin; the map is now Pen & Pin Central** (`index.html`, `install.html`, `manifest.webmanifest`, `sw.js`, `src/main.js`, `src/level.js`, `src/net.js`, `README.md`, `Dockerfile`, `icons/icon.svg`)
+  - New name on the welcome screen, main menu, page titles, install page, installed app name, README, Dockerfile comment and icon comment.
+  - The map is called PEN & PIN CENTRAL (map screen and menu).
+  - Online lobby ids now start with `penandpin-` (they used `doodledistrict-`), so players on an old cached version cannot join new lobbies until they refresh.
+  - The offline cache is now `pen-and-pin-v1`, so phones fetch a fresh copy.
+  - Kept as they were: saved settings keys (`doodle_*`, so players keep their settings), the other maps' names (Doodle Nairobi and so on, which are off the menu) and the older changelog entries below.
+
 ## 2026-10-14 (online play fix)
 - **Online connections now work across mobile data and strict networks** (`net-config.js`, `src/net.js`, `index.html`, `sw.js`, `README.md`)
   - Found: lobby, join and match start all work (tested with two browsers on a local PeerJS server), but players were only given STUN, with no relay. Behind mobile carrier or strict wifi NAT, WebRTC cannot connect without a relay, so joins failed.

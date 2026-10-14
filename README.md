@@ -1,4 +1,4 @@
-# Doodle District
+# Pen & Pin
 
 A first-person survival shooter drawn in blue ballpoint on lined notebook paper. Grapple across
 rooftops and canyons, slice bullets back at the doodles that fired them, lob grenades, and see how
@@ -83,7 +83,7 @@ slashes and turns some bullets aside, and the guns use their own damage table; t
 
 - **Doodle Depot**: a compact container yard in the spirit of fast mobile shooters. Mirrored so both ends are fair,
   with three lanes, a central tower, two warehouses with climbable roofs, stacked containers and gantry cranes to hook.
-- **Doodle District**: streets, rooftops and fire escapes, with grapple rings on the high spots. Solo
+- **Pen & Pin Central**: streets, rooftops and fire escapes, with grapple rings on the high spots. Solo
   plays the tight original block. A match opens it up: a ring of empty street, walls, a ribbed dome
   that cannot be hooked, an open field in the middle crossed by a ruler bridge, a few pads hung from
   the dome, and slow paper planes you can hook and ride (the solo planes too).

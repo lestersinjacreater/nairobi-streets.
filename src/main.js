@@ -659,7 +659,7 @@ function wireMap(onPick) { const box = hud.el.panel.querySelector('#mapsel'); if
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 function mainHTML() {
-  return `<h1>DOODLE DISTRICT</h1><h2>A ballpoint survival shooter</h2>
+  return `<h1>PEN &amp; PIN</h1><h2>A ballpoint survival shooter</h2>
     <div class="mainbtns"><button type="button" class="start" id="soloBtn">PLAY SOLO<i>Survive wave after wave</i></button><button type="button" id="onlineBtn">PLAY ONLINE<i>Free-for-all · up to 10 players</i></button></div>
     ${mapHTML(mapKey, true)}
     <div class="mapsel"><button type="button" class="mapbtn" id="viewMapBtn">VIEW MAP<i>bird's eye view of the whole map</i></button><a class="mapbtn" id="getAppBtn" href="./install.html">GET THE APP<i>QR code · install on Android</i></a></div>

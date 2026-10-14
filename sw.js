@@ -2,7 +2,7 @@
 // Network first, so a new deploy shows up on the next launch; the cached copy is the fallback.
 // Online matches still need the internet (PeerJS connects players through its server).
 // Every file the game loads must be listed in SHELL; tools/pwa.test.mjs checks that.
-const CACHE = 'doodle-district-v1';
+const CACHE = 'pen-and-pin-v1';
 const SHELL = [
   './', './index.html', './install.html', './net-config.js', './style.css', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',

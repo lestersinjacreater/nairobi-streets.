@@ -10,7 +10,7 @@ import NAIROBI_OSM from './nairobi-data.js';
 // Doodle Mexico is built and kept, but off the menu until it is ready; flip this to offer it again
 export const MEXICO_READY = false;
 export const LEVELS = [
-  { key: 'district', name: 'DOODLE DISTRICT', blurb: 'streets, rooftops and fire escapes' },
+  { key: 'district', name: 'PEN & PIN CENTRAL', blurb: 'streets, rooftops and fire escapes' },
   ...(MEXICO_READY ? [{ key: 'mexico', name: 'DOODLE MEXICO', blurb: 'a sun-baked plaza · pinatas, tacos and mariachi' }] : []),
 ];
 
@@ -137,7 +137,7 @@ function createBuilder(scene, world) {
   return { L, addGeo, collider, box, slab, wallX, wallZ, stairs, rail, cyl, sphere, ring, spawn, sniper, pickup, finish, planes, crossingPlanes, scene, world };
 }
 
-// ============================ map 1: Doodle District ============================
+// ============================ map 1: Pen & Pin Central ============================
 function buildDistrict(B, arena = false) {
   const { L, box, slab, wallX, wallZ, stairs, rail, cyl, sphere, ring, spawn, sniper, pickup, planes, crossingPlanes, addGeo, collider, scene } = B;
   // ---------------- ground + perimeter ----------------

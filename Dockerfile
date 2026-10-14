@@ -1,4 +1,4 @@
-# Doodle District - static site Dockerfile
+# Pen & Pin - static site Dockerfile
 FROM nginx:1.27-alpine
 
 # Copy site files into the default nginx document root
