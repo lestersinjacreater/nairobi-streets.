@@ -393,7 +393,7 @@ function updateFocus(dt) {
 }
 
 // ---------------- free for all: spawning, death, scoring ----------------
-const HOW = { rifle: 'RIFLE', shotgun: 'SHOTGUN', sniper: 'SNIPER', machinegun: 'MACHINE GUN', katana: 'KATANA', boxing: 'BOXING GLOVES', grenade: 'GRENADE', deflect: 'OWN BULLET' };
+const HOW = { rifle: 'RIFLE', shotgun: 'SHOTGUN', sniper: 'SNIPER', machinegun: 'AM31', katana: 'KATANA', boxing: 'BOXING GLOVES', grenade: 'GRENADE', deflect: 'OWN BULLET' };
 const howWord = (src) => HOW[src] || null;
 const spawnSpots = () => (level.arenaSpawns && level.arenaSpawns.length ? level.arenaSpawns : level.spawns);
 function arenaSpawn() {

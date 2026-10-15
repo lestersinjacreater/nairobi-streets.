@@ -2,6 +2,11 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-15 (AM31)
+- **The machine gun is now the AM31** (`src/weapons.js`, `src/main.js`, `src/hud.js`, `README.md`, `docs/play-store-listing.md`)
+  - New name in the weapon list, ammo readout, kill feed, help screen, README and store listing. Slot 6, stats, model and sounds are unchanged. Internally it is still called `machinegun`, so weapon ids and online messages stay compatible.
+  - "AM31" is the name only: it is our own original design, not a copy of any real gun.
+
 ## 2026-10-15
 - **New weapon: the machine gun** (`src/weapons.js`, `src/player.js`, `src/input.js`, `src/players.js`, `src/enemies.js`, `src/audio.js`, `src/main.js`, `src/hud.js`, `README.md`, `docs/play-store-listing.md`)
   - A belt-fed LMG in slot 6 (press 6, or cycle with the wheel or the SWAP button). 100-round belt (200 in reserve, 400 max), about 15 shots a second at 60 fps, 14 damage (12 against players), headshots x2.
