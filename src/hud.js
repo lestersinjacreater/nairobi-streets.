@@ -176,7 +176,7 @@ export const CONTROLS_HTML = `
     <div><b>Tab</b> scoreboard (online) &nbsp; <b>Esc</b> pause</div>
     <div><b>V</b> toggle first-person / third-person view</div>
     <div><b>Both mouse buttons</b> dash-slash once the gauge is lit</div>
-    <div><b>1-6 / wheel</b> rifle · shotgun · sniper · katana · boxing gloves · AM31 machine gun</div>
+    <div><b>1-6 / wheel</b> rifle · shotgun · sniper · katana · boxing gloves · M31 machine gun</div>
   </div>
   <div><div class="colhead">PS5 CONTROLLER</div>
     <div><b>L stick</b> move &nbsp; <b>R stick</b> look &nbsp; <b>L3</b> sprint</div>

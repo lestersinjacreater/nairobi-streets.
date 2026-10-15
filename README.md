@@ -77,7 +77,7 @@ On-screen hints follow whichever device you touched last.
 
 ## Weapons and gear
 
-Rifle, shotgun, sniper (with scope), a katana, boxing gloves and the AM31, a belt-fed machine gun (slot 6: a 100-round belt and a very high fire rate, but a wide spread, heavy kick, long reload and damage that fades with distance). Holding block with the katana parries
+Rifle, shotgun, sniper (with scope), a katana, boxing gloves and the M31, a belt-fed machine gun (slot 6: a 100-round belt and a very high fire rate, but a wide spread, heavy kick, long reload and damage that fades with distance). Holding block with the katana parries
 some incoming bullets and returns a share of them. Katana kills charge a gauge; when it is lit you
 can dash to a marked enemy and execute it (solo only). Grenades bounce, then go off in a thick orange blast that scorches the paper; holding the
 button winds up a longer throw and shows the arc. The grapple runs on breath: hanging drains it,

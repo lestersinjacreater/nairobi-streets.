@@ -24,7 +24,7 @@ PLAY WITH FRIENDS
 - Players can join a match that is already running.
 
 YOUR TOOLKIT
-- Rifle, shotgun, sniper with a scope, the AM31 belt-fed machine gun, katana and boxing gloves.
+- Rifle, shotgun, sniper with a scope, the M31 belt-fed machine gun, katana and boxing gloves.
 - Grapple hook: swing, reel in, launch, and even ride the paper planes flying over the city.
 - Katana block that parries bullets and sends them back.
 - Grenades you can hold to throw further, wall jumps, double jumps, slides and air dashes.

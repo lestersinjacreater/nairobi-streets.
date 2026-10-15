@@ -2,10 +2,10 @@
 
 Every code change, newest first. Add an entry here with each change.
 
-## 2026-10-15 (AM31)
-- **The machine gun is now the AM31** (`src/weapons.js`, `src/main.js`, `src/hud.js`, `README.md`, `docs/play-store-listing.md`)
+## 2026-10-15 (M31)
+- **The machine gun is now the M31** (it was briefly named AM31 by mistake) (`src/weapons.js`, `src/main.js`, `src/hud.js`, `README.md`, `docs/play-store-listing.md`)
   - New name in the weapon list, ammo readout, kill feed, help screen, README and store listing. Slot 6, stats, model and sounds are unchanged. Internally it is still called `machinegun`, so weapon ids and online messages stay compatible.
-  - "AM31" is the name only: it is our own original design, not a copy of any real gun.
+  - "M31" is the name only: it is our own original design, not a copy of any real gun.
 
 ## 2026-10-15
 - **New weapon: the machine gun** (`src/weapons.js`, `src/player.js`, `src/input.js`, `src/players.js`, `src/enemies.js`, `src/audio.js`, `src/main.js`, `src/hud.js`, `README.md`, `docs/play-store-listing.md`)
