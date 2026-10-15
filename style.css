@@ -401,3 +401,5 @@ body.touch .panel .touchhelp { display: block; } body.touch .panel .cols { displ
 /* the loadout's BACK button stays at the top while the list scrolls under it */
 .lo-top { position: sticky; top: 0; z-index: 3; text-align: left; padding: 2px 0 6px; background: var(--paper); border-bottom: 2px solid rgba(26,48,192,.25); margin-bottom: 6px; }
 .lo-top button { font: inherit; font-size: 20px; padding: 6px 18px; min-height: 44px; color: var(--ink); background: var(--paper); border: 2.5px solid var(--ink); border-radius: 8px 11px 7px 10px / 10px 7px 11px 8px; cursor: pointer; }
+
+.lo-guns { margin: 10px 0 16px; }

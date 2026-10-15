@@ -77,7 +77,7 @@ On-screen hints follow whichever device you touched last.
 
 ## Weapons and gear
 
-**Loadout.** On the main menu, LOADOUT lists every gun in the game (33 of them: pistols, SMGs, assault rifles, shotguns, snipers, LMGs and four rotary guns) with stat bars and a filter by type. Pick any three; they are saved on your device. In a match your three guns show on a see-through card: keys 1 to 3, the mouse wheel, or tap a gun on a phone. Key 4 is the katana and 5 the boxing gloves, and the melee button still slashes with the katana.
+**Loadout.** On the main menu, LOADOUT lists every gun in the game (33 of them: pistols, SMGs, assault rifles, shotguns, snipers, LMGs and four rotary guns) with stat bars and a filter by type. Pick any three; they are saved on your device. You can also change them from an online lobby while you wait for a match to start. In a match your three guns show on a see-through card: keys 1 to 3, the mouse wheel, or tap a gun on a phone. Key 4 is the katana and 5 the boxing gloves, and the melee button still slashes with the katana.
 
 The rotary guns (M134 minigun, GAU-19, Yak-B 12.7, GShG-7.62) spin their barrels up while you hold fire, then shoot 22 to 36 times a second; they slow your walk while spinning and stop you sprinting. The M31 is a belt-fed machine gun. All the numbers are in `src/arsenal.js`.
 

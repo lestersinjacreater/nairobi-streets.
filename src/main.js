@@ -702,7 +702,8 @@ function lobbyHTML() {
       ${mapHTML(lobby.map || mapKey, host)}
       <div class="hint">${lobby.isPublic ? 'Public lobby: anyone can join with Quick Play or the code' : 'Private lobby: friends can join with this code'}</div>
       <div class="plist">${rows.map((p) => `<div class="${p.id === lobby.hostId ? 'host' : ''}${p.id === net.id ? ' me' : ''}"><span>${esc(p.name)}</span><span>${p.id === net.id ? 'YOU' : ''}</span></div>`).join('')}</div>
-      <div class="row"><button type="button" class="big" id="startBtn">START MATCH</button><button type="button" class="alt" id="leaveBtn">LEAVE</button></div>
+      <div class="hint lo-guns">Your guns: ${loadout.map((id) => esc(GUN_STATS[id].name)).join(' · ')}</div>
+      <div class="row"><button type="button" class="big" id="startBtn">START MATCH</button><button type="button" class="alt" id="lobbyLoadoutBtn">LOADOUT</button><button type="button" class="alt" id="leaveBtn">LEAVE</button></div>
       <div class="status" id="status">${esc(lobby.status || '')}</div><div class="hint">Anyone can start · ${n < 2 ? 'players can still join after launch' : n + ' players ready'}</div>
     </div>`;
 }
@@ -722,6 +723,7 @@ function wireOnline() {
   const box = hud.el.panel.querySelector('#online'); if (!box) return;
   box.addEventListener('click', (e) => e.stopPropagation()); box.addEventListener('keydown', (e) => e.stopPropagation());
   const q = (id) => box.querySelector('#' + id); wireName(box);
+  if (q('lobbyLoadoutBtn')) q('lobbyLoadoutBtn').addEventListener('click', () => { loReturn = 'lobby'; loSel = 0; screen = 'loadout'; showStart(); }); // change guns while you wait
   if (q('quickBtn')) q('quickBtn').addEventListener('click', () => { lockButtons(box); quickPlay(); });
   if (q('createBtn')) q('createBtn').addEventListener('click', () => { lockButtons(box); createLobby(box.querySelector('input[name=vis]:checked').value === 'public'); });
   if (q('joinBtn')) { q('joinBtn').addEventListener('click', () => { const c = q('codeBox').value.trim().toUpperCase(); if (!c) { setStatus('ENTER THE LOBBY CODE FROM YOUR FRIEND'); return; } lockButtons(box); joinLobby(c); }); q('codeBox').addEventListener('keydown', (e) => { if (e.key === 'Enter') q('joinBtn').click(); }); }
@@ -747,7 +749,7 @@ function projectMapLabels() {
 }
 function renderLobby() { if (game.state === 'lobby') showStart(); }
 // ---------------- the loadout screen: every gun in the game, pick three ----------------
-let loadout = loadLoadout(), loSel = 0, loCls = 'ALL';
+let loadout = loadLoadout(), loSel = 0, loCls = 'ALL', loReturn = 'main'; // loReturn: the screen BACK goes to (main menu or lobby)
 const BAR_NAMES = [['damage', 'DMG'], ['rate', 'RATE'], ['mag', 'MAG'], ['range', 'RANGE'], ['control', 'AIM']];
 function loSlotsHTML() {
   return loadout.map((id, i) => { const g = GUN_STATS[id]; return `<button type="button" class="lo-slot${i === loSel ? ' on' : ''}" data-slot="${i}"><i>SLOT ${i + 1}</i><b>${esc(g.name)}</b><span>${esc(g.cls)}</span></button>`; }).join('');
@@ -786,13 +788,13 @@ function wireLoadout() {
       if (at >= 0) { [loadout[at], loadout[loSel]] = [loadout[loSel], loadout[at]]; } else loadout[loSel] = id;
       loSel = (loSel + 1) % 3; saveLoadout(loadout);
     } else if (t.id === 'loReset') { loadout = [...DEFAULT_LOADOUT]; loSel = 0; saveLoadout(loadout); }
-    else if (t.id === 'loDone' || t.id === 'loBack') { if (loadout.join() !== player.loadout.join()) player.setLoadout(loadout); screen = 'main'; showStart(); return; }
+    else if (t.id === 'loDone' || t.id === 'loBack') { if (loadout.join() !== player.loadout.join()) player.setLoadout(loadout); screen = loReturn; showStart(); return; }
     root.querySelector('#loSlots').innerHTML = loSlotsHTML(); root.querySelector('#loGrid').innerHTML = loGridHTML();
   });
 }
 function showStart() {
   hud.setGameplayVisible(false);
-  if (game.state === 'lobby') screen = 'lobby';
+  if (game.state === 'lobby' && screen !== 'loadout') screen = 'lobby';
   if (screen === 'mapview') {
     hud.showScreen(mapViewHTML(), 'mapview');
     const p = hud.el.panel;
@@ -808,7 +810,7 @@ function showStart() {
     wireSettings(); wireCheckpoints((w) => beginAtWave(w)); wireMap((k) => { mapKey = k; localStorage.setItem('doodle_map', k); setLevel(k, false); showStart(); });
     p.querySelector('#soloBtn').addEventListener('click', (e) => { e.stopPropagation(); begin(); });
     p.querySelector('#onlineBtn').addEventListener('click', (e) => { e.stopPropagation(); screen = 'online'; showStart(); });
-    p.querySelector('#loadoutBtn').addEventListener('click', (e) => { e.stopPropagation(); screen = 'loadout'; loSel = 0; showStart(); });
+    p.querySelector('#loadoutBtn').addEventListener('click', (e) => { e.stopPropagation(); loReturn = 'main'; screen = 'loadout'; loSel = 0; showStart(); });
     const vm = p.querySelector('#viewMapBtn');
     if (vm) vm.addEventListener('click', (e) => { e.stopPropagation(); screen = 'mapview'; player.resetOverview(); showStart(); });
   } else if (screen === 'loadout') wireLoadout();
@@ -853,6 +855,7 @@ function hostStart() {
   net.send('start', { spawns, map: lobby.map || mapKey }); startMatch(false, spawns[net.id]); sendScores();
 }
 function startMatch(late, spawnIdx) {
+  if (loadout.join() !== player.loadout.join()) player.setLoadout(loadout); // you may still have been on the loadout screen when the host pressed START
   net.inMatch = true; game.mode = 'ffa'; setArena(true); resetGame(); matchLeft = FFA_TIME; clockT = 0; game.clockStarted = false;
   // nobody sends snapshots in the lobby, so the silence clock restarts here or the sweep would drop everyone
   for (const r of remote.values()) r.lastSeen = performance.now();

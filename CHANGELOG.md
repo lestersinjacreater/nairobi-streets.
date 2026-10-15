@@ -2,6 +2,14 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-15 (loadout from the lobby)
+- **Players can change their loadout while waiting in an online lobby** (`src/main.js`, `style.css`, `README.md`)
+  - The lobby has a new LOADOUT button between START MATCH and LEAVE, and a "Your guns" line showing the three you carry. It opens the same Loadout screen; BACK or DONE returns to the lobby (from the main menu it still returns to the main menu).
+  - The lobby redraws every time a player joins or leaves, which used to reset the screen. The loadout screen now stays put while the lobby updates behind it.
+  - If the host presses START while you are still choosing, your picks are applied before the match begins, so you never spawn with the wrong guns.
+  - Checked with two browsers: the loadout opened from the lobby, a second player joined while it was open (screen stayed), BACK returned to the lobby with the new guns shown and equipped, a match started while the second player was still on the loadout screen and their pick was applied, and each side saw the other's weapon (MG42, minigun, M82) correctly. The three lobby buttons fit without clipping at 640x360, 844x390 and a portrait 390x844 phone.
+  - Not done: changing the loadout from the in-match pause menu (a loadout can change only before a match, so players who want a different gun must leave back to the lobby).
+
 ## 2026-10-15 (loadout back button)
 - **The Loadout screen now has a BACK button at the top** (`src/main.js`, `style.css`)
   - Before, the only way out was DONE at the very bottom, after scrolling past 33 guns. BACK now sits at the top and stays on screen while the list scrolls. It does the same as DONE: your three guns are saved and applied, and you return to the main menu.
