@@ -2,6 +2,13 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-15 (human proportions)
+- **Characters now look like adult people instead of cartoon blobs** (`src/enemies.js`)
+  - Costumed figures (jester, gentleman, duchess, dame, mourner, queen, and you and other players) have a small head (about half the old size), a narrow waist under a shaped chest, a longer neck, thicker arms and legs, small hands and real shoes.
+  - New human face: almond eyes, thin brows, a nose line and small red lips, replacing the dot eyes and angry brows. Dead figures still show crossed-out eyes.
+  - Gowns have a slim bodice flaring into a bell skirt, with a hair bun at the back; the gentleman wears black trousers. Head hit area shrank to match the smaller head.
+  - Checked with close-up screenshots in solo play (no errors); arsenal and PWA tests pass. Not changed: robots, bombers, ravens and the other non-human enemies, and animations.
+
 ## 2026-10-15 (Victorian storybook redesign)
 - **The whole game is redrawn as a Victorian storybook illustration**, inspired by the harlequin-jester and black-gown picture the user shared (`src/render.js`, `src/enemies.js`, `src/player.js`, `src/players.js`, `src/level.js`, `src/main.js`, `src/effects.js`, `src/weapons.js`, `style.css`, `index.html`, `install.html`, `privacy.html`, `manifest.webmanifest`, `icons/*`)
   - **Look:** parchment sky and paper grain, flat painted colour with soft three-step shading, thin dark outlines, a vignette, and distance fog that greys far figures into pale silhouettes like the faded crowd in the picture. The notebook hatching, ruled lines and margin are gone. Palette: black, deep crimson, ivory, antique gold, muted stone.

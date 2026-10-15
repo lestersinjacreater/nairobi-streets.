@@ -58,6 +58,22 @@ function doodleFace(headG, solid, opts = {}) {
   const o = new THREE.Mesh(new THREE.TorusGeometry(0.055, 0.018, 4, 9), solid); o.position.set(0, ey - 0.17, ez - 0.02); xeyes.add(o);
   return { eyes, xeyes };
 }
+// a quiet human face for the costumed figures: almond eyes, thin brows, a nose line and small lips (no cartoon dots)
+function humanFace(headG, solid, opts = {}) {
+  const eyes = new THREE.Group(); headG.add(eyes);
+  const ex = 0.095, ey = 0.04, ez = opts.ez ?? 0.25;
+  const lip = makeInkMaterial({ ink: INK.RED, shadeScale: 0, shadeBias: 1 });
+  for (const sx of [-1, 1]) {
+    const e = sph(0.03, sx * ex, ey, ez - 0.012, solid, eyes, 6); e.scale.set(1.5, 0.7, 0.5);
+    const b = bx(0.1, 0.014, 0.016, sx * ex, ey + 0.055, ez - 0.01, solid, eyes); b.rotation.z = sx * -0.1;
+  }
+  const nose = bx(0.014, 0.075, 0.02, 0, ey - 0.07, ez + 0.0, solid, eyes); nose.rotation.x = -0.25;
+  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.011, 4, 9, Math.PI * 0.75), lip);
+  mouth.position.set(0, ey - 0.125, ez - 0.03); mouth.rotation.z = Math.PI * 1.125 + (opts.smile ? 0 : 0); mouth.scale.set(1, 0.6, 1); eyes.add(mouth);
+  const xeyes = new THREE.Group(); headG.add(xeyes); xeyes.visible = false;
+  for (const sx of [-1, 1]) for (const a of [0.8, -0.8]) { const c = bx(0.1, 0.02, 0.02, sx * ex, ey, ez, solid, xeyes); c.rotation.z = a; }
+  return { eyes, xeyes };
+}
 function buildHat(headG, mat, solid, T) {
   const h = T.hat;
   if (h === 'cap') { const c = new THREE.Mesh(new THREE.SphereGeometry(0.29, 10, 5, 0, TAU, 0, Math.PI * 0.5), mat); c.position.y = 0.05; c.scale.y = 0.62; headG.add(c); const brim = bx(0.34, 0.035, 0.24, 0, 0.05, 0.24, mat, headG); brim.rotation.x = -0.18; }
@@ -129,39 +145,45 @@ export function buildHumanoid(mat, solid, T) {
   const build = T.build || {};
   const bodyW = build.bodyW ?? 1, headS = build.headS ?? 1, limbR = build.limbR ?? 0.032;
   const jit = rand(0.95, 1.06); // every figure is drawn slightly differently
+  const H = !!T.costume;               // costumed figures get adult human proportions: small head, narrow waist, long limbs
+  const bw = H ? Math.min(bodyW, 1.1) : bodyW;
   const hips = new THREE.Group(); hips.position.y = 0.86; root.add(hips);
   parts.hips = new THREE.Object3D(); hips.add(parts.hips);
   const torso = new THREE.Group(); torso.position.y = 0.04; hips.add(torso);
-  blob(0.3 * bodyW, 0.3, 0.19 * bodyW, 0, 0.26, 0, mat, torso);
+  if (H) { blob(0.19 * bw, 0.2, 0.12 * bw, 0, 0.4, 0, mat, torso); blob(0.13 * bw, 0.17, 0.1 * bw, 0, 0.14, 0, mat, torso); }  // chest over a narrow waist
+  else blob(0.3 * bodyW, 0.3, 0.19 * bodyW, 0, 0.26, 0, mat, torso);
   parts.torso = new THREE.Object3D(); parts.torso.position.y = 0.26; torso.add(parts.torso);
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.12, 6), mat); neck.position.y = 0.56; torso.add(neck);
-  const headG = new THREE.Group(); headG.position.y = 0.62; torso.add(headG);
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(H ? 0.032 : 0.045, H ? 0.04 : 0.05, H ? 0.16 : 0.12, 6), mat); neck.position.y = H ? 0.6 : 0.56; torso.add(neck);
+  const headG = new THREE.Group(); headG.position.y = H ? 0.64 : 0.62; if (H) headG.scale.setScalar(0.52); torso.add(headG);
   // costumed figures have porcelain-pale faces and hands (ivory) with dark hair, like the figures in the picture this look comes from
   const skin = T.costume ? makeInkMaterial({ ink: INK.IVORY, shadeScale: 0, shadeBias: 1, emphasis: true }) : mat;
   const head = blob(0.275 * headS * jit, 0.3 * headS, 0.25 * headS, 0, 0.26, 0, skin, headG);
   if (T.costume) { const hair = new THREE.Mesh(new THREE.SphereGeometry(0.3, 10, 6, 0, TAU, 0, Math.PI * 0.5), solid); hair.position.y = 0.3; hair.scale.set(1.0 * headS, 0.95 * headS, 1.0 * headS); headG.add(hair); }
   parts.head = new THREE.Object3D(); parts.head.position.y = 0.26; headG.add(parts.head);
   const faceG = new THREE.Group(); faceG.position.y = 0.26; faceG.scale.setScalar(headS); headG.add(faceG);
-  const fc = doodleFace(faceG, solid, { ez: 0.2 * headS + 0.06, smile: T.weapon === 'blade' });
+  const fc = H ? humanFace(faceG, solid, { ez: 0.2 * headS + 0.06 }) : doodleFace(faceG, solid, { ez: 0.2 * headS + 0.06, smile: T.weapon === 'blade' });
   const hatG = new THREE.Group(); hatG.position.y = 0.26; hatG.scale.setScalar(headS); headG.add(hatG); buildHat(hatG, mat, solid, T);
-  const shY = 0.46, shX = 0.26 * bodyW;
-  const armL = noodle(0.3, limbR, mat, torso, -shX, shY, 0), armR = noodle(0.3, limbR, mat, torso, shX, shY, 0);
-  const foreL = noodle(0.28, limbR * 0.92, mat, armL, 0, -0.3, 0), foreR = noodle(0.28, limbR * 0.92, mat, armR, 0, -0.3, 0);
-  mitten(limbR * 2.3, skin, foreL, -0.3); mitten(limbR * 2.3, skin, foreR, -0.3);
-  const legMatR = T.costume === 'harlequin' ? solid : mat; // a harlequin is crimson on one side and black on the other
-  const legL = noodle(0.42, limbR * 1.15, mat, hips, -0.13 * bodyW, -0.02, 0), legR = noodle(0.42, limbR * 1.15, legMatR, hips, 0.13 * bodyW, -0.02, 0);
-  const shinL = noodle(0.42, limbR * 1.05, mat, legL, 0, -0.42, 0), shinR = noodle(0.42, limbR * 1.05, legMatR, legR, 0, -0.42, 0);
-  shoe(mat, shinL, -0.42, bodyW); shoe(mat, shinR, -0.42, bodyW);
+  const shY = H ? 0.5 : 0.46, shX = (H ? 0.21 : 0.26) * bw;
+  const aR = H ? Math.max(limbR, 0.038) : limbR, aLen = H ? 0.33 : 0.3, fLen = H ? 0.32 : 0.28;
+  const armL = noodle(aLen, aR, mat, torso, -shX, shY, 0), armR = noodle(aLen, aR, mat, torso, shX, shY, 0);
+  const foreL = noodle(fLen, aR * 0.85, mat, armL, 0, -aLen, 0), foreR = noodle(fLen, aR * 0.85, mat, armR, 0, -aLen, 0);
+  mitten(H ? 0.05 : limbR * 2.3, skin, foreL, -fLen); mitten(H ? 0.05 : limbR * 2.3, skin, foreR, -fLen);
+  const legMatR = T.costume === 'harlequin' || T.costume === 'gentleman' ? solid : mat, legMatL = T.costume === 'gentleman' ? solid : mat; // harlequin: crimson one side, black the other; gentleman: black trousers // a harlequin is crimson on one side and black on the other
+  const lR = H ? Math.max(limbR, 0.045) : limbR, lx = (H ? 0.1 : 0.13) * bw;
+  const legL = noodle(0.42, lR * 1.15, legMatL, hips, -lx, -0.02, 0), legR = noodle(0.42, lR * 1.15, legMatR, hips, lx, -0.02, 0);
+  const shinL = noodle(0.42, lR * 0.95, legMatL, legL, 0, -0.42, 0), shinR = noodle(0.42, lR * 0.95, legMatR, legR, 0, -0.42, 0);
+  shoe(H ? solid : mat, shinL, -0.42, H ? 0.8 : bodyW); shoe(H ? solid : mat, shinR, -0.42, H ? 0.8 : bodyW);
   // Victorian costume: puffed sleeves, a ruff, a black waistcoat with ivory buttons, and for a gown a long skirt over the legs
   if (T.costume) {
     const ivory = skin;
-    for (const sx of [-1, 1]) sph(0.14 * bodyW, sx * shX, shY - 0.02, 0, T.costume === 'harlequin' && sx > 0 ? solid : mat, torso, 8);
-    const ruff = new THREE.Mesh(new THREE.TorusGeometry(0.13 * Math.min(bodyW, 1.3), 0.045, 5, 12), ivory); ruff.rotation.x = Math.PI / 2; ruff.position.y = 0.58; torso.add(ruff);
-    const vest = blob(0.25 * bodyW, 0.25, 0.2 * bodyW, 0, 0.3, 0.03, solid, torso);
-    for (let i = 0; i < 3; i++) sph(0.022, 0, 0.18 + i * 0.1, 0.2 * bodyW + 0.02, ivory, torso, 5);
+    for (const sx of [-1, 1]) sph(0.1 * bw, sx * shX, shY - 0.02, 0, T.costume === 'harlequin' && sx > 0 ? solid : mat, torso, 8);   // puffed shoulder
+    const ruff = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.03, 5, 12), ivory); ruff.rotation.x = Math.PI / 2; ruff.position.y = 0.55; torso.add(ruff);
+    blob(0.17 * bw, 0.2, 0.115 * bw, 0, 0.4, 0.02, solid, torso); blob(0.115 * bw, 0.15, 0.095 * bw, 0, 0.15, 0.02, solid, torso);
+    for (let i = 0; i < 4; i++) sph(0.016, 0, 0.1 + i * 0.1, 0.115 * bw + 0.005, ivory, torso, 5);
+    if (T.costume === 'gown') sph(0.1, 0, 0.55, -0.1, solid, torso, 6); // a hair bun at the back of the head
     if (T.costume === 'gown') {
-      const skirt = new THREE.Mesh(new THREE.CylinderGeometry(0.24 * bodyW, 0.62 * bodyW, 0.88, 14, 1, true), T.skirt === 'red' ? mat : solid); skirt.position.y = -0.42; hips.add(skirt);
-      const hem = new THREE.Mesh(new THREE.TorusGeometry(0.62 * bodyW, 0.025, 4, 16), ivory); hem.rotation.x = Math.PI / 2; hem.position.y = -0.85; hips.add(hem);
+      const skirt = new THREE.Mesh(new THREE.CylinderGeometry(0.15 * bw, 0.6 * bodyW, 0.9, 16, 1, true), T.skirt === 'red' ? mat : solid); skirt.position.y = -0.42; hips.add(skirt);
+      const hem = new THREE.Mesh(new THREE.TorusGeometry(0.6 * bodyW, 0.025, 4, 16), ivory); hem.rotation.x = Math.PI / 2; hem.position.y = -0.86; hips.add(hem);
     }
   }
   for (const [k, g] of [['armL', armL], ['armR', armR], ['foreL', foreL], ['foreR', foreR], ['legL', legL], ['legR', legR], ['shinL', shinL], ['shinR', shinR]]) parts[k] = g.userData.mid;
@@ -175,7 +197,7 @@ export function buildHumanoid(mat, solid, T) {
     parts.shield = new THREE.Object3D(); shieldG.add(parts.shield);
   }
   Object.assign(J, { hips, torso, headG, armL, armR, foreL, foreR, legL, legR, shinL, shinR, gun, shieldG });
-  const hit = [['head', 0.3], ['torso', 0.33], ['hips', 0.2], ['armL', 0.11], ['armR', 0.11], ['foreL', 0.1], ['foreR', 0.1], ['legL', 0.13], ['legR', 0.13], ['shinL', 0.11], ['shinR', 0.11]];
+  const hit = [['head', H ? 0.19 : 0.3], ['torso', 0.33], ['hips', 0.2], ['armL', 0.11], ['armR', 0.11], ['foreL', 0.1], ['foreR', 0.1], ['legL', 0.13], ['legR', 0.13], ['shinL', 0.11], ['shinR', 0.11]];
   if (T.shield) hit.unshift(['shield', 0.66]);
   root.scale.setScalar(T.scale);
   return { root, parts, J, tip, face: fc, hit };
