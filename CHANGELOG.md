@@ -2,6 +2,11 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-15 (loadout back button)
+- **The Loadout screen now has a BACK button at the top** (`src/main.js`, `style.css`)
+  - Before, the only way out was DONE at the very bottom, after scrolling past 33 guns. BACK now sits at the top and stays on screen while the list scrolls. It does the same as DONE: your three guns are saved and applied, and you return to the main menu.
+  - Checked on a phone-sized and a desktop-sized screen: after scrolling to the bottom, BACK is still visible and tappable (45 px tall), and it returns to the menu with the loadout saved and equipped.
+
 ## 2026-10-15 (loadout and 33 guns)
 - **A Loadout screen with 33 guns, and a see-through three-gun card in the game** (new `src/arsenal.js`, `tools/arsenal.test.mjs`; changed `src/weapons.js`, `src/player.js`, `src/players.js`, `src/main.js`, `src/touch.js`, `src/hud.js`, `style.css`, `sw.js`, `README.md`, `docs/play-store-listing.md`)
   - **The armoury:** 33 guns in seven types. Pistols (Revolver, Quill 9, M1911, Stapler), SMGs (MAC-10, Tommy Gun, Pencil SMG, Highlighter PDW), assault rifles (Rifle, AK-47, M16, M4, FAL, G3, Ballpoint AR, Marker Carbine), shotguns (Shotgun, Sawed-Off, Auto-12, Combat Shotgun), snipers (Sniper, Dragunov SVD, Mosin, M82), LMGs (M31, M249, M60, MG42, PKM) and the four rotary guns. All stats live in one plain-data file, `src/arsenal.js`. The older guns keep exactly their old numbers; the 24 new ones are first-pass numbers.

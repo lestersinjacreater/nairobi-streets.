@@ -767,6 +767,7 @@ function loGridHTML() {
 function loadoutHTML() {
   return `<h1>LOADOUT</h1><h2>Pick the three guns you carry in a match</h2>
     <div class="loadout" id="loadout">
+      <div class="lo-top"><button type="button" class="alt" id="loBack">&#8249; BACK</button></div>
       <div class="lo-hint2">Tap a slot, then tap a gun to put it there. A gun already in another slot swaps places.</div>
       <div class="lo-slots" id="loSlots">${loSlotsHTML()}</div>
       <div class="lo-tabs" id="loTabs">${loTabsHTML()}</div>
@@ -785,7 +786,7 @@ function wireLoadout() {
       if (at >= 0) { [loadout[at], loadout[loSel]] = [loadout[loSel], loadout[at]]; } else loadout[loSel] = id;
       loSel = (loSel + 1) % 3; saveLoadout(loadout);
     } else if (t.id === 'loReset') { loadout = [...DEFAULT_LOADOUT]; loSel = 0; saveLoadout(loadout); }
-    else if (t.id === 'loDone') { if (loadout.join() !== player.loadout.join()) player.setLoadout(loadout); screen = 'main'; showStart(); return; }
+    else if (t.id === 'loDone' || t.id === 'loBack') { if (loadout.join() !== player.loadout.join()) player.setLoadout(loadout); screen = 'main'; showStart(); return; }
     root.querySelector('#loSlots').innerHTML = loSlotsHTML(); root.querySelector('#loGrid').innerHTML = loGridHTML();
   });
 }
