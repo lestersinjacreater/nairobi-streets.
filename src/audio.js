@@ -59,6 +59,7 @@ class Sfx {
   // another player's gun, heard from where they stand: a bit hotter than a bot's so it cuts through
   remoteShot(kind, pos) {
     if (kind === 'shotgun') { this.noise({ dur: 0.32, gain: 1.0, type: 'lowpass', freq: 1600, freqEnd: 150, pos }); this.tone({ freq: 95, freqEnd: 30, dur: 0.26, gain: 0.7, type: 'triangle', pos }); }
+    else if (kind === 'm134' || kind === 'gau19' || kind === 'yakb' || kind === 'gshg') { this.noise({ dur: 0.12, gain: 0.75, type: 'bandpass', freq: rand(450, 700), freqEnd: 110, q: 0.6, pos }); this.tone({ freq: 95, freqEnd: 35, dur: 0.1, gain: 0.45, type: 'square', pos }); }
     else if (kind === 'machinegun') { this.noise({ dur: 0.1, gain: 0.8, type: 'bandpass', freq: rand(600, 900), freqEnd: 140, q: 0.7, pos }); this.tone({ freq: 130, freqEnd: 45, dur: 0.09, gain: 0.5, type: 'square', pos }); }
     else if (kind === 'sniper') { this.noise({ dur: 0.4, gain: 1.0, type: 'bandpass', freq: 750, freqEnd: 120, q: 0.5, pos }); this.tone({ freq: 420, freqEnd: 50, dur: 0.32, gain: 0.5, type: 'sawtooth', pos }); }
     else { this.noise({ dur: 0.16, gain: 0.85, type: 'bandpass', freq: rand(1000, 1500), freqEnd: 220, q: 0.8, pos }); this.noise({ dur: 0.05, gain: 0.4, type: 'highpass', freq: 2600, pos }); this.tone({ freq: 200, freqEnd: 50, dur: 0.12, gain: 0.45, type: 'square', pos }); }
@@ -140,6 +141,13 @@ class Sfx {
     this.noise({ dur: 0.32, gain: 0.9, type: 'lowpass', freq: 1800, freqEnd: 120 }); this.noise({ dur: 0.08, gain: 0.5, type: 'highpass', freq: 2500 });
     this.tone({ freq: 110, freqEnd: 30, dur: 0.28, gain: 0.7, type: 'triangle' });
   }
+  // rotary gun: played on every few shots only, deep and short so it blends into a roar
+  minigunFire() {
+    this.noise({ dur: 0.12, gain: 0.7, type: 'bandpass', freq: 600, freqEnd: 120, q: 0.6 }); this.noise({ dur: 0.05, gain: 0.3, type: 'highpass', freq: 2200 });
+    this.tone({ freq: 100, freqEnd: 32, dur: 0.11, gain: 0.55, type: 'square' });
+  }
+  // the barrels winding up: a soft whirr whose pitch follows the spin (0 to 1)
+  minigunSpin(f) { this.tone({ freq: 70 + f * 300, freqEnd: 80 + f * 320, dur: 0.12, gain: 0.07 + f * 0.05, type: 'sawtooth' }); }
   // short and low so fourteen a second reads as a rattle, not a smear
   machineGun() {
     this.noise({ dur: 0.1, gain: 0.7, type: 'bandpass', freq: 800, freqEnd: 160, q: 0.7 }); this.noise({ dur: 0.04, gain: 0.35, type: 'highpass', freq: 2600 });

@@ -2,6 +2,17 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-15 (rotary guns)
+- **Four new rotary machine guns: M134 Minigun, GAU-19, Yak-B 12.7 and GShG-7.62** (`src/weapons.js`, `src/player.js`, `src/input.js`, `src/players.js`, `src/enemies.js`, `src/audio.js`, `src/main.js`, `src/touch.js`, `src/hud.js`, `style.css`, `README.md`, `docs/play-store-listing.md`)
+  - Weapons 7 to 10 (keys 7, 8, 9, 0). Each spins its barrels up while fire is held (0.45 to 1.3 seconds), then fires fast: M134 30 a second (200-round belt, 9 damage), GAU-19 22 a second (120 rounds, 15 damage, heavy 12.7 mm), Yak-B 36 a second (150 rounds, 12 damage, the slowest to spin) and GShG-7.62 28 a second (100 rounds, 8 damage, the quickest to spin and lightest to carry). Damage against other players is lower, and all four lose damage over distance.
+  - Heavy to carry: no sprinting while the barrels are spinning, and your walk slows to 45 to 65 percent at full spin. Spread is wide and each has a long reload (3 to 5 seconds).
+  - Four first-person models with a spinning ring of six barrels, a motor housing, and a belt box (M134), round drum (GAU-19 and GShG) or green ammo can (Yak-B). A deep short gunshot sound, plus a whirr that rises in pitch as the barrels spin up.
+  - Built to spare phones: sound, smoke and sparks play on every 2nd to 4th shot, and these guns eject no shells. The fire rate is kept exact between frames (30, 22, 36 and 28 shots a second at 60 fps).
+  - Online: other players see a rotary gun in your hands, hear it, and see its tracers. They are on the end of the weapon list, so the older weapon numbers do not change.
+  - Touch: a new PREV button beside SWAP, since there are now ten weapons to cycle through. The hint text was narrowed so it clears the new button. Layout re-audited at 640x360, 844x390 and 960x540: no overlaps, nothing off-screen, no tap target under 44 px.
+  - Checked in the game: spin-up delays of 0.67, 0.87, 1.25 and 0.43 s, fire rates of 30.3, 22.3, 36.4 and 28 shots a second, magazines and reloads, empty-magazine handling, keys 7 to 0, and another online browser seeing each gun with no errors.
+  - Not tested: how it feels at real frame rates on a phone, and the balance (the numbers are a first pass).
+
 ## 2026-10-15 (M31)
 - **The machine gun is now the M31** (it was briefly named AM31 by mistake) (`src/weapons.js`, `src/main.js`, `src/hud.js`, `README.md`, `docs/play-store-listing.md`)
   - New name in the weapon list, ammo readout, kill feed, help screen, README and store listing. Slot 6, stats, model and sounds are unchanged. Internally it is still called `machinegun`, so weapon ids and online messages stay compatible.

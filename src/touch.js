@@ -18,6 +18,7 @@ const BUTTONS = [
   { a: 'crouch', label: 'SLIDE', r: 19, b: 3, s: 11 },
   { a: 'reload', label: 'RELOAD', r: 31, b: 14, s: 10 },
   { a: 'nextWeapon', label: 'SWAP', r: 44, b: 18, s: 10 },
+  { a: 'prevWeapon', label: 'PREV', r: 57, b: 18, s: 10 },
   { a: 'grenade', label: 'NADE', r: 3, b: 43, s: 10.5 },
   { a: 'melee', label: 'SLASH', r: 16, b: 44, s: 10.5 },
   { a: 'grapple', label: 'HOOK', r: 29, b: 44, s: 12.5, look: true, cls: 'hook' },

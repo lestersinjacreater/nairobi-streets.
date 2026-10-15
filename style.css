@@ -328,7 +328,7 @@ body.dash-ready .tbtn.dash { display: flex; }
 #hud.touch .hud-br { top: 11vmin; bottom: auto; right: auto; left: 50%; transform: translateX(-50%); padding: 0 10px; background: none; box-shadow: none; }
 #hud.touch .weapon { font-size: 18px; }
 /* tips sit in the quiet strip at the bottom centre: the top is taken by the HUD and the wave message, the sides by the thumbs */
-#hud.touch .tip { left: 31%; right: 35%; top: auto; bottom: 18vmin; text-align: center; font-size: clamp(13px, 4.4vmin, 18px); }
+#hud.touch .tip { left: 31%; right: 40%; top: auto; bottom: 18vmin; text-align: center; font-size: clamp(13px, 4.4vmin, 18px); }
 /* kill feed: it used to run under the right-hand buttons. Now it sits just left of them, three lines at most, newest at the bottom */
 #hud.touch .killfeed { top: auto; bottom: 58vmin; right: 66vmin; font-size: 18px; max-height: 3.6em; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; }
 /* the combo text used to land on the minimap; park it just right of the minimap, under the score */

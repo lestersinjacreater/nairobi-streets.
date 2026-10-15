@@ -69,13 +69,20 @@ const GUNS = {
   // the M31: a belt-fed LMG (internally still 'machinegun' so weapon ids and online messages do not change): a huge magazine and a very high fire rate, paid for with a wide, wandering spread, heavy kick,
   // a long reload and damage that fades with distance. It wins close and mid range; the rifle wins when you must aim.
   machinegun: { name: 'M31', hint: 'machine gun · belt-fed, hold fire and hose them down', kind: 'machinegun', magSize: 100, reserve: 200, maxReserve: 400, interval: 1 / 16, damage: 14, headMul: 2.0, pellets: 1, spread: 0.028, adsSpread: 0.008, spreadKick: 0.0055, spreadMax: 0.11, adsFov: 62, sight: [0, 0.12, -0.05, 0.3], camKick: [0.0075, 0.0045], modelKick: [0.3, 0.35, 2.8, -3.6, 1.1, 1.4], fovKick: 1.0, reloadDur: 3.3, reloadType: 'mag', auto: true, falloff: [22, 58, 0.5], tracer: 0.022, flashScale: 1.15, sound: 'machineGun', shell: [0.02, INK.ORANGE], moveSpread: 0.002, pvp: [12, 1.7, [18, 48, 0.4]] },
+  // ROTARY GUNS. All four spin their barrels up before they fire (hold fire), then spray at a very high rate, but you walk
+  // slowly while they spin, cannot sprint, and the spread is wide. spinUp = seconds to reach full speed, moveMul = walk speed
+  // at full spin, carry = keep the exact fire rate even between frames, fxEvery = sound and smoke on every Nth shot only.
+  m134: { name: 'M134 MINIGUN', hint: 'rotary · 7.62 mm · spins up, then shreds', kind: 'm134', rotary: true, magSize: 200, reserve: 400, maxReserve: 600, interval: 1 / 30, damage: 9, headMul: 1.6, pellets: 1, spread: 0.045, adsSpread: 0.018, spreadKick: 0.002, spreadMax: 0.1, adsFov: 70, sight: [0, 0.14, -0.1, 0.32], camKick: [0.0035, 0.0025], modelKick: [0.12, 0.15, 1.2, -1.6, 0.5, 0.7], fovKick: 0.5, reloadDur: 4.2, reloadType: 'mag', auto: true, falloff: [28, 70, 0.5], tracer: 0.02, flashScale: 1.0, sound: 'minigunFire', shell: null, moveSpread: 0.0025, spinUp: 0.7, moveMul: 0.55, carry: true, fxEvery: 3, pvp: [6.5, 1.5, [22, 55, 0.4]] },
+  gau19: { name: 'GAU-19', hint: 'rotary · 12.7 mm · heavy rounds, slower spin', kind: 'gau19', rotary: true, magSize: 120, reserve: 240, maxReserve: 360, interval: 1 / 22, damage: 15, headMul: 1.7, pellets: 1, spread: 0.04, adsSpread: 0.016, spreadKick: 0.003, spreadMax: 0.095, adsFov: 70, sight: [0, 0.15, -0.1, 0.32], camKick: [0.005, 0.0032], modelKick: [0.18, 0.22, 1.8, -2.2, 0.7, 0.9], fovKick: 0.7, reloadDur: 4.6, reloadType: 'mag', auto: true, falloff: [30, 80, 0.5], tracer: 0.03, flashScale: 1.2, sound: 'minigunFire', shell: null, moveSpread: 0.0025, spinUp: 0.9, moveMul: 0.5, carry: true, fxEvery: 2, pvp: [10, 1.6, [24, 60, 0.4]] },
+  yakb: { name: 'YAK-B 12.7', hint: 'rotary · 12.7 mm · the fastest, and the slowest to spin', kind: 'yakb', rotary: true, magSize: 150, reserve: 300, maxReserve: 450, interval: 1 / 36, damage: 12, headMul: 1.6, pellets: 1, spread: 0.05, adsSpread: 0.02, spreadKick: 0.0022, spreadMax: 0.11, adsFov: 72, sight: [0, 0.15, -0.1, 0.32], camKick: [0.0042, 0.003], modelKick: [0.15, 0.2, 1.5, -2, 0.6, 0.8], fovKick: 0.6, reloadDur: 5.0, reloadType: 'mag', auto: true, falloff: [26, 66, 0.45], tracer: 0.028, flashScale: 1.15, sound: 'minigunFire', shell: null, moveSpread: 0.003, spinUp: 1.3, moveMul: 0.45, carry: true, fxEvery: 4, pvp: [8.5, 1.5, [22, 55, 0.4]] },
+  gshg: { name: 'GSHG-7.62', hint: 'rotary · 7.62 mm · light, quick to spin', kind: 'gshg', rotary: true, magSize: 100, reserve: 300, maxReserve: 400, interval: 1 / 28, damage: 8, headMul: 1.6, pellets: 1, spread: 0.042, adsSpread: 0.016, spreadKick: 0.002, spreadMax: 0.095, adsFov: 68, sight: [0, 0.14, -0.1, 0.3], camKick: [0.003, 0.0022], modelKick: [0.1, 0.13, 1.0, -1.4, 0.45, 0.6], fovKick: 0.45, reloadDur: 3.0, reloadType: 'mag', auto: true, falloff: [24, 62, 0.45], tracer: 0.019, flashScale: 0.95, sound: 'minigunFire', shell: null, moveSpread: 0.002, spinUp: 0.45, moveMul: 0.65, carry: true, fxEvery: 3, pvp: [6, 1.5, [20, 52, 0.4]] },
   revolver: { name: 'REVOLVER', hint: 'hand cannon · headshots erase', kind: 'revolver', magSize: 6, reserve: 36, maxReserve: 72, interval: 0.3, damage: 62, headMul: 3, pellets: 1, spread: 0.006, adsSpread: 0.002, spreadKick: 0.02, spreadMax: 0.06, adsFov: 52, sight: [0, 0.08, -0.34, 0.42], camKick: [0.038, 0.007], modelKick: [0.3, 0.9, 3.2, -10, 1.5, 2.5], fovKick: 2.5, reloadDur: 1.9, reloadType: 'cylinder', auto: false, falloff: null, tracer: 0.026, flashScale: 1.35, sound: 'revolver', shell: null, moveSpread: 0.0015, pvp: [52, 2.9, [9, 34, 0.42]] },
 };
 
 export class Gun extends ViewModel {
   constructor(ctx, type) {
     super(ctx); Object.assign(this, GUNS[type]); this.isGun = true; this.mag = this.magSize;
-    this.fireT = 0; this.reloading = false; this.reloadT = 0; this.spreadCur = this.spread; this.flashT = 0; this.pumpT = 0; this.racked = false; this.needPump = false;
+    this.spin = 0; this._fxN = 0; this._spinSndT = 0; this.fireT = 0; this.reloading = false; this.reloadT = 0; this.spreadCur = this.spread; this.flashT = 0; this.pumpT = 0; this.racked = false; this.needPump = false;
     this.mat = makeInkMaterial({ ink: INK.BLUE }); this.dark = makeInkMaterial({ ink: INK.BLACK }); this.red = makeInkMaterial({ ink: INK.RED, fill: true });
     this.build(); this.setSight(...this.sight);
   }
@@ -87,6 +94,13 @@ export class Gun extends ViewModel {
     if (this.reloadType === 'shells') audio.shell(); else if (this.reloadType === 'cylinder') audio.cylinder(); else audio.reload();
   }
   update(dt, st) {
+    // rotary guns: the barrels spin up while fire is held and wind down when it is let go
+    if (this.spinUp) {
+      const want = st.fire && !this.reloading && this.mag > 0 && !st.blockFire;
+      this.spin = clamp(this.spin + (want ? dt / this.spinUp : -dt / (this.spinUp * 1.2)), 0, 1);
+      if (this.barrels) this.barrels.rotation.z += this.spin * dt * 38;
+      this._spinSndT -= dt; if (this.spin > 0.04 && this._spinSndT <= 0) { audio.minigunSpin(this.spin); this._spinSndT = 0.1; }
+    }
     this.fireT -= dt; if (this.flashT > 0) { this.flashT -= dt; if (this.flashT <= 0) this.flash.visible = false; }
     // moving and flying bloom the shot; aiming down the sights steadies most of that, the scope nearly all of it
     const base = st.aim ? this.adsSpread : this.spread; let moveAdd = Math.min(st.speed, 24) * this.moveSpread + (st.grounded ? 0 : 0.01) + (st.sliding ? 0.008 : 0);
@@ -126,27 +140,29 @@ export class Gun extends ViewModel {
     }
     if (st.reloadPressed && this.mag < this.magSize && this.reserve > 0 && !this.reloading && this.pumpT <= 0) { this.startReload(); return; }
     const wantFire = this.auto ? st.fire : st.firePressed;
-    if (wantFire && this.fireT <= 0 && this.pumpT <= 0 && !st.blockFire) {
+    if (this.spinUp && this.mag <= 0 && st.firePressed && !this.reloading) { audio.empty(); this.startReload(); }
+    if (wantFire && this.fireT <= 0 && this.pumpT <= 0 && !st.blockFire && (!this.spinUp || this.spin >= 0.95)) {
       if (this.mag <= 0) { if (st.firePressed) { audio.empty(); this.startReload(); } }
       else { if (this.reloading) { this.reloading = false; if (this.handL) this.handL.position.copy(this.handLPos); } this.fire(st); }
     }
   }
   fire(st) {
-    const ctx = this.ctx, P = ctx.player; this.fireT = this.interval; this.mag--;
+    const ctx = this.ctx, P = ctx.player; this.fireT = this.carry ? Math.max(this.fireT, -0.02) + this.interval : this.interval; this.mag--;
     const spreadNow = this.spreadCur; this.spreadCur = Math.min(this.spreadCur + this.spreadKick, this.spreadMax);
     let hits = 0;
     for (let i = 0; i < this.pellets; i++) if (this.fireRay(P.eye, P.aimDir(spreadNow))) hits++;
     // fx
     this.flash.visible = true; this.flashT = 0.045; this.flash.rotation.z = rand(0, TAU); this.flash.scale.setScalar(this.flashScale * rand(0.8, 1.4));
     this.muzzle.getWorldPosition(_v); _v2.copy(P.forward);
-    ctx.effects.strokeBurst(_v, INK.ORANGE, 4 + this.pellets, 6 * this.flashScale, { life: 0.08, size: 0.03, gravity: 0, drag: 8 });
-    ctx.effects.smoke(_v, _v2, this.kind === 'shotgun' ? 5 : 2);
+    // a rotary gun fires 20 to 36 shots a second: smoke, sparks, sound and shake only on some of them to spare the phone
+    const fx = !this.fxEvery || (++this._fxN % this.fxEvery === 0);
+    if (fx) { ctx.effects.strokeBurst(_v, INK.ORANGE, 4 + this.pellets, 6 * this.flashScale, { life: 0.08, size: 0.03, gravity: 0, drag: 8 }); ctx.effects.smoke(_v, _v2, this.kind === 'shotgun' ? 5 : 2); }
     if (this.shell && this.reloadType !== 'shells') this._ejectShell();
     if (this.cycleDur) { this.pumpT = this.cycleDur + 0.12; this.pumped = false; if (this.reloadType === 'shells') this.needPump = true; }
     const k = this.modelKick; this.recoil.kick(rand(-k[0], k[0]), rand(k[1] * 0.4, k[1]), k[2]); this.recoilRot.kick(k[3], rand(-k[4], k[4]), rand(-k[5], k[5]));
     P.recoil(this.camKick[0] * (st.aim ? 0.7 : 1) + rand(0, this.camKick[0] * 0.3), rand(-this.camKick[1], this.camKick[1])); P.kickFov(this.fovKick);
     if (this.scope && st.aim) ctx.hud.scopeKick();
-    audio[this.sound](); ctx.input.rumble(0.15 + this.fovKick * 0.08, 0.5, 40 + this.fovKick * 15); ctx.effects.shakeAmt += 0.02 + this.fovKick * 0.02;
+    if (fx) { audio[this.sound](); ctx.input.rumble(0.15 + this.fovKick * 0.08, 0.5, 40 + this.fovKick * 15); ctx.effects.shakeAmt += 0.02 + this.fovKick * 0.02; }
     if (hits > 0 && this.kind === 'shotgun') ctx.game.hitstop(0.03, 0.3);
     if (this.mag === 0 && this.reloadType === 'mag') setTimeout(() => { if (this.mag === 0 && !this.reloading) this.startReload(); }, 250);
   }
@@ -273,6 +289,47 @@ export class MachineGun extends Gun {
     this.muzzle = new THREE.Object3D(); this.muzzle.position.set(0, 0.03, -1.28); g.add(this.muzzle);
     this.ejectPt = new THREE.Object3D(); this.ejectPt.position.set(0.07, 0.03, 0.02); g.add(this.ejectPt);
     this.flash = makeFlash(g, 0, 0.03, -1.28, 1.15);
+  }
+}
+
+// A rotary gun: a ring of barrels that spins, a motor behind it and an ammo feed. One builder, four looks.
+export class Minigun extends Gun {
+  constructor(ctx, type) { super(ctx, type); this.basePos.set(0.22, -0.22, -0.38); }
+  build() {
+    const g = this.root, mat = this.mat, dark = this.dark, T = this.kind;
+    const green = makeInkMaterial({ ink: INK.GREEN });
+    const rod = (r, len, x, y, z, m, parent) => { const geo = new THREE.CylinderGeometry(r, r, len, 8); geo.rotateX(Math.PI / 2); const mesh = new THREE.Mesh(geo, m); mesh.position.set(x, y, z); parent.add(mesh); return mesh; };
+    // look: per gun, barrel ring radius and length, where the barrels start, the body block, and the ammo store
+    const L = { m134: { r: 0.05, len: 0.95, z0: -0.32, body: [0.12, 0.16, 0.5] }, gau19: { r: 0.062, len: 0.72, z0: -0.3, body: [0.15, 0.16, 0.46] },
+      yakb: { r: 0.058, len: 0.82, z0: -0.3, body: [0.15, 0.17, 0.5] }, gshg: { r: 0.045, len: 0.62, z0: -0.3, body: [0.12, 0.15, 0.44] } }[T];
+    bx(L.body[0], L.body[1], L.body[2], 0, 0, 0.06, mat, g);                          // receiver and feed
+    rod(0.09, 0.3, 0, 0.02, L.z0 + 0.08, mat, g);                                      // motor housing behind the barrels
+    // the barrel ring: it spins in update()
+    this.barrels = new THREE.Group(); this.barrels.position.set(0, 0.02, L.z0 - L.len / 2); g.add(this.barrels);
+    for (let i = 0; i < 6; i++) { const a = (i / 6) * TAU; rod(0.016, L.len, Math.cos(a) * L.r, Math.sin(a) * L.r, 0, dark, this.barrels); }
+    for (const z of [L.len / 2 - 0.02, 0, -L.len / 2 + 0.03]) rod(L.r + 0.026, 0.035, 0, 0, z, mat, this.barrels);
+    const grip = bx(0.05, 0.14, 0.06, 0, -0.13, 0.24, mat, g); grip.rotation.x = 0.3;
+    const muzzleZ = L.z0 - L.len - 0.02;
+    if (T === 'm134') {
+      bx(0.04, 0.1, 0.2, 0, 0.13, 0.12, mat, g);                                      // carry handle at the back
+      this.magMesh = bx(0.13, 0.15, 0.22, -0.17, -0.1, 0.14, mat, g); this.magY = -0.1; this.magMesh.position.x = -0.17;
+      for (let i = 0; i < 6; i++) bx(0.03, 0.03, 0.045, -0.15 + i * 0.022, -0.04 + i * 0.012, 0.1 - i * 0.012, dark, g); // belt of rounds
+    } else if (T === 'gau19') {
+      const drum = rod(0.15, 0.22, 0, -0.2, 0.1, mat, g); drum.rotation.set(0, 0, Math.PI / 2); this.magMesh = drum; this.magY = -0.2;   // big round drum
+      bx(0.12, 0.12, 0.2, 0, 0.02, 0.42, dark, g); rod(0.012, 0.35, 0.08, -0.02, 0.3, dark, g);                                  // rear motor and a cable
+    } else if (T === 'yakb') {
+      this.magMesh = bx(0.17, 0.2, 0.3, 0, -0.2, 0.1, green, g); this.magY = -0.2;      // the green ammo can
+      bx(0.15, 0.16, 0.3, 0, 0.02, 0.44, dark, g); bx(0.03, 0.14, 0.03, -0.1, 0.08, 0.1, mat, g); bx(0.03, 0.14, 0.03, 0.1, 0.08, 0.1, mat, g);
+    } else {
+      const drum = rod(0.11, 0.2, 0, -0.17, 0.1, mat, g); drum.rotation.set(0, 0, Math.PI / 2); this.magMesh = drum; this.magY = -0.17; // compact drum
+      frame(0.07, 0.07, 0.012, 0.16, 0, 0.12, 0.08, mat, g);                         // carry handle
+      for (const x of [-0.05, 0.05]) { const leg = bx(0.016, 0.016, 0.22, x, -0.07, L.z0 - 0.1, dark, g); leg.rotation.x = 0.12; } // short bipod
+    }
+    sph(0.0012, 0, 0.14, -0.1, this.red, g, 5);                                         // the sight dot
+    hand(mat, 0.02, -0.15, 0.24, g, [0.5, -0.6, 1]); this.handL = hand(mat, -0.08, -0.06, -0.05, g, [-0.35, -0.9, 0.9]); this.handLPos = this.handL.position.clone();
+    this.muzzle = new THREE.Object3D(); this.muzzle.position.set(0, 0.02, muzzleZ); g.add(this.muzzle);
+    this.ejectPt = new THREE.Object3D(); this.ejectPt.position.set(0.07, 0.03, 0.02); g.add(this.ejectPt);
+    this.flash = makeFlash(g, 0, 0.02, muzzleZ, this.flashScale);
   }
 }
 

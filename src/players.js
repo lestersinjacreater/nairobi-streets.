@@ -8,7 +8,8 @@ import { buildHumanoid, buildWeaponProp } from './enemies.js';
 import { clamp, damp, angleLerp, wrapAngle } from './util.js';
 
 const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0);
-const WEAPON_KINDS = ['rifle', 'shotgun', 'sniper', 'blade', 'boxing', 'machinegun'];
+const WEAPON_KINDS = ['rifle', 'shotgun', 'sniper', 'blade', 'boxing', 'machinegun', 'm134', 'gau19', 'yakb', 'gshg'];
+const ROTARY = new Set(['m134', 'gau19', 'yakb', 'gshg']); // other players hold these as one shared rotary-gun model
 const HIT = [['head', 0.3], ['torso', 0.33], ['hips', 0.2], ['armL', 0.11], ['armR', 0.11], ['foreL', 0.1], ['foreR', 0.1], ['legL', 0.13], ['legR', 0.13], ['shinL', 0.11], ['shinR', 0.11]];
 
 // what a player broadcasts about itself, ~20 times a second:
@@ -69,7 +70,7 @@ export class RemotePlayer {
   setWeapon(i) {
     if (i === this.weaponIndex && this.J.gun.children.length) return; this.weaponIndex = i;
     const gun = this.J.gun; while (gun.children.length) gun.remove(gun.children[0]);
-    buildWeaponProp(gun, this.mat, this.solid, { weapon: WEAPON_KINDS[i] || 'rifle' });
+    buildWeaponProp(gun, this.mat, this.solid, { weapon: ROTARY.has(WEAPON_KINDS[i]) ? 'rotary' : (WEAPON_KINDS[i] || 'rifle') });
   }
   push(snap, t) {
     if (!snap) return;
