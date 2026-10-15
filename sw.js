@@ -7,7 +7,7 @@ const SHELL = [
   './', './index.html', './install.html', './privacy.html', './net-config.js', './style.css', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',
   './vendor/three/three.module.js', './vendor/three/addons/utils/BufferGeometryUtils.js', './vendor/peerjs/peerjs.min.js', './vendor/qrcode/qrcode.js',
-  './src/audio.js', './src/effects.js', './src/enemies.js', './src/hud.js', './src/input.js', './src/level.js', './src/main.js',
+  './src/arsenal.js', './src/audio.js', './src/effects.js', './src/enemies.js', './src/hud.js', './src/input.js', './src/level.js', './src/main.js',
   './src/nairobi-data.js', './src/nav.js', './src/net.js', './src/physics.js', './src/player.js', './src/players.js',
   './src/render.js', './src/touch.js', './src/util.js', './src/weapons.js',
 ];

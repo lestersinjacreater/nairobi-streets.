@@ -3,7 +3,8 @@ import * as THREE from 'three';
 import { makeBody } from './physics.js';
 import { makeInkMaterial, INK } from './render.js';
 import { buildHumanoid } from './enemies.js';
-import { Rifle, Shotgun, Sniper, Katana, BoxingGloves, MachineGun, Minigun } from './weapons.js';
+import { Katana, BoxingGloves, makeGun } from './weapons.js';
+import { ARSENAL_INDEX, loadLoadout } from './arsenal.js';
 // the dome shell and anything else flagged this way cannot be hooked
 const NO_GRAPPLE = (b) => !!b.data.noGrapple;
 const STAM_FIRE = 0.09, STAM_DRAIN = 0.08, STAM_GROUND = 0.4, STAM_AIR = 0.2, STAM_MIN = 0.18, STAM_PAUSE = 0.5, PARRY_WINDOW = 0.55;
@@ -24,9 +25,10 @@ export class Player {
     this.rig = new THREE.Group(); this.camera.add(this.rig); ctx.scene.add(this.camera);
     const avatar = buildHumanoid(makeInkMaterial({ ink: INK.BLUE, shadeScale: 0, shadeBias: 1 }), makeInkMaterial({ ink: INK.BLACK, fill: true, side: THREE.DoubleSide }), { weapon: 'rifle', scale: 1, hat: 'cap', build: { bodyW: 1, headS: 1, limbR: 0.033 } });
     this.avatar = avatar.root; this.avatarJ = avatar.J; this.avatar.visible = false; ctx.scene.add(this.avatar);
-    this.weapons = [new Rifle(ctx), new Shotgun(ctx), new Sniper(ctx), new Katana(ctx), new BoxingGloves(ctx), new MachineGun(ctx), new Minigun(ctx, 'm134'), new Minigun(ctx, 'gau19'), new Minigun(ctx, 'yakb'), new Minigun(ctx, 'gshg')]; this.katanaIndex = 3; // new guns go on the end so slot numbers (and what online players see) never shift
-    for (const w of this.weapons) { this.rig.add(w.root); if (w.isGun) w.startReserve = w.reserve; }
-    this.weaponIndex = 0; this.weapon = this.weapons[0]; this.weapon.equip(); this.returnT = 0; this.prevWeaponIndex = 0;
+    // three guns from the loadout, then the katana and the boxing gloves (slots 4 and 5 and the melee button). The melee two never change.
+    this.katanaIndex = 3; this.weapons = []; this.melee = [new Katana(ctx), new BoxingGloves(ctx)];
+    this.melee[0].id = 'katana'; this.melee[0].regIndex = ARSENAL_INDEX.katana; this.melee[1].id = 'boxing'; this.melee[1].regIndex = ARSENAL_INDEX.boxing;
+    this.prevGunIndex = 0; this.returnT = 0; this.setLoadout(loadLoadout());
     this.recoilPitch = new Spring(190, 17); this.recoilYaw = new Spring(190, 17); this.fovKick = new Spring(220, 14); this.landDip = new Spring(170, 15);
     this.roll = 0; this.fov = 82; this.bobPhase = 0; this.bobAmt = 0; this.stepDist = 0; this.eyeH = EYE_STAND;
     this.crouching = false; this.sliding = false; this.slideT = 0; this.coyote = 0; this.jumpBuffer = 0; this.wallTouch = 9; this.wallN = new THREE.Vector3(); this.wallJumpCd = 0; this.mantleCd = 0;
@@ -58,9 +60,22 @@ export class Player {
     b.vel.addScaledVector(d, speed); if (b.onGround) { b.vel.y = Math.max(b.vel.y, 2.5); b.onGround = false; }
     audio.dash(); this.kickFov(3);
   }
+  // swap the three guns (from the loadout screen). Builds fresh models and full ammo; the melee weapons stay.
+  setLoadout(ids) {
+    const ctx = this.ctx;
+    for (const w of this.weapons) { this.rig.remove(w.root); if (w.isGun) w.root.traverse((o) => { if (o.geometry) o.geometry.dispose(); }); }
+    const guns = ids.map((id) => { const w = makeGun(ctx, id); w.id = id; w.regIndex = ARSENAL_INDEX[id]; return w; });
+    this.weapons = [...guns, ...this.melee]; this.loadout = [...ids];
+    for (const w of this.weapons) { this.rig.add(w.root); w.root.visible = false; if (w.isGun) w.startReserve = w.reserve; }
+    this.weaponIndex = 0; this.weapon = this.weapons[0]; this.weapon.equip(); this.prevWeaponIndex = 0; this.prevGunIndex = 0;
+    if (ctx.hud) { ctx.hud.setWeapon(this.weapon.name, this.weapon.hint); ctx.hud.setCrosshairMode(''); }
+  }
+  // next or previous of the three equipped guns (from a melee weapon, from the gun you were holding)
+  cycleGun(dir) { const cur = this.weaponIndex < 3 ? this.weaponIndex : this.prevGunIndex; this.switchTo((cur + dir + 3) % 3); }
   switchTo(i, silent = false) {
     if (i < 0 || i >= this.weapons.length) return; if (i === this.weaponIndex && !silent) return;
     if (this.weapon.kind !== 'katana') this.prevWeaponIndex = this.weaponIndex;
+    if (i < 3) this.prevGunIndex = i;
     this.weapon.unequip(); this.weaponIndex = i; this.weapon = this.weapons[i]; this.weapon.equip(); if (!silent) audio.switchWeapon();
     this.ctx.hud.setWeapon(this.weapon.name, this.weapon.hint); this.ctx.hud.setCrosshairMode(this.weapon.kind === 'katana' ? 'katana' : '');
   }
@@ -241,9 +256,9 @@ export class Player {
     this.updateNadeArc(this._nadeHeld ? this.nadeCharge : -1);
     this.updateNades(dt);
     // ---- weapons ----
-    for (let i = 0; i < 10; i++) if (inp.pressed('slot' + (i + 1))) this.switchTo(Math.min(i, this.weapons.length - 1));
-    if (inp.pressed('nextWeapon')) this.switchTo((this.weaponIndex + 1) % this.weapons.length);
-    if (inp.pressed('prevWeapon')) this.switchTo((this.weaponIndex + this.weapons.length - 1) % this.weapons.length);
+    for (let i = 0; i < this.weapons.length; i++) if (inp.pressed('slot' + (i + 1))) this.switchTo(i);
+    if (inp.pressed('nextWeapon')) this.cycleGun(1);
+    if (inp.pressed('prevWeapon')) this.cycleGun(-1);
     const st = this._weaponState(sprinting, aiming, hs2);
     if (inp.pressed('melee') && !['katana', 'boxing'].includes(this.weapon.kind)) { this.switchTo(this.katanaIndex); this.returnT = 0.85; this.weapons[this.katanaIndex].startSlash(st); st.meleePressed = false; }
     if (this.returnT > 0) { if (['katana', 'boxing'].includes(this.weapon.kind) && (st.firePressed || st.aim || st.meleePressed)) this.returnT = 0; else { this.returnT -= dt; if (this.returnT <= 0) this.switchTo(this.prevWeaponIndex); } }

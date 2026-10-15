@@ -2,14 +2,15 @@
 // the snapshots its owner sends; it also exposes the same surface enemies and weapons expect of a
 // target (body, center, eye, hit spheres, takeDamage) so the rest of the game does not care
 // whether it is shooting at a bot or a friend.
+import { ARSENAL } from './arsenal.js';
 import * as THREE from 'three';
 import { makeInkMaterial, setFill, INK } from './render.js';
 import { buildHumanoid, buildWeaponProp } from './enemies.js';
 import { clamp, damp, angleLerp, wrapAngle } from './util.js';
 
 const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0);
-const WEAPON_KINDS = ['rifle', 'shotgun', 'sniper', 'blade', 'boxing', 'machinegun', 'm134', 'gau19', 'yakb', 'gshg'];
-const ROTARY = new Set(['m134', 'gau19', 'yakb', 'gshg']); // other players hold these as one shared rotary-gun model
+// what other players see in your hands comes from your weapon's position in the arsenal (arsenal.js), so every gun is shown
+const PROPS = ARSENAL.map((a) => a.prop);
 const HIT = [['head', 0.3], ['torso', 0.33], ['hips', 0.2], ['armL', 0.11], ['armR', 0.11], ['foreL', 0.1], ['foreR', 0.1], ['legL', 0.13], ['legR', 0.13], ['shinL', 0.11], ['shinR', 0.11]];
 
 // what a player broadcasts about itself, ~20 times a second:
@@ -70,7 +71,7 @@ export class RemotePlayer {
   setWeapon(i) {
     if (i === this.weaponIndex && this.J.gun.children.length) return; this.weaponIndex = i;
     const gun = this.J.gun; while (gun.children.length) gun.remove(gun.children[0]);
-    buildWeaponProp(gun, this.mat, this.solid, { weapon: ROTARY.has(WEAPON_KINDS[i]) ? 'rotary' : (WEAPON_KINDS[i] || 'rifle') });
+    buildWeaponProp(gun, this.mat, this.solid, { weapon: PROPS[i] || 'rifle' });
   }
   push(snap, t) {
     if (!snap) return;
@@ -140,7 +141,7 @@ export class RemotePlayer {
     if (!b.onGround) { J.legL.rotation.x = -0.5; J.legR.rotation.x = 0.6; J.shinL.rotation.x = 1.0; J.shinR.rotation.x = 0.5; }
     // guns are carried up and forward, two hands on them, tilting with where they look; the
     // blade hangs at the side until it is raised to guard
-    const blade = WEAPON_KINDS[this.weaponIndex] === 'blade'; const gloves = WEAPON_KINDS[this.weaponIndex] === 'boxing'; const aim = blade || gloves ? 0 : (this.aiming ? 1 : sp > 6.5 ? 0.8 : 0.95);
+    const blade = PROPS[this.weaponIndex] === 'blade'; const gloves = PROPS[this.weaponIndex] === 'boxing'; const aim = blade || gloves ? 0 : (this.aiming ? 1 : sp > 6.5 ? 0.8 : 0.95);
     const look = clamp(this.pitch, -1.1, 1.1);
     if (blade || gloves) {
       const g = this.blocking ? 1 : 0;

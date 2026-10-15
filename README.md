@@ -69,7 +69,7 @@ join a match already in progress. The host's browser keeps score; each player ru
 | Reload | R | □ |
 | Grenade (hold to throw further) | G | R3 or d-pad up |
 | Katana dash (gauge lit) | both mouse buttons or X | L2 + R2 |
-| Weapons | 1-6, 7-0 / wheel | △, d-pad |
+| Your 3 guns | 1-3 / wheel | △, d-pad |
 | Scoreboard (online) | Tab | Create |
 | Menu | Esc | Options |
 
@@ -77,7 +77,11 @@ On-screen hints follow whichever device you touched last.
 
 ## Weapons and gear
 
-Rifle, shotgun, sniper (with scope), a katana, boxing gloves the M31, a belt-fed machine gun, and four rotary guns on keys 7 to 0: the M134 minigun, GAU-19, Yak-B 12.7 and GShG-7.62 (hold fire to spin the barrels up, then they fire 22 to 36 shots a second; they slow your walk while spinning and stop you sprinting). The M31 (slot 6: a 100-round belt and a very high fire rate, but a wide spread, heavy kick, long reload and damage that fades with distance). Holding block with the katana parries
+**Loadout.** On the main menu, LOADOUT lists every gun in the game (33 of them: pistols, SMGs, assault rifles, shotguns, snipers, LMGs and four rotary guns) with stat bars and a filter by type. Pick any three; they are saved on your device. In a match your three guns show on a see-through card: keys 1 to 3, the mouse wheel, or tap a gun on a phone. Key 4 is the katana and 5 the boxing gloves, and the melee button still slashes with the katana.
+
+The rotary guns (M134 minigun, GAU-19, Yak-B 12.7, GShG-7.62) spin their barrels up while you hold fire, then shoot 22 to 36 times a second; they slow your walk while spinning and stop you sprinting. The M31 is a belt-fed machine gun. All the numbers are in `src/arsenal.js`.
+
+Holding block with the katana parries
 some incoming bullets and returns a share of them. Katana kills charge a gauge; when it is lit you
 can dash to a marked enemy and execute it (solo only). Grenades bounce, then go off in a thick orange blast that scorches the paper; holding the
 button winds up a longer throw and shows the arc. The grapple runs on breath: hanging drains it,

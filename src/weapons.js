@@ -4,6 +4,7 @@ import { makeInkMaterial, INK } from './render.js';
 import { SEE_THROUGH } from './physics.js';
 import { rand, clamp, damp, lerp, Spring3, TAU } from './util.js';
 import { audio } from './audio.js';
+import { GUN_STATS } from './arsenal.js';
 
 const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _v3 = new THREE.Vector3();
 const easeOut = (t) => 1 - Math.pow(1 - t, 3);
@@ -62,26 +63,14 @@ class ViewModel {
   }
 }
 
-const GUNS = {
-  rifle: { name: 'RIFLE', hint: 'full auto · put the red dot on them', kind: 'rifle', magSize: 35, reserve: 175, maxReserve: 350, interval: 1 / 11, damage: 24, headMul: 2.6, pellets: 1, spread: 0.016, adsSpread: 0.0034, spreadKick: 0.009, spreadMax: 0.075, adsFov: 58, sight: [0, 0.12, -0.05, 0.3], camKick: [0.009, 0.0034], modelKick: [0.25, 0.3, 2.4, -3.2, 0.9, 1.2], fovKick: 1.2, reloadDur: 1.45, reloadType: 'mag', auto: true, falloff: null, tracer: 0.02, flashScale: 1, sound: 'shot', shell: [0.02, INK.ORANGE], moveSpread: 0.0012, pvp: [19, 1.8, null] },
-  shotgun: { name: 'SHOTGUN', hint: 'pump action · devastating up close', kind: 'shotgun', magSize: 6, reserve: 36, maxReserve: 72, interval: 0.78, damage: 19, headMul: 1.8, pellets: 10, spread: 0.062, adsSpread: 0.034, spreadKick: 0, spreadMax: 0.1, adsFov: 68, sight: [0, 0.095, -1.0, 0.52], camKick: [0.05, 0.012], modelKick: [0.4, 0.6, 5, -9, 2, 3], fovKick: 4, reloadDur: 0.45, reloadType: 'shells', auto: false, falloff: [11, 32, 0.22], tracer: 0.014, flashScale: 1.9, sound: 'shotgunFire', shell: [0.035, INK.RED], moveSpread: 0.0006, cycleDur: 0.45, pvp: [16, 1.6, [9, 26, 0.15]] },
-  sniper: { name: 'SNIPER', hint: 'bolt action · one shot, one erase', kind: 'sniper', scope: true, magSize: 5, reserve: 25, maxReserve: 50, interval: 0.2, damage: 150, headMul: 3, pellets: 1, spread: 0.075, adsSpread: 0.0004, spreadKick: 0.05, spreadMax: 0.14, adsFov: 20, sight: [0, 0.135, 0, 0.42], camKick: [0.055, 0.008], modelKick: [0.25, 0.8, 4.5, -11, 1.2, 2], fovKick: 4.5, reloadDur: 2.1, reloadType: 'mag', auto: false, falloff: null, tracer: 0.03, flashScale: 1.7, sound: 'sniperFire', shell: [0.03, INK.ORANGE], moveSpread: 0.004, cycleDur: 0.85, pvp: [150, 1.5, null] },
-  // the M31: a belt-fed LMG (internally still 'machinegun' so weapon ids and online messages do not change): a huge magazine and a very high fire rate, paid for with a wide, wandering spread, heavy kick,
-  // a long reload and damage that fades with distance. It wins close and mid range; the rifle wins when you must aim.
-  machinegun: { name: 'M31', hint: 'machine gun · belt-fed, hold fire and hose them down', kind: 'machinegun', magSize: 100, reserve: 200, maxReserve: 400, interval: 1 / 16, damage: 14, headMul: 2.0, pellets: 1, spread: 0.028, adsSpread: 0.008, spreadKick: 0.0055, spreadMax: 0.11, adsFov: 62, sight: [0, 0.12, -0.05, 0.3], camKick: [0.0075, 0.0045], modelKick: [0.3, 0.35, 2.8, -3.6, 1.1, 1.4], fovKick: 1.0, reloadDur: 3.3, reloadType: 'mag', auto: true, falloff: [22, 58, 0.5], tracer: 0.022, flashScale: 1.15, sound: 'machineGun', shell: [0.02, INK.ORANGE], moveSpread: 0.002, pvp: [12, 1.7, [18, 48, 0.4]] },
-  // ROTARY GUNS. All four spin their barrels up before they fire (hold fire), then spray at a very high rate, but you walk
-  // slowly while they spin, cannot sprint, and the spread is wide. spinUp = seconds to reach full speed, moveMul = walk speed
-  // at full spin, carry = keep the exact fire rate even between frames, fxEvery = sound and smoke on every Nth shot only.
-  m134: { name: 'M134 MINIGUN', hint: 'rotary · 7.62 mm · spins up, then shreds', kind: 'm134', rotary: true, magSize: 200, reserve: 400, maxReserve: 600, interval: 1 / 30, damage: 9, headMul: 1.6, pellets: 1, spread: 0.045, adsSpread: 0.018, spreadKick: 0.002, spreadMax: 0.1, adsFov: 70, sight: [0, 0.14, -0.1, 0.32], camKick: [0.0035, 0.0025], modelKick: [0.12, 0.15, 1.2, -1.6, 0.5, 0.7], fovKick: 0.5, reloadDur: 4.2, reloadType: 'mag', auto: true, falloff: [28, 70, 0.5], tracer: 0.02, flashScale: 1.0, sound: 'minigunFire', shell: null, moveSpread: 0.0025, spinUp: 0.7, moveMul: 0.55, carry: true, fxEvery: 3, pvp: [6.5, 1.5, [22, 55, 0.4]] },
-  gau19: { name: 'GAU-19', hint: 'rotary · 12.7 mm · heavy rounds, slower spin', kind: 'gau19', rotary: true, magSize: 120, reserve: 240, maxReserve: 360, interval: 1 / 22, damage: 15, headMul: 1.7, pellets: 1, spread: 0.04, adsSpread: 0.016, spreadKick: 0.003, spreadMax: 0.095, adsFov: 70, sight: [0, 0.15, -0.1, 0.32], camKick: [0.005, 0.0032], modelKick: [0.18, 0.22, 1.8, -2.2, 0.7, 0.9], fovKick: 0.7, reloadDur: 4.6, reloadType: 'mag', auto: true, falloff: [30, 80, 0.5], tracer: 0.03, flashScale: 1.2, sound: 'minigunFire', shell: null, moveSpread: 0.0025, spinUp: 0.9, moveMul: 0.5, carry: true, fxEvery: 2, pvp: [10, 1.6, [24, 60, 0.4]] },
-  yakb: { name: 'YAK-B 12.7', hint: 'rotary · 12.7 mm · the fastest, and the slowest to spin', kind: 'yakb', rotary: true, magSize: 150, reserve: 300, maxReserve: 450, interval: 1 / 36, damage: 12, headMul: 1.6, pellets: 1, spread: 0.05, adsSpread: 0.02, spreadKick: 0.0022, spreadMax: 0.11, adsFov: 72, sight: [0, 0.15, -0.1, 0.32], camKick: [0.0042, 0.003], modelKick: [0.15, 0.2, 1.5, -2, 0.6, 0.8], fovKick: 0.6, reloadDur: 5.0, reloadType: 'mag', auto: true, falloff: [26, 66, 0.45], tracer: 0.028, flashScale: 1.15, sound: 'minigunFire', shell: null, moveSpread: 0.003, spinUp: 1.3, moveMul: 0.45, carry: true, fxEvery: 4, pvp: [8.5, 1.5, [22, 55, 0.4]] },
-  gshg: { name: 'GSHG-7.62', hint: 'rotary · 7.62 mm · light, quick to spin', kind: 'gshg', rotary: true, magSize: 100, reserve: 300, maxReserve: 400, interval: 1 / 28, damage: 8, headMul: 1.6, pellets: 1, spread: 0.042, adsSpread: 0.016, spreadKick: 0.002, spreadMax: 0.095, adsFov: 68, sight: [0, 0.14, -0.1, 0.3], camKick: [0.003, 0.0022], modelKick: [0.1, 0.13, 1.0, -1.4, 0.45, 0.6], fovKick: 0.45, reloadDur: 3.0, reloadType: 'mag', auto: true, falloff: [24, 62, 0.45], tracer: 0.019, flashScale: 0.95, sound: 'minigunFire', shell: null, moveSpread: 0.002, spinUp: 0.45, moveMul: 0.65, carry: true, fxEvery: 3, pvp: [6, 1.5, [20, 52, 0.4]] },
-  revolver: { name: 'REVOLVER', hint: 'hand cannon · headshots erase', kind: 'revolver', magSize: 6, reserve: 36, maxReserve: 72, interval: 0.3, damage: 62, headMul: 3, pellets: 1, spread: 0.006, adsSpread: 0.002, spreadKick: 0.02, spreadMax: 0.06, adsFov: 52, sight: [0, 0.08, -0.34, 0.42], camKick: [0.038, 0.007], modelKick: [0.3, 0.9, 3.2, -10, 1.5, 2.5], fovKick: 2.5, reloadDur: 1.9, reloadType: 'cylinder', auto: false, falloff: null, tracer: 0.026, flashScale: 1.35, sound: 'revolver', shell: null, moveSpread: 0.0015, pvp: [52, 2.9, [9, 34, 0.42]] },
-};
+// every gun's stats now live in arsenal.js (plain data), so the loadout screen can show them without loading any 3D code
+const GUNS = GUN_STATS;
+const SHELL_INK = { orange: INK.ORANGE, red: INK.RED };
 
 export class Gun extends ViewModel {
   constructor(ctx, type) {
-    super(ctx); Object.assign(this, GUNS[type]); this.isGun = true; this.mag = this.magSize;
+    super(ctx); Object.assign(this, GUNS[type]); this.id = type; this.isGun = true; this.mag = this.magSize;
+    if (this.shell && typeof this.shell[1] === 'string') this.shell = [this.shell[0], SHELL_INK[this.shell[1]] ?? INK.ORANGE]; // arsenal.js names the shell colour
     this.spin = 0; this._fxN = 0; this._spinSndT = 0; this.fireT = 0; this.reloading = false; this.reloadT = 0; this.spreadCur = this.spread; this.flashT = 0; this.pumpT = 0; this.racked = false; this.needPump = false;
     this.mat = makeInkMaterial({ ink: INK.BLUE }); this.dark = makeInkMaterial({ ink: INK.BLACK }); this.red = makeInkMaterial({ ink: INK.RED, fill: true });
     this.build(); this.setSight(...this.sight);
@@ -156,14 +145,14 @@ export class Gun extends ViewModel {
     this.muzzle.getWorldPosition(_v); _v2.copy(P.forward);
     // a rotary gun fires 20 to 36 shots a second: smoke, sparks, sound and shake only on some of them to spare the phone
     const fx = !this.fxEvery || (++this._fxN % this.fxEvery === 0);
-    if (fx) { ctx.effects.strokeBurst(_v, INK.ORANGE, 4 + this.pellets, 6 * this.flashScale, { life: 0.08, size: 0.03, gravity: 0, drag: 8 }); ctx.effects.smoke(_v, _v2, this.kind === 'shotgun' ? 5 : 2); }
+    if (fx) { ctx.effects.strokeBurst(_v, INK.ORANGE, 4 + this.pellets, 6 * this.flashScale, { life: 0.08, size: 0.03, gravity: 0, drag: 8 }); ctx.effects.smoke(_v, _v2, this.family === 'shotgun' ? 5 : 2); }
     if (this.shell && this.reloadType !== 'shells') this._ejectShell();
     if (this.cycleDur) { this.pumpT = this.cycleDur + 0.12; this.pumped = false; if (this.reloadType === 'shells') this.needPump = true; }
     const k = this.modelKick; this.recoil.kick(rand(-k[0], k[0]), rand(k[1] * 0.4, k[1]), k[2]); this.recoilRot.kick(k[3], rand(-k[4], k[4]), rand(-k[5], k[5]));
     P.recoil(this.camKick[0] * (st.aim ? 0.7 : 1) + rand(0, this.camKick[0] * 0.3), rand(-this.camKick[1], this.camKick[1])); P.kickFov(this.fovKick);
     if (this.scope && st.aim) ctx.hud.scopeKick();
     if (fx) { audio[this.sound](); ctx.input.rumble(0.15 + this.fovKick * 0.08, 0.5, 40 + this.fovKick * 15); ctx.effects.shakeAmt += 0.02 + this.fovKick * 0.02; }
-    if (hits > 0 && this.kind === 'shotgun') ctx.game.hitstop(0.03, 0.3);
+    if (hits > 0 && this.family === 'shotgun') ctx.game.hitstop(0.03, 0.3);
     if (this.mag === 0 && this.reloadType === 'mag') setTimeout(() => { if (this.mag === 0 && !this.reloading) this.startReload(); }, 250);
   }
   fireRay(origin, dir) {
@@ -331,6 +320,54 @@ export class Minigun extends Gun {
     this.ejectPt = new THREE.Object3D(); this.ejectPt.position.set(0.07, 0.03, 0.02); g.add(this.ejectPt);
     this.flash = makeFlash(g, 0, 0.02, muzzleZ, this.flashScale);
   }
+}
+
+// Every gun without its own hand-built model: one builder, shaped by the gun's `look` (see arsenal.js).
+export class Arms extends Gun {
+  constructor(ctx, type) { super(ctx, type); const p = this.look && this.look.pos; if (p) this.basePos.set(p[0], p[1], p[2]); }
+  build() {
+    const g = this.root, mat = this.mat, dark = this.dark, L = this.look, half = L.len / 2;
+    const rod = (r, len, x, y, z, m, parent, axis = 'z') => { const geo = new THREE.CylinderGeometry(r, r, len, 10); if (axis === 'z') geo.rotateX(Math.PI / 2); else if (axis === 'x') geo.rotateZ(Math.PI / 2); const mesh = new THREE.Mesh(geo, m); mesh.position.set(x, y, z); parent.add(mesh); return mesh; };
+    bx(0.09, 0.12, L.len, 0, 0, 0, mat, g);                                                   // receiver
+    if (L.guard) bx(0.075, 0.085, L.guard, 0, 0, -(half + L.guard / 2), mat, g);               // handguard
+    const barZ = -(half + L.guard + L.bar / 2); rod(L.br, L.bar, 0, 0.02, barZ, dark, g);      // barrel
+    if (L.stock) { const st = bx(0.07, 0.11, L.stock, 0, -0.01, half + L.stock / 2, mat, g); st.rotation.x = 0.04; }
+    // the magazine (it drops away on reload)
+    const my = -(0.06 + L.magH / 2);
+    if (L.mag === 'drum') { this.magMesh = rod(0.11, 0.1, 0, -0.17, -0.03, mat, g, 'x'); }
+    else if (L.mag === 'box') this.magMesh = bx(0.075, L.magH, 0.16, 0, my, -0.03, mat, g);
+    else if (L.mag === 'banana') { this.magMesh = bx(0.06, L.magH, 0.1, 0, my, -0.06, mat, g); this.magMesh.rotation.x = 0.45; }
+    else if (L.mag === 'grip') this.magMesh = bx(0.05, L.magH, 0.07, 0, -0.13, half - 0.06, mat, g);
+    else { this.magMesh = bx(0.06, L.magH, 0.1, 0, my, -0.04, mat, g); this.magMesh.rotation.x = 0.15; }
+    this.magY = this.magMesh.position.y;
+    const grip = bx(0.05, 0.14, 0.06, 0, -0.13, half - 0.12, mat, g); grip.rotation.x = 0.3;
+    // the sight
+    if (L.sight === 'scope') {
+      rod(0.05, 0.5, 0, 0.135, -0.1, mat, g); rod(0.064, 0.07, 0, 0.135, -0.36, mat, g); rod(0.06, 0.07, 0, 0.135, 0.14, mat, g);
+      const cross = new THREE.Group(); cross.position.set(0, 0.135, -0.38); g.add(cross); bx(0.09, 0.006, 0.004, 0, 0, 0, this.red, cross); bx(0.006, 0.09, 0.004, 0, 0, 0, this.red, cross);
+    } else if (L.sight === 'iron') {
+      bx(0.05, 0.04, 0.012, 0, 0.085, half - 0.06, dark, g); bx(0.012, 0.05, 0.012, 0, 0.09, -(half + L.guard + L.bar * 0.85), dark, g); sph(0.0012, 0, 0.12, -0.05, this.red, g, 5);
+    } else if (L.sight === 'bead') { sph(0.013, 0, 0.095, -(half + L.guard + L.bar * 0.9), this.red, g, 6); sph(0.0012, 0, 0.12, -0.05, this.red, g, 5); }
+    else { frame(0.075, 0.07, 0.012, 0.03, 0, 0.12, -0.05, mat, g); bx(0.03, 0.018, 0.05, 0, 0.062, -0.05, dark, g); sph(0.0012, 0, 0.12, -0.05, this.red, g, 5); }
+    if (L.bolt) { this.boltH = bx(0.026, 0.026, 0.16, 0.07, 0.05, half - 0.1, dark, g); this.boltZ = half - 0.1; sph(0.032, 0.07, 0.05, half - 0.02, dark, g, 6); }
+    if (L.bipod) for (const x of [-0.05, 0.05]) { const leg = bx(0.018, 0.018, 0.24, x, -0.07, barZ + 0.1, dark, g); leg.rotation.x = 0.1; }
+    hand(mat, 0.02, -0.15, half - 0.12, g, [0.5, -0.6, 1]); this.handL = hand(mat, -0.05, -0.08, -(half + Math.max(L.guard * 0.55, 0.12)), g, [-0.35, -0.9, 0.9]); this.handLPos = this.handL.position.clone();
+    const mz = -(half + L.guard + L.bar);
+    this.muzzle = new THREE.Object3D(); this.muzzle.position.set(0, 0.02, mz); g.add(this.muzzle);
+    this.ejectPt = new THREE.Object3D(); this.ejectPt.position.set(0.06, 0.02, 0.02); g.add(this.ejectPt);
+    this.flash = makeFlash(g, 0, 0.02, mz, this.flashScale);
+  }
+}
+
+// make any gun by id, with the right model
+export function makeGun(ctx, id) {
+  if (id === 'shotgun') return new Shotgun(ctx);
+  if (id === 'sniper') return new Sniper(ctx);
+  if (id === 'revolver') return new Revolver(ctx);
+  if (id === 'machinegun') return new MachineGun(ctx);
+  if (GUNS[id] && GUNS[id].rotary) return new Minigun(ctx, id);
+  if (id === 'rifle' || !GUNS[id]) return new Rifle(ctx);
+  return new Arms(ctx, id);
 }
 
 export class Katana extends ViewModel {

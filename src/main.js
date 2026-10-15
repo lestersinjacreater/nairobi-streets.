@@ -16,6 +16,7 @@ import { Net } from './net.js';
 import { HUD, CONTROLS_HTML } from './hud.js';
 import { audio } from './audio.js';
 import { rand, choose, clamp } from './util.js';
+import { ARSENAL_BY_ID, GUN_STATS, GUN_IDS, CLASSES, gunBars, saveLoadout, loadLoadout, DEFAULT_LOADOUT } from './arsenal.js';
 
 const canvas = document.getElementById('c');
 const R = new InkRenderer(canvas);
@@ -181,7 +182,7 @@ function breakProp(br, dir, local, quiet = false) {
 // every ray a gun fires this tick is sent to the others, who draw it as a tracer from the shooter's gun
 const shotQueue = [];
 ctx.onShot = (end) => { if (net.active && inMatch()) shotQueue.push(+end.x.toFixed(1), +end.y.toFixed(1), +end.z.toFixed(1)); };
-const TRACER_THICK = { rifle: 0.02, shotgun: 0.014, sniper: 0.03, machinegun: 0.022, m134: 0.02, gau19: 0.03, yakb: 0.028, gshg: 0.019 };
+const tracerThick = (id) => (GUN_STATS[id] ? GUN_STATS[id].tracer : 0.02);
 const _sm = new THREE.Vector3(), _se = new THREE.Vector3();
 let vehicleHitCooldown = 0;
 function checkVehicleImpacts(dt) {
@@ -393,7 +394,7 @@ function updateFocus(dt) {
 }
 
 // ---------------- free for all: spawning, death, scoring ----------------
-const HOW = { rifle: 'RIFLE', shotgun: 'SHOTGUN', sniper: 'SNIPER', machinegun: 'M31', m134: 'M134 MINIGUN', gau19: 'GAU-19', yakb: 'YAK-B 12.7', gshg: 'GSHG-7.62', katana: 'KATANA', boxing: 'BOXING GLOVES', grenade: 'GRENADE', deflect: 'OWN BULLET' };
+const HOW = { katana: 'KATANA', boxing: 'BOXING GLOVES', grenade: 'GRENADE', deflect: 'OWN BULLET', ...Object.fromEntries(Object.entries(GUN_STATS).map(([id, g]) => [id, g.name])) };
 const howWord = (src) => HOW[src] || null;
 const spawnSpots = () => (level.arenaSpawns && level.arenaSpawns.length ? level.arenaSpawns : level.spawns);
 function arenaSpawn() {
@@ -542,9 +543,9 @@ net.on('parry', (d) => { audio.shieldHit(player.center); input.rumble(0.35, 0.3,
 net.on('shots', (d, from) => {
   const r = remote.get(from); if (!r || !r.root || !r.alive) return;
   _sm.set(r.body.pos.x + r.right.x * 0.3 + r.forward.x * 0.8, r.body.pos.y + 1.35 + r.forward.y * 0.8, r.body.pos.z + r.right.z * 0.3 + r.forward.z * 0.8);
-  const th = TRACER_THICK[d.k] || 0.02; const e = d.e || [];
+  const th = tracerThick(d.k); const e = d.e || [];
   for (let i = 0; i + 2 < e.length; i += 3) { _se.set(e[i], e[i + 1], e[i + 2]); effects.tracer(_sm, _se, INK.BLUE, th, 0.06); }
-  r.flash(); audio.remoteShot(d.k, _sm);
+  r.flash(); audio.remoteShot((ARSENAL_BY_ID[d.k] && ARSENAL_BY_ID[d.k].sfx) || d.k, _sm);
 });
 net.on('cut', () => { if (player.grapple.state !== 'idle') { player.detachGrapple(false); effects.strokeBurst(player.center, INK.ORANGE, 8, 4, { life: 0.25, size: 0.03 }); hud.tip('YOUR ROPE WAS CUT', 1.3); input.rumble(0.5, 0.3, 80); } });
 net.on('score', (rows) => { if (!net.isHost) applyScores(rows); });
@@ -582,7 +583,7 @@ function netUpdate(dt) {
   for (const r of remote.values()) r.update(dt, now);
   // a connection that died without saying so leaves a figure standing around: drop anyone silent too long
   if (inMatch() && !migrating) for (const [id, r] of remote) { if (r.lastSeen && performance.now() - r.lastSeen > 9000) { if (!net.isHost && id === net.hostId) { net.leave(); migrateHost(); break; } const nm = r.name; removeRemote(id); hud.kill(nm + ' CONNECTION LOST', 0); if (net.isHost) { const c = net.conns.get(id); if (c) { try { c.close(); } catch (e) { /* ignore */ } net.conns.delete(id); } net.send('leave', { id }); broadcastLobby(); sendScores(); } } }
-  if (syncTick % 3 === 0 && inMatch()) net.send('ps', encodeLocal(player, player.weaponIndex, { firing: player.firing, idle: input.idleSeconds > IDLE_FLAG }), true);
+  if (syncTick % 3 === 0 && inMatch()) net.send('ps', encodeLocal(player, player.weapon.regIndex, { firing: player.firing, idle: input.idleSeconds > IDLE_FLAG }), true);
   if (shotQueue.length) net.broadcast('shots', { k: player.weapon.kind, e: shotQueue.splice(0) });
   if (net.isHost && inMatch() && remote.size > 0) game.clockStarted = true;
   const clockOn = inMatch() && !game.over && (net.isHost ? !!game.clockStarted : clockRunning);
@@ -660,7 +661,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 
 function mainHTML() {
   return `<h1>PEN &amp; PIN</h1><h2>A ballpoint survival shooter</h2>
-    <div class="mainbtns"><button type="button" class="start" id="soloBtn">PLAY SOLO<i>Survive wave after wave</i></button><button type="button" id="onlineBtn">PLAY ONLINE<i>Free-for-all · up to 10 players</i></button></div>
+    <div class="mainbtns"><button type="button" class="start" id="soloBtn">PLAY SOLO<i>Survive wave after wave</i></button><button type="button" id="onlineBtn">PLAY ONLINE<i>Free-for-all · up to 10 players</i></button><button type="button" id="loadoutBtn">LOADOUT<i>pick your 3 guns · ${GUN_IDS.length} to choose from</i></button></div>
     ${mapHTML(mapKey, true)}
     <div class="mapsel"><button type="button" class="mapbtn" id="viewMapBtn">VIEW MAP<i>bird's eye view of the whole map</i></button><a class="mapbtn" id="getAppBtn" href="./install.html">GET THE APP<i>QR code · install on Android</i></a></div>
     ${CONTROLS_HTML}${settingsHTML()}${checkpointHTML()}${best ? `<div class="beststat">BEST SCORE: ${best}</div>` : ''}`;
@@ -745,6 +746,49 @@ function projectMapLabels() {
   hud.setMapLabels(items);
 }
 function renderLobby() { if (game.state === 'lobby') showStart(); }
+// ---------------- the loadout screen: every gun in the game, pick three ----------------
+let loadout = loadLoadout(), loSel = 0, loCls = 'ALL';
+const BAR_NAMES = [['damage', 'DMG'], ['rate', 'RATE'], ['mag', 'MAG'], ['range', 'RANGE'], ['control', 'AIM']];
+function loSlotsHTML() {
+  return loadout.map((id, i) => { const g = GUN_STATS[id]; return `<button type="button" class="lo-slot${i === loSel ? ' on' : ''}" data-slot="${i}"><i>SLOT ${i + 1}</i><b>${esc(g.name)}</b><span>${esc(g.cls)}</span></button>`; }).join('');
+}
+function loTabsHTML() {
+  const tab = (c, label) => `<button type="button" class="${c === loCls ? 'on' : ''}" data-cls="${esc(c)}">${label}</button>`;
+  return tab('ALL', 'ALL ' + GUN_IDS.length) + CLASSES.map((c) => tab(c, c.toUpperCase() + ' ' + GUN_IDS.filter((id) => GUN_STATS[id].cls === c).length)).join('');
+}
+function loGridHTML() {
+  return GUN_IDS.filter((id) => loCls === 'ALL' || GUN_STATS[id].cls === loCls).map((id) => {
+    const g = GUN_STATS[id], bars = gunBars(id), slot = loadout.indexOf(id);
+    return `<button type="button" class="lo-card${slot >= 0 ? ' used' : ''}" data-gun="${id}"><div class="lo-name">${esc(g.name)}</div><div class="lo-cls">${esc(g.cls)}</div>`
+      + `<div class="lo-bars">${BAR_NAMES.map(([k, label]) => `<div class="lo-bar"><span>${label}</span><em><i style="width:${bars[k]}%"></i></em></div>`).join('')}</div>`
+      + `<div class="lo-hint">${esc(g.hint || '')}</div>${slot >= 0 ? `<span class="lo-tag">SLOT ${slot + 1}</span>` : ''}</button>`;
+  }).join('');
+}
+function loadoutHTML() {
+  return `<h1>LOADOUT</h1><h2>Pick the three guns you carry in a match</h2>
+    <div class="loadout" id="loadout">
+      <div class="lo-hint2">Tap a slot, then tap a gun to put it there. A gun already in another slot swaps places.</div>
+      <div class="lo-slots" id="loSlots">${loSlotsHTML()}</div>
+      <div class="lo-tabs" id="loTabs">${loTabsHTML()}</div>
+      <div class="lo-grid" id="loGrid">${loGridHTML()}</div>
+      <div class="row"><button type="button" class="alt" id="loReset">RESET</button><button type="button" class="big" id="loDone">DONE</button></div>
+    </div>`;
+}
+function wireLoadout() {
+  const root = hud.el.panel.querySelector('#loadout'); if (!root) return;
+  root.addEventListener('click', (e) => {
+    e.stopPropagation(); const t = e.target.closest('button'); if (!t) return;
+    if (t.dataset.slot != null) loSel = Number(t.dataset.slot);
+    else if (t.dataset.cls != null) { loCls = t.dataset.cls; root.querySelector('#loTabs').innerHTML = loTabsHTML(); }
+    else if (t.dataset.gun) {
+      const id = t.dataset.gun, at = loadout.indexOf(id);
+      if (at >= 0) { [loadout[at], loadout[loSel]] = [loadout[loSel], loadout[at]]; } else loadout[loSel] = id;
+      loSel = (loSel + 1) % 3; saveLoadout(loadout);
+    } else if (t.id === 'loReset') { loadout = [...DEFAULT_LOADOUT]; loSel = 0; saveLoadout(loadout); }
+    else if (t.id === 'loDone') { if (loadout.join() !== player.loadout.join()) player.setLoadout(loadout); screen = 'main'; showStart(); return; }
+    root.querySelector('#loSlots').innerHTML = loSlotsHTML(); root.querySelector('#loGrid').innerHTML = loGridHTML();
+  });
+}
 function showStart() {
   hud.setGameplayVisible(false);
   if (game.state === 'lobby') screen = 'lobby';
@@ -756,16 +800,18 @@ function showStart() {
     player.resetOverview();
     return;
   }
-  const html = screen === 'lobby' ? lobbyHTML() : screen === 'online' ? onlineHTML() : mainHTML();
+  const html = screen === 'lobby' ? lobbyHTML() : screen === 'online' ? onlineHTML() : screen === 'loadout' ? loadoutHTML() : mainHTML();
   hud.showScreen(html);
   const p = hud.el.panel;
   if (screen === 'main') {
     wireSettings(); wireCheckpoints((w) => beginAtWave(w)); wireMap((k) => { mapKey = k; localStorage.setItem('doodle_map', k); setLevel(k, false); showStart(); });
     p.querySelector('#soloBtn').addEventListener('click', (e) => { e.stopPropagation(); begin(); });
     p.querySelector('#onlineBtn').addEventListener('click', (e) => { e.stopPropagation(); screen = 'online'; showStart(); });
+    p.querySelector('#loadoutBtn').addEventListener('click', (e) => { e.stopPropagation(); screen = 'loadout'; loSel = 0; showStart(); });
     const vm = p.querySelector('#viewMapBtn');
     if (vm) vm.addEventListener('click', (e) => { e.stopPropagation(); screen = 'mapview'; player.resetOverview(); showStart(); });
-  } else wireOnline();
+  } else if (screen === 'loadout') wireLoadout();
+  else wireOnline();
 }
 function showPause() {
   if (online()) {
@@ -896,7 +942,8 @@ function step(now) {
   for (const a of level.animated) a.update(game.time);
   audio.setListener(player.eye, player.right);
   const w = player.weapon; if (w.isGun) hud.setAmmo(w.mag, w.reserve, w.magSize, w.reloading); else hud.setKatana();
-  hud.setSlots(player.weapons.map((wp, i) => ({ name: wp.name, active: i === player.weaponIndex, ammo: wp.isGun ? wp.mag + '/' + wp.reserve : '∞', empty: wp.isGun && wp.mag === 0 && wp.reserve === 0 })));
+  const slotList = player.weapons.slice(0, 3).map((wp, i) => ({ name: wp.name, active: i === player.weaponIndex, ammo: wp.isGun ? wp.mag + '/' + wp.reserve : '∞', empty: wp.isGun && wp.mag === 0 && wp.reserve === 0 }));
+  hud.setSlots(slotList); touch.setSlots(slotList);
   hud.setGrenades(player.grenades); hud.setGrappleStamina(player.grapStam); hud.setHealth(player.hp, player.maxHp); hud.setSpread(w.spreadPx); hud.update(dt);
   hud.setMinimap({
     bounds: level.bounds,

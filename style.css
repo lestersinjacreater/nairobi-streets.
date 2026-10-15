@@ -31,7 +31,7 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 .hud-tr { position: absolute; right: 4%; top: 3%; text-align: right; font-size: 30px; transform: rotate(1deg); }
 .hud-bl { position: absolute; left: 9%; bottom: 5%; }
 /* the weapon list sits over the held gun, so it gets a scrap of paper to stand on */
-.hud-br { position: absolute; right: 3%; bottom: 4%; text-align: right; padding: 6px 12px 4px; background: rgba(250,248,238,.82); border-radius: 10px 14px 8px 12px / 12px 8px 14px 10px; box-shadow: 2px 3px 0 rgba(38,42,54,.12); transform: rotate(-0.8deg); }
+.hud-br { position: absolute; right: 3%; bottom: 4%; text-align: right; padding: 6px 12px 4px; background: none; box-shadow: none; transform: rotate(-0.8deg); } /* a see-through card: just the three guns, on the paper halo */
 .ammo b { font-size: 58px; } .ammo span { font-size: 28px; opacity: .8; } .reloading { font-size: 22px !important; color: var(--red); }
 .tally { display: flex; flex-wrap: wrap; width: 240px; gap: 3px; margin-top: -8px; align-items: flex-end; }
 .tally i { display: block; width: 4px; height: 20px; background: var(--ink); transform: rotate(4deg); border-radius: 2px; opacity: .9; }
@@ -330,11 +330,11 @@ body.dash-ready .tbtn.dash { display: flex; }
 /* tips sit in the quiet strip at the bottom centre: the top is taken by the HUD and the wave message, the sides by the thumbs */
 #hud.touch .tip { left: 31%; right: 40%; top: auto; bottom: 18vmin; text-align: center; font-size: clamp(13px, 4.4vmin, 18px); }
 /* kill feed: it used to run under the right-hand buttons. Now it sits just left of them, three lines at most, newest at the bottom */
-#hud.touch .killfeed { top: auto; bottom: 58vmin; right: 66vmin; font-size: 18px; max-height: 3.6em; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; }
+#hud.touch .killfeed { top: 32vmin; bottom: auto; right: 66vmin; font-size: 18px; height: 3.6em; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; }
 /* the combo text used to land on the minimap; park it just right of the minimap, under the score */
 #hud.touch .hud-tl .combo { position: absolute; top: 100%; left: calc(2.2vw + clamp(118px, 15vw, 190px) + 8px - 9vw); white-space: nowrap; font-size: clamp(14px, 2.4vw, 22px); }
 /* the weapon name sat on the health bar */
-#hud.touch .hud-br { top: 13vmin; }
+#hud.touch .hud-br { display: none; } /* on touch the gun chips (in #touch) replace this card */
 /* scoreboard: ten players did not fit; keep it between the left and right thumbs and let it scroll if it must */
 #hud.touch .board { top: 3vmin; left: 37vmin; right: 56vmin; width: auto; transform: none; min-width: 0; max-height: 94%; overflow-y: auto; box-sizing: border-box; padding: 6px 12px; font-size: 16px; }
 #hud.touch .board h3 { font-size: 20px; margin-bottom: 2px; }
@@ -363,3 +363,37 @@ body.dash-ready .tbtn.dash { display: flex; }
 .touchhelp b { color: var(--red); }
 @media (pointer: coarse) { .panel .touchhelp { display: block; } .panel .cols { display: none; } }
 body.touch .panel .touchhelp { display: block; } body.touch .panel .cols { display: none; }
+
+/* ---- touch: the three gun chips (transparent; the gun in your hands is underlined) ---- */
+.tslots { position: absolute; left: 50%; top: 19vmin; transform: translateX(-50%); display: flex; gap: 2vmin; pointer-events: none; }
+.tbtn.tslot { position: static; width: auto !important; height: auto !important; min-width: max(19vmin, 74px); min-height: 44px; padding: 2px 6px; white-space: nowrap; border-radius: 10px; border: 2px solid transparent; background: transparent; box-shadow: none; flex-direction: column; font-size: 2.9vmin; line-height: 1.05; pointer-events: auto; color: #262a36; text-shadow: 0 0 3px rgba(250,248,238,.95), 0 0 6px rgba(250,248,238,.9); }
+.tbtn.tslot b { font-size: max(2.7vmin, 11px); letter-spacing: .5px; }
+.tbtn.tslot i { font-style: normal; font-size: max(2.5vmin, 11px); opacity: .75; }
+.tbtn.tslot.active { border-color: rgba(38,42,54,.65); border-bottom-width: 3px; background: rgba(250,248,238,.18); }
+.tbtn.tslot.empty i { color: var(--red); opacity: 1; }
+.tbtn.tslot.on { background: rgba(38,42,54,.15); transform: scale(.96); }
+
+/* ---- the loadout screen ---- */
+.loadout { text-align: left; }
+.lo-hint2 { text-align: center; font-size: 18px; opacity: .75; margin: 2px 0 8px; }
+.lo-slots { display: flex; gap: 10px; justify-content: center; margin: 6px 0 10px; flex-wrap: wrap; }
+.lo-slot { font: inherit; color: var(--ink); background: transparent; border: 2.5px dashed var(--ink); border-radius: 9px 13px 8px 12px / 12px 8px 11px 9px; padding: 6px 14px; min-width: 150px; cursor: pointer; display: flex; flex-direction: column; align-items: center; line-height: 1.15; }
+.lo-slot i { font-style: normal; font-size: 13px; letter-spacing: 1.5px; opacity: .65; } .lo-slot b { font-size: 21px; } .lo-slot span { font-size: 13px; opacity: .65; }
+.lo-slot.on { border-style: solid; background: var(--ink); color: var(--paper); }
+.lo-tabs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 10px; }
+.lo-tabs button { font: inherit; font-size: 15px; letter-spacing: 1px; color: var(--ink); background: transparent; border: 2px solid var(--ink); border-radius: 7px 10px 6px 9px / 9px 6px 10px 7px; padding: 3px 10px; cursor: pointer; opacity: .6; }
+.lo-tabs button.on { opacity: 1; background: var(--ink); color: var(--paper); }
+.lo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.lo-card { position: relative; font: inherit; text-align: left; color: var(--ink); background: rgba(255,255,255,.55); border: 2.5px solid var(--ink); border-radius: 8px 12px 7px 11px / 11px 7px 12px 8px; padding: 8px 10px 6px; cursor: pointer; }
+.lo-card:hover { background: rgba(255,255,255,.9); }
+.lo-card.used { background: rgba(26,48,192,.12); }
+.lo-name { font-size: 20px; line-height: 1.1; } .lo-cls { font-size: 12px; letter-spacing: 1.5px; opacity: .65; text-transform: uppercase; margin-bottom: 4px; }
+.lo-bars { display: grid; gap: 2px; } .lo-bar { display: flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: 1px; }
+.lo-bar span { width: 38px; opacity: .7; } .lo-bar em { flex: 1; height: 7px; border: 1.5px solid var(--ink); border-radius: 3px; overflow: hidden; display: block; } .lo-bar i { display: block; height: 100%; background: var(--ink); }
+.lo-hint { font-size: 13px; opacity: .7; margin-top: 4px; line-height: 1.15; }
+.lo-tag { position: absolute; top: 6px; right: 8px; font-size: 11px; letter-spacing: 1px; color: var(--paper); background: var(--red); border-radius: 4px; padding: 0 5px; }
+@media (max-width: 700px), (max-height: 520px) { .lo-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; } .lo-name { font-size: 17px; } .lo-slot { min-width: 110px; padding: 4px 8px; } .lo-slot b { font-size: 17px; } }
+.mainbtns button:nth-child(3) { background: var(--paper); color: var(--ink); }
+
+#hud.touch .message { top: 32%; } /* below the gun chips */
+.lo-card.used .lo-name { padding-right: 54px; }

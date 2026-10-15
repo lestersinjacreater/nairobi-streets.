@@ -18,7 +18,6 @@ const BUTTONS = [
   { a: 'crouch', label: 'SLIDE', r: 19, b: 3, s: 11 },
   { a: 'reload', label: 'RELOAD', r: 31, b: 14, s: 10 },
   { a: 'nextWeapon', label: 'SWAP', r: 44, b: 18, s: 10 },
-  { a: 'prevWeapon', label: 'PREV', r: 57, b: 18, s: 10 },
   { a: 'grenade', label: 'NADE', r: 3, b: 43, s: 10.5 },
   { a: 'melee', label: 'SLASH', r: 16, b: 44, s: 10.5 },
   { a: 'grapple', label: 'HOOK', r: 29, b: 44, s: 12.5, look: true, cls: 'hook' },
@@ -33,6 +32,7 @@ export class TouchControls {
     const t = input.touch;
     const el = this.el = document.createElement('div'); el.id = 'touch'; el.setAttribute('aria-hidden', 'true');
     el.innerHTML = `<div class="tstick"><i></i></div>
+      <div class="tslots">${[1, 2, 3].map((n) => `<button type="button" class="tbtn tslot" data-a="slot${n}" data-look="0" data-toggle="0"><b></b><i></i></button>`).join('')}</div>
       <button type="button" class="tbtn tpause" data-a="pause">II</button>
       ${BUTTONS.map((b) => `<button type="button" class="tbtn ${b.cls || ''}" data-a="${b.a}" data-look="${b.look ? 1 : 0}" data-toggle="${b.toggle ? 1 : 0}" style="${b.l != null ? 'left:' + b.l : 'right:' + b.r}vmin;bottom:${b.b}vmin;width:max(${b.s}vmin,44px);height:max(${b.s}vmin,44px);font-size:${(b.s * 0.24).toFixed(2)}vmin">${b.label}</button>`).join('')}`;
     document.body.appendChild(el);
@@ -80,6 +80,11 @@ export class TouchControls {
     };
     el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end); el.addEventListener('lostpointercapture', end);
     el.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+  // the three gun chips along the top: name and ammo, the one in your hands marked. Tap one to switch to it.
+  setSlots(list) {
+    const key = list.map((s) => s.name + '|' + (s.active ? 1 : 0) + '|' + s.ammo).join(';'); if (key === this._slotKey) return; this._slotKey = key;
+    this.el.querySelectorAll('.tslot').forEach((btn, i) => { const s = list[i]; if (!s) return; btn.querySelector('b').textContent = s.name; btn.querySelector('i').textContent = s.ammo; btn.classList.toggle('active', !!s.active); btn.classList.toggle('empty', !!s.empty); });
   }
   // shown only while playing on a touch device; hiding it lets every held control go
   setActive(on) {

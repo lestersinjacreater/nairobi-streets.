@@ -24,7 +24,8 @@ PLAY WITH FRIENDS
 - Players can join a match that is already running.
 
 YOUR TOOLKIT
-- Rifle, shotgun, sniper with a scope, the M31 belt-fed machine gun, four rotary miniguns (M134, GAU-19, Yak-B 12.7, GShG-7.62), katana and boxing gloves.
+- 33 guns to choose from: pistols, SMGs, assault rifles, shotguns, snipers, machine guns and rotary miniguns (M134, GAU-19, Yak-B 12.7, GShG-7.62), plus a katana and boxing gloves.
+- A loadout screen: pick the three guns you carry into each match.
 - Grapple hook: swing, reel in, launch, and even ride the paper planes flying over the city.
 - Katana block that parries bullets and sends them back.
 - Grenades you can hold to throw further, wall jumps, double jumps, slides and air dashes.
