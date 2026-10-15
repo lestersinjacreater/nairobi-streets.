@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Pen &amp; Pin</title>
 <meta name="description" content="A first-person survival shooter drawn in blue ballpoint on notebook paper.">
-<meta name="theme-color" content="#1a30c0">
+<meta name="theme-color" content="#2c211f">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -20,27 +20,27 @@
 </script>
 <style>
 /* welcome screen: the first thing anyone sees, unless the game is already installed */
-#landing { position: fixed; inset: 0; z-index: 1000; display: none; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #f6f3e6; color: #1a30c0; font-family: 'Comic Sans MS', 'Marker Felt', 'Segoe Print', sans-serif;
-  background-image: repeating-linear-gradient(transparent 0 31px, #b9c6ea 31px 32px); }
+#landing { position: fixed; inset: 0; z-index: 1000; display: none; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #e4d8c8; color: #2c211f; font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, 'Iowan Old Style', Georgia, 'Noto Serif', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', serif;
+  background-image: radial-gradient(ellipse at 50% 28%, rgba(255,246,232,.55), rgba(110,80,62,.16) 105%); }
 #landing.on { display: block; }
-#landing::before { content: ''; position: fixed; left: 44px; top: 0; bottom: 0; width: 2px; background: rgba(208,32,48,.55); }
+#landing::before { display: none; }
 #landing .wrap { min-height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 24px 20px 24px 64px; }
 #landing h1 { margin: 0; font-size: clamp(34px, 8vw, 62px); letter-spacing: 1px; line-height: 1; }
 #landing .sub { margin: 10px 0 24px; font-size: clamp(18px, 3.4vw, 24px); opacity: .85; }
 #landing .btns { display: grid; gap: 14px; width: min(420px, 100%); }
-#landing button { font: inherit; font-size: 24px; padding: 14px 18px; border: 3px solid #1a30c0; border-radius: 12px; cursor: pointer; box-shadow: 3px 5px 0 rgba(26,48,192,.18); }
+#landing button { font: inherit; font-size: 24px; padding: 14px 18px; border: 3px solid #2c211f; border-radius: 12px; cursor: pointer; box-shadow: 3px 5px 0 rgba(44,33,31,.18); }
 #landing button i { display: block; font-style: normal; font-size: 15px; margin-top: 3px; opacity: .85; }
-#landing .dl { background: #1a30c0; color: #fff; }
-#landing .web { background: #fff; color: #1a30c0; }
-#landing .priv { margin: 16px 0 0; font-size: 15px; } #landing .priv a { color: #1a30c0; opacity: .8; }
-#landing .help { display: none; margin-top: 22px; background: #fff; border: 3px solid #1a30c0; border-radius: 14px; padding: 14px 18px; width: min(420px, 100%); text-align: left; font-size: 19px; line-height: 1.4; }
+#landing .dl { background: #2c211f; color: #f3ebdd; }
+#landing .web { background: #f3ebdd; color: #2c211f; }
+#landing .priv { margin: 16px 0 0; font-size: 15px; } #landing .priv a { color: #2c211f; opacity: .8; }
+#landing .help { display: none; margin-top: 22px; background: #f3ebdd; border: 3px solid #2c211f; border-radius: 14px; padding: 14px 18px; width: min(420px, 100%); text-align: left; font-size: 19px; line-height: 1.4; }
 #landing .help.on { display: block; }
-#landing .help b { color: #d02030; }
+#landing .help b { color: #8f1f1b; }
 #landing .help ol { margin: 6px 0 0; padding-left: 22px; }
-#landing .qr { display: none; text-align: center; margin-top: 12px; color: #12185a; }
+#landing .qr { display: none; text-align: center; margin-top: 12px; color: #1d1412; }
 #landing .qr svg { width: 190px; height: 190px; }
 #landing .qr.on { display: block; }
-@media (max-width: 520px) { #landing::before { left: 16px; } #landing .wrap { padding-left: 34px; } }
+@media (max-width: 520px) { #landing::before { display: none; } #landing .wrap { padding-left: 34px; } }
 </style>
 </head>
 <body>

@@ -128,11 +128,11 @@ export class Effects {
       this.growing.push({ pool, i, pos: p, quat, size: size * (k === 0 ? rand(0.75, 1) : rand(0.3, 0.6)), t: 0, dur: rand(0.5, 1.1), ink });
     }
   }
-  bulletImpact(point, normal, ink = INK.BLUE) {
+  bulletImpact(point, normal, ink = INK.BLACK) {
     this.decal(point, normal, ink, rand(0.06, 0.1), 'hole');
     this.sparks(point, normal, ink, 5);
   }
-  sparks(point, normal, ink = INK.BLUE, n = 6, speed = 7) {
+  sparks(point, normal, ink = INK.BLACK, n = 6, speed = 7) {
     for (let i = 0; i < n; i++) {
       _v.set(rand(-1, 1), rand(-1, 1), rand(-1, 1)).normalize(); if (_v.dot(normal) < 0) _v.negate();
       _v.addScaledVector(normal, 0.6).normalize().multiplyScalar(rand(speed * 0.4, speed));
@@ -145,7 +145,7 @@ export class Effects {
       this._spawn('stroke', pos, _v, { size: opts.size ?? rand(0.02, 0.04), life: opts.life ?? rand(0.25, 0.5), ink, gravity: opts.gravity ?? 0, stretch: opts.stretch ?? 0.05, drag: opts.drag ?? 3, collide: null });
     }
   }
-  tracer(from, to, ink = INK.BLUE, thick = 0.022, life = 0.06) {
+  tracer(from, to, ink = INK.BLACK, thick = 0.022, life = 0.06) {
     _d.subVectors(to, from); const len = _d.length(); if (len < 0.05) return; _d.divideScalar(len);
     _v.copy(from).addScaledVector(_d, len / 2);
     this._spawn('stroke', _v, null, { life, size: thick, ink, axis: _d.clone(), len, gravity: 0, shrink: false });
@@ -208,13 +208,13 @@ export class Effects {
   shell(pos, vel, ink = INK.ORANGE, size = 0.02) { this._spawn('stroke', pos, vel, { size, life: rand(0.9, 1.4), ink, gravity: 22, stretch: 0.012, collide: null, shrink: false, len: 0, drag: 0.5 }); }
   // doodle smoke: outlined circles that rise and grow
   smoke(pos, dir, n = 3) {
-    for (let i = 0; i < n; i++) { _v.copy(dir).multiplyScalar(rand(0.6, 1.8)).add(_v2.set(rand(-0.5, 0.5), rand(0.6, 1.4), rand(-0.5, 0.5))); this._spawn('drop', pos, _v, { size: rand(0.04, 0.07), life: rand(0.45, 0.8), ink: INK.BLUE, fill: false, gravity: -1.2, drag: 3, collide: null, grow: 3.2, shrink: false }); }
+    for (let i = 0; i < n; i++) { _v.copy(dir).multiplyScalar(rand(0.6, 1.8)).add(_v2.set(rand(-0.5, 0.5), rand(0.6, 1.4), rand(-0.5, 0.5))); this._spawn('drop', pos, _v, { size: rand(0.04, 0.07), life: rand(0.45, 0.8), ink: INK.BLACK, fill: false, gravity: -1.2, drag: 3, collide: null, grow: 3.2, shrink: false }); }
   }
   // ink explosion: burst of drops + strokes, a big decal on the ground and shake
   explosion(pos, radius = 4, ink = INK.BLACK) {
     for (let i = 0; i < 40; i++) { _v.set(rand(-1, 1), rand(-0.2, 1), rand(-1, 1)).normalize().multiplyScalar(rand(4, 14)); this._spawn('drop', pos, _v, { size: rand(0.03, 0.1), life: rand(1, 2), ink, collide: 'decal', gravity: 20, decalSize: rand(3, 6) }); }
     for (let i = 0; i < 26; i++) { _v.set(rand(-1, 1), rand(-0.3, 1), rand(-1, 1)).normalize().multiplyScalar(rand(10, 22)); this._spawn('stroke', pos, _v, { size: rand(0.03, 0.06), life: rand(0.2, 0.45), ink: i % 3 === 0 ? INK.ORANGE : ink, gravity: 6, stretch: 0.05, collide: null }); }
-    for (let i = 0; i < 8; i++) { _v.set(rand(-1, 1), rand(0.5, 1.5), rand(-1, 1)).multiplyScalar(rand(1, 3)); this._spawn('drop', pos, _v, { size: rand(0.12, 0.25), life: rand(0.7, 1.2), ink: INK.BLUE, fill: false, gravity: -1.5, drag: 2.5, collide: null, grow: 3, shrink: false }); }
+    for (let i = 0; i < 8; i++) { _v.set(rand(-1, 1), rand(0.5, 1.5), rand(-1, 1)).multiplyScalar(rand(1, 3)); this._spawn('drop', pos, _v, { size: rand(0.12, 0.25), life: rand(0.7, 1.2), ink: INK.BLACK, fill: false, gravity: -1.5, drag: 2.5, collide: null, grow: 3, shrink: false }); }
     this.bloodPool(pos, radius * 0.9, ink); this.shakeAmt += 0.5;
   }
 

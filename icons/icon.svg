@@ -1,25 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Pen &amp; Pin app icon: a ballpoint crosshair on ruled notebook paper.
+  <!-- Pen &amp; Pin app icon: a jester's bell cap over a thin crosshair ring on parchment.
        Everything important sits inside the central 80% so the maskable crop keeps it. -->
-  <rect width="512" height="512" fill="#f6f3e6"/>
-  <g stroke="#9fb4e8" stroke-width="3">
-    <line x1="0" y1="64" x2="512" y2="64"/><line x1="0" y1="124" x2="512" y2="124"/><line x1="0" y1="184" x2="512" y2="184"/>
-    <line x1="0" y1="244" x2="512" y2="244"/><line x1="0" y1="304" x2="512" y2="304"/><line x1="0" y1="364" x2="512" y2="364"/>
-    <line x1="0" y1="424" x2="512" y2="424"/><line x1="0" y1="484" x2="512" y2="484"/>
+  <defs><radialGradient id="p" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#f1e6d6"/><stop offset="1" stop-color="#d9c8b3"/></radialGradient></defs>
+  <rect width="512" height="512" fill="url(#p)"/>
+  <g fill="none" stroke="#2c211f" stroke-linecap="round">
+    <circle cx="256" cy="256" r="150" stroke-width="10"/>
+    <circle cx="256" cy="256" r="138" stroke-width="3" opacity=".6"/>
   </g>
-  <line x1="70" y1="0" x2="70" y2="512" stroke="#eb7b8c" stroke-width="4"/>
-  <g fill="none" stroke="#1a30c0" stroke-linecap="round">
-    <!-- hatching inside the ring -->
-    <g stroke-width="5" opacity=".55">
-      <line x1="170" y1="330" x2="250" y2="410"/><line x1="160" y1="290" x2="270" y2="400"/><line x1="170" y1="250" x2="290" y2="370"/>
-    </g>
-    <!-- the ring, drawn twice slightly off like a pen going round -->
-    <path d="M256 104 C352 102 410 170 408 258 C406 346 344 410 256 408 C168 406 104 348 106 258 C108 168 170 106 262 106" stroke-width="15"/>
-    <path d="M262 116 C344 120 398 180 396 262 C392 340 336 398 252 396 C174 392 118 336 120 254" stroke-width="6" opacity=".7"/>
+  <!-- jester cap: crimson and black cones with ivory bells -->
+  <path d="M256 330 L150 300 C170 230 205 190 232 130 C240 170 250 230 256 330Z" fill="#8f1f1b" stroke="#2c211f" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M256 330 L362 300 C342 230 307 190 280 130 C272 170 262 230 256 330Z" fill="#2c211f" stroke="#2c211f" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="146" y="298" width="220" height="34" rx="8" fill="#2c211f"/>
+  <g fill="#f3ebdd" stroke="#2c211f" stroke-width="5"><circle cx="232" cy="124" r="19"/><circle cx="280" cy="124" r="19"/></g>
+  <g stroke="#8f1f1b" stroke-width="12" stroke-linecap="round">
+    <line x1="256" y1="60" x2="256" y2="104"/><line x1="256" y1="408" x2="256" y2="452"/>
+    <line x1="60" y1="256" x2="104" y2="256"/><line x1="408" y1="256" x2="452" y2="256"/>
   </g>
-  <g stroke="#d02030" stroke-width="15" stroke-linecap="round">
-    <line x1="256" y1="60" x2="256" y2="150"/><line x1="256" y1="362" x2="256" y2="452"/>
-    <line x1="60" y1="256" x2="150" y2="256"/><line x1="362" y1="256" x2="452" y2="256"/>
-  </g>
-  <circle cx="256" cy="256" r="17" fill="#d02030"/>
+  <circle cx="256" cy="374" r="12" fill="#8f1f1b"/>
 </svg>

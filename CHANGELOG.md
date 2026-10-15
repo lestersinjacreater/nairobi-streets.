@@ -2,6 +2,15 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-15 (Victorian storybook redesign)
+- **The whole game is redrawn as a Victorian storybook illustration**, inspired by the harlequin-jester and black-gown picture the user shared (`src/render.js`, `src/enemies.js`, `src/player.js`, `src/players.js`, `src/level.js`, `src/main.js`, `src/effects.js`, `src/weapons.js`, `style.css`, `index.html`, `install.html`, `privacy.html`, `manifest.webmanifest`, `icons/*`)
+  - **Look:** parchment sky and paper grain, flat painted colour with soft three-step shading, thin dark outlines, a vignette, and distance fog that greys far figures into pale silhouettes like the faded crowd in the picture. The notebook hatching, ruled lines and margin are gone. Palette: black, deep crimson, ivory, antique gold, muted stone.
+  - **Characters:** enemies are now costumed: JESTER (red and black, bell cap), GENTLEMAN (top hat), DUCHESS and DAME (bonnet, gown; the Dame carries the shield), MOURNER (veil), THE QUEEN (boss), plus THE SHROUD, THE INKBLOT, POWDER KEG and RAVEN. Porcelain-ivory faces, puffed sleeves, ruff, buttoned vest, calmer faces. Your own avatar and other players are harlequin jesters.
+  - **World and text:** pale moon with halo and grey clouds in the sky; waves say "They are stepping out of the frames"; menus, HUD, install and privacy pages use umber and crimson on parchment with a serif font.
+  - **Effects and weapons** that were pale stone are now dark ink so tracers and impacts stay visible; app icons redrawn (bell cap over a crosshair ring).
+  - Gameplay, weapons, maps, multiplayer and controls are unchanged. The old notebook look is in git history. Checked with screenshots of the game, menu, loadout, welcome page and enemy lineup; arsenal and PWA tests pass.
+  - Not done yet: the Play Store feature graphic and screenshots still show the old look; the giant pencil, eraser and mug props in the solo plaza are still notebook-themed.
+
 ## 2026-10-15 (loadout from the lobby)
 - **Players can change their loadout while waiting in an online lobby** (`src/main.js`, `style.css`, `README.md`)
   - The lobby has a new LOADOUT button between START MATCH and LEAVE, and a "Your guns" line showing the three you carry. It opens the same Loadout screen; BACK or DONE returns to the lobby (from the main menu it still returns to the main menu).

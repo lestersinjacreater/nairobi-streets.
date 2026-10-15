@@ -219,7 +219,7 @@ function spawnPickup(kind, pos, id = null) {
 function removePickup(p) { R.scene.remove(p.mesh); const i = pickups.indexOf(p); if (i >= 0) pickups.splice(i, 1); }
 function collectPickup(p) {
   if (p.kind === 'ammo') { player.addAmmoAll(0.4); player.grenades = Math.min(player.maxGrenades, player.grenades + 1); hud.kill('+AMMO · +GRENADE', 0); } else { player.hp = Math.min(player.maxHp, player.hp + 35); hud.kill(level.key === 'mexico' ? 'TACO · +35 HP' : level.key === 'nairobi' ? 'MANDAZI · +35 HP' : '+35 HP', 0); }
-  audio.pickup(); effects.strokeBurst(p.mesh.position, p.kind === 'ammo' ? INK.BLUE : INK.GREEN, 12, 4, { life: 0.3 });
+  audio.pickup(); effects.strokeBurst(p.mesh.position, p.kind === 'ammo' ? INK.BLACK : INK.GREEN, 12, 4, { life: 0.3 });
 }
 function updatePickups(dt) {
   for (let i = pickups.length - 1; i >= 0; i--) {
@@ -245,8 +245,8 @@ const ROSTER = [
 ];
 const MODIFIERS = [
   { name: '', apply: () => { enemies.mods.speed = 1; enemies.mods.damage = 1; } },
-  { name: 'CAFFEINE · MOVE FASTER', apply: () => { enemies.mods.speed = 1.35; enemies.mods.damage = 0.85; } },
-  { name: 'HEAVY INK · HIT HARDER', apply: () => { enemies.mods.speed = 0.9; enemies.mods.damage = 1.4; } },
+  { name: 'FEVER · MOVE FASTER', apply: () => { enemies.mods.speed = 1.35; enemies.mods.damage = 0.85; } },
+  { name: 'HEAVY HEARTS · HIT HARDER', apply: () => { enemies.mods.speed = 0.9; enemies.mods.damage = 1.4; } },
   { name: 'SWARM · MORE, FRAGILE ENEMIES', apply: () => { enemies.mods.speed = 1.15; enemies.mods.damage = 0.9; } },
 ];
 const tips = () => [
@@ -257,7 +257,7 @@ const tips = () => [
   `Press <b>${hud.key('jump')}</b> again in the air for a double jump`,
 ];
 const bossFor = (n) => BOSSES[(Math.floor(n / 5) - 1) % BOSSES.length];
-const enemyName = (t) => ({ boss: 'DOODLER', eraser: 'ERASER', inkblot: 'INKBLOT' })[t] || t.toUpperCase();
+const enemyName = (t) => ({ boss: 'THE QUEEN', eraser: 'THE SHROUD', inkblot: 'THE INKBLOT' })[t] || t.toUpperCase();
 function startWave(n) {
   game.wave = n; game.queue = []; game.spawnT = 2; game.intermission = 0; game.boss = null; hud.setBoss(null, null);
   const boss = n > 0 && n % 5 === 0;
@@ -272,7 +272,7 @@ function startWave(n) {
   const total = pool.reduce((a, r) => a + r.w, 0);
   for (let i = 0; i < count; i++) { let r = Math.random() * total, t = pool[0].t; for (const c of pool) { r -= c.w; if (r <= 0) { t = c.t; break; } } game.queue.push(t); }
   if (boss) { hud.message('WAVE ' + n, enemyName(bossFor(n)) + ' APPROACHING', 3); audio.bossRoar(player.center); }
-  else hud.message('WAVE ' + n, n === 1 ? 'They are crawling off the page' : mod.name || choose(['DRAW HARDER', 'KEEP DOODLING', 'DO NOT STAY GROUNDED', 'SWING AWAY', 'REFLECT THEIR BULLETS']), 2.6);
+  else hud.message('WAVE ' + n, n === 1 ? 'They are stepping out of the frames' : mod.name || choose(['STAND YOUR GROUND', 'KEEP YOUR COMPOSURE', 'DO NOT STAY GROUNDED', 'SWING AWAY', 'REFLECT THEIR BULLETS']), 2.6);
   audio.wave();
   if (n <= tips().length) hud.tip(tips()[n - 1], 7);
   for (let i = 0; i < 7; i++) spawnPickup(i < 5 ? 'ammo' : 'health', choose(level.pickups));
@@ -321,7 +321,7 @@ enemies.onKill = (e, info, over) => {
   if (info.source === 'katana' || info.source === 'focus') { game.katanaStreak++; player.weapons[player.katanaIndex].addBlood(0.42); if (game.katanaStreak >= KATANA_CHARGE_KILLS) enterFocus(); }
   else if (info.source !== 'blast') game.katanaStreak = 0;
   if (info.source === 'deflect') { label = 'RETURN TO SENDER'; pts += 120; }
-  if (info.source === 'fall') label = 'OFF THE PAGE';
+  if (info.source === 'fall') label = 'OFF THE STAGE';
   else if (!player.body.onGround && info.source !== 'deflect') { label += ' · AIR KILL'; pts += 40; }
   game.addScore(pts, label); audio.kill(!!info.crit || e.T.boss);
   const r = Math.random(); if (r < 0.5) spawnPickup('ammo', e.body.pos); else if (r < 0.62) spawnPickup('health', e.body.pos);
@@ -365,7 +365,7 @@ function updateFocusDash(dt) {
   const want = Math.max(0, flat - 1.1); const moved = marchBody(b, nx, nz, Math.min(DASH_SPEED * dt, want));
   const aimY = target.body.pos.y + (target.T.flying ? 0.2 : 0); const dy = aimY - b.pos.y;
   if (Math.abs(dy) > 0.05) { const y = b.pos.y; b.pos.y += clamp(dy, -DASH_SPEED * dt, DASH_SPEED * dt); if (world.overlapsBody(b)) { b.pos.y = y; d.stuckY = (d.stuckY || 0) + dt; } else d.stuckY = 0; }
-  d.lastTrail += dt; if (d.lastTrail > 0.02) { d.lastTrail = 0; effects.tracer(d.trail, player.center, INK.BLUE, 0.045, 0.28); d.trail.copy(player.center); effects.strokeBurst(player.center, INK.BLUE, 2, 5, { life: 0.22, size: 0.03 }); }
+  d.lastTrail += dt; if (d.lastTrail > 0.02) { d.lastTrail = 0; effects.tracer(d.trail, player.center, INK.BLACK, 0.045, 0.28); d.trail.copy(player.center); effects.strokeBurst(player.center, INK.BLACK, 2, 5, { life: 0.22, size: 0.03 }); }
   const reach = Math.hypot(flat, Math.max(0, Math.abs(dy) - 0.6));
   if (reach <= 1.5) { focusExecute(target); return true; }
   if (moved < 1e-4 && want > 0.05 && (d.stuckY || 0) > 0.08) { endDash(true); return true; }
@@ -422,7 +422,7 @@ function onLocalDeath() {
 }
 function respawnLocal() {
   player.reset(arenaSpawn()); player.name = myName; player.lastHitBy = null; player.lastHit = null; game.state = 'play'; player.shieldT = 2; hud.tip('RESPAWN SHIELD · 2s', 1.6);
-  effects.strokeBurst(player.center, INK.BLUE, 24, 6, { life: 0.5, size: 0.03 }); audio.spawn(player.center);
+  effects.strokeBurst(player.center, INK.BLACK, 24, 6, { life: 0.5, size: 0.03 }); audio.spawn(player.center);
 }
 function tallyDeath(victim, killer) {
   const v = scores.get(victim); if (v) v.deaths++;
@@ -534,7 +534,7 @@ net.on('pdead', (d, from) => {
   if (r) { r.ragdoll(d.dir ? new THREE.Vector3().fromArray(d.dir) : null, !!d.over); audio.enemyDie(r.center); }
   const how = d.how ? ' · ' + d.how + (d.crit ? ' HEADSHOT' : '') : '';
   if (d.killer === net.id) { game.kills++; game.addScore(100, 'ERASED ' + vn + how); audio.kill(true); }
-  else hud.kill(kn ? kn + ' ERASED ' + vn + how : vn + ' OFF THE PAGE', 0);
+  else hud.kill(kn ? kn + ' ERASED ' + vn + how : vn + ' OFF THE STAGE', 0);
   if (net.isHost) tallyDeath(from, d.killer);
 });
 net.on('nade', (d) => player.throwGrenade(d));
@@ -544,17 +544,17 @@ net.on('shots', (d, from) => {
   const r = remote.get(from); if (!r || !r.root || !r.alive) return;
   _sm.set(r.body.pos.x + r.right.x * 0.3 + r.forward.x * 0.8, r.body.pos.y + 1.35 + r.forward.y * 0.8, r.body.pos.z + r.right.z * 0.3 + r.forward.z * 0.8);
   const th = tracerThick(d.k); const e = d.e || [];
-  for (let i = 0; i + 2 < e.length; i += 3) { _se.set(e[i], e[i + 1], e[i + 2]); effects.tracer(_sm, _se, INK.BLUE, th, 0.06); }
+  for (let i = 0; i + 2 < e.length; i += 3) { _se.set(e[i], e[i + 1], e[i + 2]); effects.tracer(_sm, _se, INK.BLACK, th, 0.06); }
   r.flash(); audio.remoteShot((ARSENAL_BY_ID[d.k] && ARSENAL_BY_ID[d.k].sfx) || d.k, _sm);
 });
 net.on('cut', () => { if (player.grapple.state !== 'idle') { player.detachGrapple(false); effects.strokeBurst(player.center, INK.ORANGE, 8, 4, { life: 0.25, size: 0.03 }); hud.tip('YOUR ROPE WAS CUT', 1.3); input.rumble(0.5, 0.3, 80); } });
 net.on('score', (rows) => { if (!net.isHost) applyScores(rows); });
-net.on('fell', (d, from) => { if (!net.isHost) return; const sc = scores.get(from); if (sc) { sc.kills = Math.max(0, sc.kills - 1); sendScores(); net.send('feed', { text: sc.name + ' OFF THE PAGE · -1' }); hud.kill(sc.name + ' OFF THE PAGE · -1', 0); } });
+net.on('fell', (d, from) => { if (!net.isHost) return; const sc = scores.get(from); if (sc) { sc.kills = Math.max(0, sc.kills - 1); sendScores(); net.send('feed', { text: sc.name + ' OFF THE STAGE · -1' }); hud.kill(sc.name + ' OFF THE STAGE · -1', 0); } });
 net.on('feed', (d) => hud.kill(String(d.text || ''), 0));
 player.onFall = () => {
   if (!online() || !inMatch()) return;
-  hud.kill('OFF THE PAGE · KILL -1', 0);
-  if (net.isHost) { const sc = scores.get(net.id); if (sc) { sc.kills = Math.max(0, sc.kills - 1); sendScores(); net.send('feed', { text: sc.name + ' OFF THE PAGE · -1' }); } }
+  hud.kill('OFF THE STAGE · KILL -1', 0);
+  if (net.isHost) { const sc = scores.get(net.id); if (sc) { sc.kills = Math.max(0, sc.kills - 1); sendScores(); net.send('feed', { text: sc.name + ' OFF THE STAGE · -1' }); } }
   else net.send('fell', {});
 };
 net.on('clock', (d) => { if (!net.isHost) { matchLeft = d.left; clockRunning = !!d.on; } });

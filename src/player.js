@@ -23,7 +23,7 @@ export class Player {
     this.eye = new THREE.Vector3(); this.center = new THREE.Vector3(); this.forward = new THREE.Vector3(0, 0, -1); this.right = new THREE.Vector3(1, 0, 0);
     this.speed = 0; this.hurtFx = 0; this.flashFx = 0; this.lastDamageT = 10;
     this.rig = new THREE.Group(); this.camera.add(this.rig); ctx.scene.add(this.camera);
-    const avatar = buildHumanoid(makeInkMaterial({ ink: INK.BLUE, shadeScale: 0, shadeBias: 1 }), makeInkMaterial({ ink: INK.BLACK, fill: true, side: THREE.DoubleSide }), { weapon: 'rifle', scale: 1, hat: 'cap', build: { bodyW: 1, headS: 1, limbR: 0.033 } });
+    const avatar = buildHumanoid(makeInkMaterial({ ink: INK.BLUE, shadeScale: 0, shadeBias: 1 }), makeInkMaterial({ ink: INK.BLACK, fill: true, side: THREE.DoubleSide }), { weapon: 'rifle', scale: 1, hat: 'jester', costume: 'harlequin', build: { bodyW: 1, headS: 1, limbR: 0.033 } });
     this.avatar = avatar.root; this.avatarJ = avatar.J; this.avatar.visible = false; ctx.scene.add(this.avatar);
     // three guns from the loadout, then the katana and the boxing gloves (slots 4 and 5 and the melee button). The melee two never change.
     this.katanaIndex = 3; this.weapons = []; this.melee = [new Katana(ctx), new BoxingGloves(ctx)];
@@ -36,9 +36,9 @@ export class Player {
     this.grapple = { state: 'idle', anchor: new THREE.Vector3(), hook: new THREE.Vector3(), from: new THREE.Vector3(), flyT: 0, flyDur: 0, len: 0, cd: 0, enemy: null, mover: null, blockedT: 0, t: 0, swingT: 0, hopT: 0 };
     this.deathT = 0; this.gravityScale = 1; this.dashLock = false;
     this.isLocal = true; this.team = 0; this.name = 'you'; this.grenades = 3; this.maxGrenades = 99; this.nades = []; this.nadeCd = 0; this.firing = false; this.onThrow = null;
-    const rm = makeInkMaterial({ ink: INK.BLUE, fill: false, shadeBias: -0.3 });
+    const rm = makeInkMaterial({ ink: INK.BLACK, fill: false, shadeBias: -0.3 });
     this.rope = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 6), rm); this.rope.visible = false; ctx.scene.add(this.rope);
-    const hm = makeInkMaterial({ ink: INK.BLUE }); this.hookMesh = new THREE.Group();
+    const hm = makeInkMaterial({ ink: INK.BLACK }); this.hookMesh = new THREE.Group();
     this.hookMesh.add(new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.05, 6, 10), hm)); const hb = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.3, 0.08), hm); hb.position.y = -0.2; this.hookMesh.add(hb);
     this.hookMesh.visible = false; ctx.scene.add(this.hookMesh);
   }
@@ -104,7 +104,7 @@ export class Player {
     this.weapon.onDeflect(perfect);
     if (perfect) audio.perfectParry(); else audio.parry();
     ctx.effects.sparks(proj.pos, _v2.copy(proj.vel).normalize().negate(), INK.ORANGE, perfect ? 14 : 8, 10);
-    ctx.effects.strokeBurst(proj.pos, INK.BLUE, perfect ? 8 : 5, 4.5, { life: 0.2, size: 0.028 });
+    ctx.effects.strokeBurst(proj.pos, INK.BLACK, perfect ? 8 : 5, 4.5, { life: 0.2, size: 0.028 });
     ctx.input.rumble(0.4, 0.6, 70); ctx.game.hitstop(perfect ? 0.07 : 0.025, 0.18);
     ctx.effects.shakeAmt += 0.06; this.flashFx = perfect ? 0.35 : 0.1;
     ctx.game.addScore(perfect ? 60 : 15, perfect ? 'PERFECT PARRY' : 'BLOCKED');
@@ -216,7 +216,7 @@ export class Player {
         if (wishLen > 0) { const cur = b.vel.x * wish.x + b.vel.z * wish.z; const add = Math.max(0, 7.5 * wishLen - cur); b.vel.x += wish.x * add; b.vel.z += wish.z * add; }
         audio.jump(); this.kickFov(1.6); this.landDip.kick(-1.4);
         _v2.copy(this.center); _v2.y -= 0.7;
-        this.ctx.effects.strokeBurst(_v2, INK.BLUE, 9, 4.5, { life: 0.28, size: 0.028, gravity: -2 });
+        this.ctx.effects.strokeBurst(_v2, INK.BLACK, 9, 4.5, { life: 0.28, size: 0.028, gravity: -2 });
       }
     }
     if ((inp.pressed('dash') || (inp.pressed('crouch') && !b.onGround)) && !b.onGround && this.dashCd <= 0 && this.grapple.state !== 'on') this._dash(wishLen > 0 ? wish : _fwd);
@@ -355,7 +355,7 @@ export class Player {
     const b = this.body; this.dashCd = 1.3; const cur = b.vel.x * dir.x + b.vel.z * dir.z; const target = Math.max(cur + 6, 14);
     b.vel.x += dir.x * (target - cur); b.vel.z += dir.z * (target - cur); b.vel.y = Math.max(b.vel.y, 2);
     audio.dash(); this.kickFov(4); this.ctx.input.rumble(0.3, 0.6, 70); this.roll += (dir.x * this.right.x + dir.z * this.right.z) * 0.08;
-    _v2.copy(this.center).addScaledVector(dir, -0.6); this.ctx.effects.strokeBurst(_v2, INK.BLUE, 10, 5, { life: 0.25, size: 0.03 });
+    _v2.copy(this.center).addScaledVector(dir, -0.6); this.ctx.effects.strokeBurst(_v2, INK.BLACK, 10, 5, { life: 0.25, size: 0.03 });
   }
   _tryMantle(fwd) {
     const b = this.body, world = this.ctx.world;

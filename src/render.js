@@ -1,19 +1,22 @@
-// Ink renderer: scene is drawn into a data buffer (shade, inkId, normal.xy) + depth, then a
-// full-screen "pen on lined paper" pass draws outlines, hatching, paper grain and ruled lines.
+// Storybook renderer: the scene is drawn into a data buffer (shade, inkId, normal.xy) + depth, then a full-screen pass
+// paints it like a Victorian illustration: flat colour with soft shading, thin dark outlines, a parchment sky, and fog that
+// fades distant figures into grey silhouettes. (The earlier version drew pen-on-notebook-paper hatching here.)
 import * as THREE from 'three';
 
-export const INK = { BLUE: 0, RED: 1, BLACK: 2, ORANGE: 3, GREEN: 4, PINK: 5 };
-// Colour rules: blue is the world, red is danger (and nothing else), orange is something you can
-// hook, ride or break, green is pickups and plants. Emphasis is added to an ink id (ink + EMPH)
+export const INK = { BLUE: 0, RED: 1, BLACK: 2, ORANGE: 3, GREEN: 4, PINK: 5, IVORY: 6, GREY: 7 };
+// Colour rules (the names are from the first, ballpoint version): BLUE is the world's stone, RED is danger (and nothing else),
+// ORANGE is something you can hook, ride or break, GREEN is pickups and plants. Emphasis is added to an ink id (ink + EMPH)
 // for anything the player must spot: it is drawn with a bold line that never fades with distance.
 export const EMPH = 8;
 export const INK_COLORS = [
-  new THREE.Vector3(0.10, 0.19, 0.76), // blue ballpoint
-  new THREE.Vector3(0.86, 0.12, 0.20), // red pen
-  new THREE.Vector3(0.18, 0.20, 0.26), // graphite
-  new THREE.Vector3(0.92, 0.55, 0.08), // orange highlighter
-  new THREE.Vector3(0.12, 0.60, 0.30), // green
-  new THREE.Vector3(0.90, 0.40, 0.66), // pink eraser
+  new THREE.Vector3(0.76, 0.69, 0.63), // stone: the world (walls, floors)
+  new THREE.Vector3(0.58, 0.13, 0.11), // crimson: danger
+  new THREE.Vector3(0.10, 0.09, 0.11), // black cloth and ink
+  new THREE.Vector3(0.80, 0.60, 0.22), // antique gold: hooks, rings, things to ride or break
+  new THREE.Vector3(0.33, 0.46, 0.38), // moss: pickups and plants
+  new THREE.Vector3(0.72, 0.47, 0.50), // dusty rose
+  new THREE.Vector3(0.93, 0.89, 0.82), // ivory: lace, collars, the moon
+  new THREE.Vector3(0.56, 0.54, 0.54), // fog grey
 ];
 export const LIGHT_WORLD = new THREE.Vector3(0.38, 0.82, 0.42).normalize();
 export const shared = { uLightDir: { value: new THREE.Vector3(0, 1, 0) }, uTime: { value: 0 } };
@@ -94,7 +97,7 @@ uniform float uSlow;
 uniform float uLineSpacing;
 uniform float uLowHp;
 uniform vec3 uPaper;
-uniform vec3 uInks[6];
+uniform vec3 uInks[8];
 uniform mat4 uInvProj;
 uniform mat4 uInvView;
 
@@ -108,8 +111,8 @@ float linDepth(float z) { float zn = z * 2.0 - 1.0; return 2.0 * uNear * uFar / 
 vec3 inkColor(float id) {
   float k = floor(id + 0.5); if (k > 7.5) k -= 8.0; // strip emphasis
   int i = int(k);
-  if (i <= 0) return uInks[0]; if (i == 1) return uInks[1]; if (i == 2) return uInks[2];
-  if (i == 3) return uInks[3]; if (i == 4) return uInks[4]; return uInks[5];
+  if (i <= 0) return uInks[0]; if (i == 1) return uInks[1]; if (i == 2) return uInks[2]; if (i == 3) return uInks[3];
+  if (i == 4) return uInks[4]; if (i == 5) return uInks[5]; if (i == 6) return uInks[6]; return uInks[7];
 }
 float stripes(vec2 p, vec2 dir, float spacing, float width) {
   float t = dot(p, vec2(-dir.y, dir.x));
@@ -117,19 +120,15 @@ float stripes(vec2 p, vec2 dir, float spacing, float width) {
   float soft = width * 0.6;
   return 1.0 - smoothstep(width * 0.5 - soft, width * 0.5 + soft, f);
 }
-// Tones, lightest to darkest: tops and the ground get a faint open hatch, walls facing the sun a
-// sparse single hatch, walls in shade cross-hatching, the darkest dense strokes. Only the sky is
-// left as bare paper, so a lit wall never reads as empty space. Unshaded materials (shade exactly
-// 1: the characters) stay clean.
-float tones(vec2 hp, float sp, float w, float shade) {
-  const vec2 d1 = vec2(0.7071, 0.7071);
-  const vec2 d2 = vec2(-0.7071, 0.7071);
-  const vec2 d3 = vec2(0.2588, 0.9659);
-  float h = stripes(hp, d1, sp * 1.7, w) * step(shade, 0.985) * mix(0.5, 0.2, smoothstep(0.74, 0.86, shade));
-  h = max(h, stripes(hp, d1, sp, w) * smoothstep(0.64, 0.5, shade));
-  h = max(h, stripes(hp, d2, sp * 1.15, w) * smoothstep(0.42, 0.32, shade));
-  h = max(h, stripes(hp, d3, sp * 0.7, w) * smoothstep(0.24, 0.14, shade));
-  return max(h, smoothstep(0.12, 0.0, shade) * 0.9);
+// Painted shading: a soft light-to-dark ramp, nudged towards three flat steps like cel colour in a storybook plate.
+// Shadows go a little cooler and browner than the lit colour rather than just darker.
+vec3 painted(vec3 base, float shade) {
+  float t = smoothstep(0.10, 0.92, shade);
+  float steps = floor(t * 3.0 + 0.5) / 3.0;
+  t = mix(t, steps, 0.5);
+  vec3 dark = base * vec3(0.40, 0.36, 0.39);
+  vec3 lite = base * 1.10 + 0.02;
+  return mix(dark, lite, t);
 }
 void main() {
   vec2 px = 1.0 / uRes;
@@ -143,8 +142,8 @@ void main() {
   // Line weight: thick close up, thin in the distance; emphasised things always get the bold line.
   // Widening the sample offset widens the band the edge test fires in, on the near side.
   bool emphS = s.g > 7.5;
-  float o = sc * mix(2.0, 1.05, smoothstep(3.0, 30.0, d));
-  if (emphS) o = max(o, 2.3 * sc);
+  float o = sc * mix(1.6, 0.95, smoothstep(3.0, 30.0, d));
+  if (emphS) o = max(o, 1.9 * sc);
   vec2 ox = vec2(o, 0.0) * px, oy = vec2(0.0, o) * px;
   float zl = texture2D(tDepth, suv - ox).x, zr = texture2D(tDepth, suv + ox).x;
   float zu = texture2D(tDepth, suv + oy).x, zd = texture2D(tDepth, suv - oy).x;
@@ -169,61 +168,49 @@ void main() {
   float dFront = linDepth(zmin);
   bool sky = z >= 0.99999;
 
-  // Hatching is anchored to the surface itself, not to the screen. The fragment's world position
-  // is rebuilt from depth and the strokes are laid out in world units on whichever pair of axes
-  // faces away from the surface normal, so the pattern stays put on a wall as you move past it.
-  // Line spacing doubles in powers of two with distance, which keeps the on-screen density
-  // roughly constant instead of collapsing into moire on far geometry; neighbouring spacings are
-  // cross-faded so there is no visible seam where one hands over to the next.
-  float shade = s.r;
-  float hatch = 0.0;
-  if (!sky) {
-    if (shade < 0.0) hatch = 1.0;
-    else if (d < 2.0) {
-      // the held weapon rides with the camera, so for it the screen is the stable frame
-      hatch = tones(gl_FragCoord.xy + wob * 5.0 * sc, 8.5 * sc, 1.5 * sc, shade);
-    } else {
-      vec4 clip = vec4(vUv * 2.0 - 1.0, z * 2.0 - 1.0, 1.0);
-      vec4 vpos = uInvProj * clip; vpos /= vpos.w;
-      vec3 wpos = (uInvView * vec4(vpos.xyz, 1.0)).xyz;
-      vec2 nxy = s.ba;
-      vec3 nView = vec3(nxy, sqrt(max(0.0, 1.0 - dot(nxy, nxy))));
-      vec3 wn = normalize(mat3(uInvView) * nView);
-      vec3 an = abs(wn);
-      // project onto the plane the surface most faces, so strokes lie flat along it
-      vec2 hp = an.y > max(an.x, an.z) ? wpos.xz : (an.x > an.z ? wpos.zy : wpos.xy);
-      // the world spacing whose projected width is about nine pixels, split into two powers of two
-      float lf = log2(max(1e-4, (0.0165 * d) / 0.16));
-      float l0 = floor(lf);
-      float sp0 = 0.16 * exp2(l0), sp1 = sp0 * 2.0;
-      vec2 hp0 = hp + (vnoise(hp * (2.5 / sp0)) - 0.5) * sp0 * 0.4; // hand-drawn waver, fixed to the surface
-      vec2 hp1 = hp + (vnoise(hp * (2.5 / sp1)) - 0.5) * sp1 * 0.4;
-      hatch = mix(tones(hp0, sp0, sp0 * 0.17, shade), tones(hp1, sp1, sp1 * 0.17, shade), smoothstep(0.0, 1.0, lf - l0));
-    }
-  }
-  // distance: the world's ink thins out towards the paper; emphasised ink never does
   bool emphE = inkId > 7.5;
-  float fade = emphS ? 1.0 : mix(1.0, 0.22, smoothstep(12.0, 95.0, d));
+  float fade = emphS ? 1.0 : mix(1.0, 0.3, smoothstep(14.0, 100.0, d));
   float fadeE = emphE ? 1.0 : mix(1.0, 0.3, smoothstep(22.0, 130.0, dFront));
-
-  // paper with grain, ruled lines and a red margin
+  float shade = s.r;
   vec2 pp = gl_FragCoord.xy;
+  vec2 vc = (vUv - 0.5) * vec2(uAspect, 1.0);
+
+  // the sky: warm parchment, a little lighter overhead and greyer towards the horizon, with faint grain
+  float sky01 = clamp(vUv.y, 0.0, 1.0);
+  vec3 skyTop = vec3(0.86, 0.79, 0.72), skyLow = vec3(0.80, 0.75, 0.71);
+  vec3 fogCol = mix(skyLow, vec3(0.73, 0.69, 0.67), 0.35);
   float grain = vnoise(pp * 0.8) * 0.6 + vnoise(pp * 0.17) * 0.4;
-  vec3 paper = uPaper * (0.95 + 0.06 * grain);
-  float ls = uLineSpacing;
-  float ly = mod(pp.y + ls * 0.5, ls);
-  float rule = 1.0 - smoothstep(0.5 * sc, 1.7 * sc, abs(ly - ls * 0.5));
-  paper = mix(paper, vec3(0.58, 0.70, 0.92), rule * 0.5);
-  float margin = 1.0 - smoothstep(0.9 * sc, 2.3 * sc, abs(pp.x - uRes.x * 0.07));
-  paper = mix(paper, vec3(0.92, 0.48, 0.55), margin * 0.55);
+  vec3 paper = mix(skyLow, skyTop, smoothstep(0.35, 1.0, sky01)) * (0.96 + 0.07 * grain);
 
   vec3 col = paper;
-  col = mix(col, inkColor(s.g), hatch * 0.72 * fade);
-  float ew = 0.75 + 0.35 * vnoise(pp * 0.35);
-  col = mix(col, inkColor(inkId) * (emphE ? 0.82 : 0.92), clamp(edge * ew * (emphE ? 1.4 : 1.0), 0.0, 1.0) * fadeE);
+  if (!sky) {
+    vec3 base = inkColor(s.g);
+    vec3 surf;
+    vec3 nv = vec3(s.ba, sqrt(max(0.0, 1.0 - dot(s.ba, s.ba))));
+    float rim = 1.0 - nv.z;                         // grows towards the silhouette of a rounded form
+    if (shade < 0.0 || shade > 0.985) {             // figures and flat cloth: solid colour, softly rounded
+      surf = base * (1.0 - 0.34 * rim * rim) * (0.92 + 0.12 * nv.y);
+    } else {
+      surf = painted(base, shade);
+    }
+    // a faint mottle, as if painted with a damp brush
+    surf *= 0.95 + 0.09 * vnoise(pp * 0.045 + 7.0 * floor(inkId)) + 0.035 * (grain - 0.5);
+    // distance: colours drain to grey and sink into the fog, so far figures become silhouettes.
+    // Things the player must find (emphasised) keep most of their colour.
+    float fog = smoothstep(16.0, 125.0, d) * (emphS ? 0.3 : 1.0);
+    float lum = dot(surf, vec3(0.3, 0.5, 0.2));
+    surf = mix(surf, vec3(lum) * vec3(0.98, 0.96, 0.95), fog * 0.75);
+    surf = mix(surf, fogCol, fog * 0.8);
+    col = surf;
+  }
+  // thin, dark, slightly uneven outlines; the front-most thing's own colour tints them
+  float ew = 0.8 + 0.3 * vnoise(pp * 0.35);
+  vec3 lineCol = mix(vec3(0.10, 0.08, 0.09), inkColor(inkId) * 0.4, emphE ? 0.55 : 0.3);
+  col = mix(col, lineCol, clamp(edge * ew * (emphE ? 1.3 : 1.0), 0.0, 1.0) * fadeE);
+  // a soft shadow in the corners, like the printed plate it imitates
+  col *= 1.0 - 0.2 * smoothstep(0.42, 1.05, length(vc));
 
   // hurt: red scribble vignette; low hp: pulsing
-  vec2 vc = (vUv - 0.5) * vec2(uAspect, 1.0);
   float vig = smoothstep(0.32, 0.9, length(vc));
   float scr = 0.55 + 0.45 * stripes(pp + wob * 8.0, normalize(vec2(1.0, 0.8)), 7.0 * sc, 2.2 * sc);
   float hurt = clamp(uHurt + uLowHp * (0.35 + 0.25 * sin(uTime * 6.0)), 0.0, 1.0);
@@ -251,7 +238,7 @@ export class InkRenderer {
       uniforms: {
         tScene: { value: this.rt.texture }, tDepth: { value: depthTexture }, uRes: { value: new THREE.Vector2(2, 2) }, uAspect: { value: 1 },
         uTime: { value: 0 }, uNear: { value: this.camera.near }, uFar: { value: this.camera.far }, uHurt: { value: 0 }, uFlash: { value: 0 }, uSlow: { value: 0 },
-        uLowHp: { value: 0 }, uLineSpacing: { value: 60 }, uPaper: { value: new THREE.Vector3(0.965, 0.955, 0.905) }, uInks: { value: INK_COLORS },
+        uLowHp: { value: 0 }, uLineSpacing: { value: 60 }, uPaper: { value: new THREE.Vector3(0.90, 0.85, 0.79) }, uInks: { value: INK_COLORS },
         uInvProj: { value: new THREE.Matrix4() }, uInvView: { value: new THREE.Matrix4() },
       },
       vertexShader: postVert, fragmentShader: postFrag, depthTest: false, depthWrite: false,

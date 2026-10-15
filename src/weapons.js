@@ -72,7 +72,7 @@ export class Gun extends ViewModel {
     super(ctx); Object.assign(this, GUNS[type]); this.id = type; this.isGun = true; this.mag = this.magSize;
     if (this.shell && typeof this.shell[1] === 'string') this.shell = [this.shell[0], SHELL_INK[this.shell[1]] ?? INK.ORANGE]; // arsenal.js names the shell colour
     this.spin = 0; this._fxN = 0; this._spinSndT = 0; this.fireT = 0; this.reloading = false; this.reloadT = 0; this.spreadCur = this.spread; this.flashT = 0; this.pumpT = 0; this.racked = false; this.needPump = false;
-    this.mat = makeInkMaterial({ ink: INK.BLUE }); this.dark = makeInkMaterial({ ink: INK.BLACK }); this.red = makeInkMaterial({ ink: INK.RED, fill: true });
+    this.mat = makeInkMaterial({ ink: INK.BLACK }); this.dark = makeInkMaterial({ ink: INK.BLACK }); this.red = makeInkMaterial({ ink: INK.RED, fill: true });
     this.build(); this.setSight(...this.sight);
   }
   get spreadPx() { return 5 + this.spreadCur * 900; }
@@ -169,9 +169,9 @@ export class Gun extends ViewModel {
       end = hitE.point; const crit = hitE.part === 'head'; let d = this.damage * (crit ? this.headMul : 1);
       if (this.falloff) d *= clamp(1 - (hitE.dist - this.falloff[0]) / (this.falloff[1] - this.falloff[0]), this.falloff[2], 1);
       ctx.enemies.damage(hitE.enemy, d, { point: hitE.point, dir, part: hitE.part, source: this.kind, crit }); hit = true;
-    } else if (hitW) { end = hitW.point; ctx.effects.bulletImpact(hitW.point, hitW.normal, INK.BLUE); if (Math.random() < 0.25) audio.ricochet(hitW.point); }
+    } else if (hitW) { end = hitW.point; ctx.effects.bulletImpact(hitW.point, hitW.normal, INK.BLACK); if (Math.random() < 0.25) audio.ricochet(hitW.point); }
     else end = origin.clone().addScaledVector(dir, 300);
-    this.muzzle.getWorldPosition(_v); ctx.effects.tracer(_v, end, INK.BLUE, this.tracer, 0.05);
+    this.muzzle.getWorldPosition(_v); ctx.effects.tracer(_v, end, INK.BLACK, this.tracer, 0.05);
     if (ctx.onShot) ctx.onShot(end);
     return hit;
   }
@@ -381,7 +381,7 @@ export class Katana extends ViewModel {
     this.build();
   }
   build() {
-    const mat = makeInkMaterial({ ink: INK.BLUE }), dark = makeInkMaterial({ ink: INK.BLACK }); const g = this.root;
+    const mat = makeInkMaterial({ ink: INK.BLACK }), dark = makeInkMaterial({ ink: INK.BLACK }); const g = this.root;
     this.blade = bx(0.012, 0.035, 1.0, 0, 0, -0.55, mat, g); bx(0.012, 0.02, 0.08, 0, 0.007, -1.07, mat, g).rotation.x = 0.3;
     bx(0.1, 0.1, 0.02, 0, 0, -0.05, dark, g); bx(0.03, 0.036, 0.3, 0, 0, 0.12, dark, g);
     for (let i = 0; i < 6; i++) bx(0.036, 0.04, 0.02, 0, 0, 0.02 + i * 0.045, mat, g);
@@ -425,7 +425,7 @@ export class Katana extends ViewModel {
       const a = (-1.1 + 2.2 * i / 8) * s; const b = a + 0.12 * s;
       const pa = P.eye.clone().addScaledVector(P.forward, 1.3).addScaledVector(P.right, Math.cos(a) * 0.9 * s).addScaledVector(up, Math.sin(a) * 0.55 - 0.1);
       const pb = P.eye.clone().addScaledVector(P.forward, 1.3).addScaledVector(P.right, Math.cos(b) * 0.9 * s).addScaledVector(up, Math.sin(b) * 0.55 - 0.1);
-      this.ctx.effects.tracer(pa, pb, INK.BLUE, 0.03 - 0.002 * i, 0.12 + i * 0.01);
+      this.ctx.effects.tracer(pa, pb, INK.BLACK, 0.03 - 0.002 * i, 0.12 + i * 0.01);
     }
   }
   update(dt, st) {

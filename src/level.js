@@ -389,10 +389,11 @@ function buildDistrict(B, arena = false) {
 
   // ---------------- sky doodles ----------------
   {
-    sphere(-90, 110, -160, 12, { seg: 12 });
-    for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; const g = new THREE.BoxGeometry(6, 0.7, 0.7); g.rotateZ(a); g.translate(-90 + Math.cos(a) * 19, 110 + Math.sin(a) * 19, -160); addGeo(g, INK.BLUE); }
+    // a pale moon with two faint halos (kept visible through the fog, like the plate's glow)
+    sphere(-90, 110, -160, 14, { seg: 16, ink: INK.IVORY + EMPH });
+    for (const r of [21, 29]) { const g = new THREE.TorusGeometry(r, 0.35, 4, 48); g.translate(-90, 110, -160); addGeo(g, INK.IVORY + EMPH); }
     for (const [cx, cy, cz, s] of [[60, 70, -170, 1], [-20, 75, -190, 1.3], [140, 60, -80, 0.9], [-150, 65, 40, 1.1], [30, 80, 180, 1.2], [-90, 60, 170, 0.8]]) {
-      for (let i = 0; i < 6; i++) sphere(cx + (i - 2.5) * 5 * s, cy + Math.sin(i * 1.7) * 2.5 * s, cz, (4 + (i % 3)) * s, { seg: 10 });
+      for (let i = 0; i < 6; i++) sphere(cx + (i - 2.5) * 5 * s, cy + Math.sin(i * 1.7) * 2.5 * s, cz, (4 + (i % 3)) * s, { seg: 10, ink: INK.GREY });
     }
   }
 

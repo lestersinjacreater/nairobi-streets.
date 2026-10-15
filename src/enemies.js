@@ -12,16 +12,16 @@ const nxOf = (dx, d) => dx / (d || 1), nzOf = (dz, d) => dz / (d || 1);
 export const BOSSES = ['boss', 'eraser', 'inkblot'];
 export const STATE_CODES = { spawn: 0, hunt: 1, stunned: 2, dead: 3 }; export const STATE_NAMES = ['spawn', 'hunt', 'stunned', 'dead'];
 export const TYPES = {
-  grunt: { hp: 100, speed: 5.2, weapon: 'rifle', range: 28, stop: 16, keep: 7, burst: 3, burstInt: 0.15, cool: [1.6, 2.6], dmg: 6, spread: 0.055, pspeed: 36, score: 100, scale: 1.0, name: 'GRUNT', hat: 'cap', build: { bodyW: 1, headS: 1, limbR: 0.032 } },
-  rusher: { hp: 70, speed: 7.6, weapon: 'blade', lunge: 2.9, reach: 3.0, standoff: 1.9, cool: [1.0, 1.5], dmg: 15, score: 120, scale: 0.95, name: 'RUSHER', hat: 'band', build: { bodyW: 0.82, headS: 0.95, limbR: 0.027 } },
-  heavy: { hp: 320, speed: 3.0, weapon: 'shotgun', range: 18, stop: 9, keep: 5, pellets: 7, cool: [2.4, 3.2], dmg: 5, spread: 0.13, pspeed: 32, score: 260, scale: 1.25, name: 'HEAVY', hat: 'helmet', build: { bodyW: 1.55, headS: 0.88, limbR: 0.05 } },
-  sniper: { hp: 60, speed: 3.6, weapon: 'sniper', range: 90, stop: 90, keep: 15, aimTime: 1.7, cool: [2.8, 3.8], dmg: 22, spread: 0.006, pspeed: 95, score: 180, scale: 1.05, name: 'SNIPER', stationary: true, hat: 'hood', build: { bodyW: 0.78, headS: 0.92, limbR: 0.026 } },
-  shield: { hp: 150, speed: 3.8, weapon: 'pistol', range: 20, stop: 8, keep: 4, burst: 2, burstInt: 0.2, cool: [1.8, 2.6], dmg: 5, spread: 0.06, pspeed: 34, score: 200, scale: 1.05, name: 'SHIELD', hat: 'helmet', shield: true, build: { bodyW: 1.2, headS: 0.9, limbR: 0.042 } },
-  bomber: { hp: 26, speed: 6.5, weapon: 'bomb', fuseRange: 3.4, fuse: 1.05, blast: 4.2, dmg: 24, score: 150, scale: 0.9, name: 'INK BOMB', ink: INK.BLACK, model: 'bomber' },
-  flyer: { hp: 40, speed: 6.2, weapon: 'dive', dmg: 10, cool: [2.8, 4.2], score: 140, scale: 1.5, name: 'PAPER WASP', flying: true, model: 'flyer' },
-  boss: { hp: 2600, speed: 3.2, weapon: 'boss', bossKind: 'doodler', range: 32, stop: 6, keep: 0, cool: [2.6, 3.6], dmg: 22, score: 2500, scale: 2.7, name: 'DOODLER BOSS', boss: true, ink: INK.BLACK, hat: 'crown', build: { bodyW: 1.35, headS: 1.15, limbR: 0.06 } },
-  eraser: { hp: 3400, speed: 4.2, weapon: 'boss', bossKind: 'eraser', range: 30, stop: 8, keep: 0, cool: [2.2, 3.2], dmg: 26, score: 3200, scale: 2.6, name: 'ERASER BOSS', boss: true, ink: INK.PINK, model: 'blob', build: {} },
-  inkblot: { hp: 3000, speed: 3.0, weapon: 'boss', bossKind: 'inkblot', range: 34, stop: 10, keep: 0, cool: [2.4, 3.4], dmg: 20, score: 3600, scale: 2.4, name: 'INKBLOT BOSS', boss: true, ink: INK.BLACK, model: 'blob', build: {} },
+  grunt: { hp: 100, speed: 5.2, weapon: 'rifle', range: 28, stop: 16, keep: 7, burst: 3, burstInt: 0.15, cool: [1.6, 2.6], dmg: 6, spread: 0.055, pspeed: 36, score: 100, scale: 1.0, name: 'JESTER', hat: 'jester', costume: 'harlequin', build: { bodyW: 1, headS: 1, limbR: 0.032 } },
+  rusher: { hp: 70, speed: 7.6, weapon: 'blade', lunge: 2.9, reach: 3.0, standoff: 1.9, cool: [1.0, 1.5], dmg: 15, score: 120, scale: 0.95, name: 'GENTLEMAN', hat: 'tophat', costume: 'gentleman', build: { bodyW: 0.82, headS: 0.95, limbR: 0.027 } },
+  heavy: { hp: 320, speed: 3.0, weapon: 'shotgun', range: 18, stop: 9, keep: 5, pellets: 7, cool: [2.4, 3.2], dmg: 5, spread: 0.13, pspeed: 32, score: 260, scale: 1.25, name: 'DUCHESS', hat: 'bonnet', costume: 'gown', build: { bodyW: 1.55, headS: 0.88, limbR: 0.05 } },
+  sniper: { hp: 60, speed: 3.6, weapon: 'sniper', range: 90, stop: 90, keep: 15, aimTime: 1.7, cool: [2.8, 3.8], dmg: 22, spread: 0.006, pspeed: 95, score: 180, scale: 1.05, name: 'MOURNER', stationary: true, hat: 'veil', costume: 'gown', build: { bodyW: 0.78, headS: 0.92, limbR: 0.026 } },
+  shield: { hp: 150, speed: 3.8, weapon: 'pistol', range: 20, stop: 8, keep: 4, burst: 2, burstInt: 0.2, cool: [1.8, 2.6], dmg: 5, spread: 0.06, pspeed: 34, score: 200, scale: 1.05, name: 'DAME', hat: 'bonnet', costume: 'gown', skirt: 'red', shield: true, build: { bodyW: 1.2, headS: 0.9, limbR: 0.042 } },
+  bomber: { hp: 26, speed: 6.5, weapon: 'bomb', fuseRange: 3.4, fuse: 1.05, blast: 4.2, dmg: 24, score: 150, scale: 0.9, name: 'POWDER KEG', ink: INK.BLACK, model: 'bomber' },
+  flyer: { hp: 40, speed: 6.2, weapon: 'dive', dmg: 10, cool: [2.8, 4.2], score: 140, scale: 1.5, name: 'RAVEN', flying: true, model: 'flyer' },
+  boss: { hp: 2600, speed: 3.2, weapon: 'boss', bossKind: 'doodler', range: 32, stop: 6, keep: 0, cool: [2.6, 3.6], dmg: 22, score: 2500, scale: 2.7, name: 'THE QUEEN', boss: true, ink: INK.BLACK, hat: 'crown', costume: 'gown', build: { bodyW: 1.35, headS: 1.15, limbR: 0.06 } },
+  eraser: { hp: 3400, speed: 4.2, weapon: 'boss', bossKind: 'eraser', range: 30, stop: 8, keep: 0, cool: [2.2, 3.2], dmg: 26, score: 3200, scale: 2.6, name: 'THE SHROUD', boss: true, ink: INK.PINK, model: 'blob', build: {} },
+  inkblot: { hp: 3000, speed: 3.0, weapon: 'boss', bossKind: 'inkblot', range: 34, stop: 10, keep: 0, cool: [2.4, 3.4], dmg: 20, score: 3600, scale: 2.4, name: 'THE INKBLOT', boss: true, ink: INK.BLACK, model: 'blob', build: {} },
 };
 
 // ---------------- doodle model kit ----------------
@@ -46,12 +46,12 @@ function shoe(mat, parent, y, s = 1) { const m = new THREE.Mesh(new THREE.Sphere
 // dot eyes, angry brows and a curved mouth, all solid ink so they read at a glance
 function doodleFace(headG, solid, opts = {}) {
   const eyes = new THREE.Group(); headG.add(eyes);
-  const ex = opts.ex ?? 0.1, ey = opts.ey ?? 0.03, ez = opts.ez ?? 0.25, er = opts.er ?? 0.045;
+  const ex = opts.ex ?? 0.1, ey = opts.ey ?? 0.03, ez = opts.ez ?? 0.25, er = opts.er ?? 0.034;
   for (const sx of [-1, 1]) {
     const e = sph(er, sx * ex, ey, ez, solid, eyes, 6); e.scale.set(0.85, 1.15, 0.7);
-    const b = bx(0.115, 0.026, 0.026, sx * ex, ey + 0.11, ez - 0.01, solid, eyes); b.rotation.z = sx * -0.5;
+    const b = bx(0.095, 0.018, 0.02, sx * ex, ey + 0.1, ez - 0.01, solid, eyes); b.rotation.z = sx * -0.16;
   }
-  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.018, 4, 9, Math.PI * 0.9), solid);
+  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.013, 4, 9, Math.PI * 0.9), solid);
   mouth.position.set(0, ey - 0.16, ez - 0.02); mouth.rotation.z = opts.smile ? Math.PI : 0; eyes.add(mouth);
   const xeyes = new THREE.Group(); headG.add(xeyes); xeyes.visible = false;
   for (const sx of [-1, 1]) for (const a of [0.8, -0.8]) { const c = bx(0.13, 0.024, 0.024, sx * ex, ey, ez, solid, xeyes); c.rotation.z = a; }
@@ -64,6 +64,28 @@ function buildHat(headG, mat, solid, T) {
   else if (h === 'band') { const b = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.028, 5, 14), solid); b.rotation.x = Math.PI / 2; b.position.y = 0.11; headG.add(b); for (const [dx, dz, a] of [[0.24, -0.22, 0.5], [0.2, -0.3, -0.3]]) { const t = bx(0.04, 0.03, 0.4, dx, 0.08 - dz * 0.2, -0.26, solid, headG); t.rotation.y = a; } for (let i = 0; i < 4; i++) { const sp = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.2, 4), mat); sp.position.set(-0.12 + i * 0.08, 0.28, 0.02); sp.rotation.z = (i - 1.5) * 0.35; headG.add(sp); } }
   else if (h === 'helmet') { const c = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 6, 0, TAU, 0, Math.PI * 0.55), mat); c.position.y = 0.0; c.scale.y = 0.85; headG.add(c); const rim = new THREE.Mesh(new THREE.TorusGeometry(0.315, 0.03, 4, 14), mat); rim.rotation.x = Math.PI / 2; rim.position.y = -0.02; headG.add(rim); }
   else if (h === 'hood') { const c = new THREE.Mesh(new THREE.SphereGeometry(0.33, 10, 7, 0, TAU, 0, Math.PI * 0.62), mat); c.position.y = -0.02; c.scale.set(1.03, 1.15, 0.95); headG.add(c); const tail = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.5, 5), mat); tail.position.set(0, 0.16, -0.3); tail.rotation.x = 1.5; headG.add(tail); }
+  else if (h === 'jester') {   // two cones, one crimson and one black, each ending in an ivory bell, on a black band
+    const ivory = makeInkMaterial({ ink: INK.IVORY, shadeScale: 0, shadeBias: 1, emphasis: true });
+    for (const [sx, m] of [[-1, mat], [1, solid]]) {
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.5, 8), m); cone.position.set(sx * 0.17, 0.3, 0); cone.rotation.z = -sx * 0.95; headG.add(cone);
+      sph(0.05, sx * 0.39, 0.44, 0, ivory, headG, 6);
+    }
+    const band = new THREE.Mesh(new THREE.TorusGeometry(0.27, 0.035, 5, 14), solid); band.rotation.x = Math.PI / 2; band.position.y = 0.1; headG.add(band);
+  }
+  else if (h === 'tophat') {
+    const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.19, 0.34, 10), solid); tube.position.y = 0.3; headG.add(tube);
+    const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.03, 12), solid); brim.position.y = 0.13; headG.add(brim);
+    const rib = new THREE.Mesh(new THREE.TorusGeometry(0.186, 0.025, 4, 12), mat); rib.rotation.x = Math.PI / 2; rib.position.y = 0.2; headG.add(rib);
+  }
+  else if (h === 'bonnet') {
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(0.3, 10, 6, 0, TAU, 0, Math.PI * 0.5), solid); dome.position.y = 0.08; dome.scale.y = 0.65; headG.add(dome);
+    const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.44, 0.025, 14), solid); brim.position.y = 0.07; headG.add(brim);
+    const rib = new THREE.Mesh(new THREE.TorusGeometry(0.29, 0.03, 4, 12), mat); rib.rotation.x = Math.PI / 2; rib.position.y = 0.12; headG.add(rib);
+  }
+  else if (h === 'veil') {      // a mourner's black hood and a long drape behind
+    const c = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8, 0, TAU, 0, Math.PI * 0.7), solid); c.position.y = -0.02; c.scale.set(1.05, 1.2, 1.0); headG.add(c);
+    const drape = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.85, 8), solid); drape.position.set(0, -0.2, -0.24); drape.rotation.x = 0.22; headG.add(drape);
+  }
   else if (h === 'crown') { for (let i = 0; i < 6; i++) { const a = (i / 6) * TAU; const sp = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.26, 4), mat); sp.position.set(Math.cos(a) * 0.22, 0.34, Math.sin(a) * 0.22); headG.add(sp); } const b = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.035, 4, 14), mat); b.rotation.x = Math.PI / 2; b.position.y = 0.24; headG.add(b); }
 }
 export function buildWeaponProp(gun, mat, solid, T) {
@@ -114,7 +136,10 @@ export function buildHumanoid(mat, solid, T) {
   parts.torso = new THREE.Object3D(); parts.torso.position.y = 0.26; torso.add(parts.torso);
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.12, 6), mat); neck.position.y = 0.56; torso.add(neck);
   const headG = new THREE.Group(); headG.position.y = 0.62; torso.add(headG);
-  const head = blob(0.275 * headS * jit, 0.3 * headS, 0.25 * headS, 0, 0.26, 0, mat, headG);
+  // costumed figures have porcelain-pale faces and hands (ivory) with dark hair, like the figures in the picture this look comes from
+  const skin = T.costume ? makeInkMaterial({ ink: INK.IVORY, shadeScale: 0, shadeBias: 1, emphasis: true }) : mat;
+  const head = blob(0.275 * headS * jit, 0.3 * headS, 0.25 * headS, 0, 0.26, 0, skin, headG);
+  if (T.costume) { const hair = new THREE.Mesh(new THREE.SphereGeometry(0.3, 10, 6, 0, TAU, 0, Math.PI * 0.5), solid); hair.position.y = 0.3; hair.scale.set(1.0 * headS, 0.95 * headS, 1.0 * headS); headG.add(hair); }
   parts.head = new THREE.Object3D(); parts.head.position.y = 0.26; headG.add(parts.head);
   const faceG = new THREE.Group(); faceG.position.y = 0.26; faceG.scale.setScalar(headS); headG.add(faceG);
   const fc = doodleFace(faceG, solid, { ez: 0.2 * headS + 0.06, smile: T.weapon === 'blade' });
@@ -122,10 +147,23 @@ export function buildHumanoid(mat, solid, T) {
   const shY = 0.46, shX = 0.26 * bodyW;
   const armL = noodle(0.3, limbR, mat, torso, -shX, shY, 0), armR = noodle(0.3, limbR, mat, torso, shX, shY, 0);
   const foreL = noodle(0.28, limbR * 0.92, mat, armL, 0, -0.3, 0), foreR = noodle(0.28, limbR * 0.92, mat, armR, 0, -0.3, 0);
-  mitten(limbR * 2.3, mat, foreL, -0.3); mitten(limbR * 2.3, mat, foreR, -0.3);
-  const legL = noodle(0.42, limbR * 1.15, mat, hips, -0.13 * bodyW, -0.02, 0), legR = noodle(0.42, limbR * 1.15, mat, hips, 0.13 * bodyW, -0.02, 0);
-  const shinL = noodle(0.42, limbR * 1.05, mat, legL, 0, -0.42, 0), shinR = noodle(0.42, limbR * 1.05, mat, legR, 0, -0.42, 0);
+  mitten(limbR * 2.3, skin, foreL, -0.3); mitten(limbR * 2.3, skin, foreR, -0.3);
+  const legMatR = T.costume === 'harlequin' ? solid : mat; // a harlequin is crimson on one side and black on the other
+  const legL = noodle(0.42, limbR * 1.15, mat, hips, -0.13 * bodyW, -0.02, 0), legR = noodle(0.42, limbR * 1.15, legMatR, hips, 0.13 * bodyW, -0.02, 0);
+  const shinL = noodle(0.42, limbR * 1.05, mat, legL, 0, -0.42, 0), shinR = noodle(0.42, limbR * 1.05, legMatR, legR, 0, -0.42, 0);
   shoe(mat, shinL, -0.42, bodyW); shoe(mat, shinR, -0.42, bodyW);
+  // Victorian costume: puffed sleeves, a ruff, a black waistcoat with ivory buttons, and for a gown a long skirt over the legs
+  if (T.costume) {
+    const ivory = skin;
+    for (const sx of [-1, 1]) sph(0.14 * bodyW, sx * shX, shY - 0.02, 0, T.costume === 'harlequin' && sx > 0 ? solid : mat, torso, 8);
+    const ruff = new THREE.Mesh(new THREE.TorusGeometry(0.13 * Math.min(bodyW, 1.3), 0.045, 5, 12), ivory); ruff.rotation.x = Math.PI / 2; ruff.position.y = 0.58; torso.add(ruff);
+    const vest = blob(0.25 * bodyW, 0.25, 0.2 * bodyW, 0, 0.3, 0.03, solid, torso);
+    for (let i = 0; i < 3; i++) sph(0.022, 0, 0.18 + i * 0.1, 0.2 * bodyW + 0.02, ivory, torso, 5);
+    if (T.costume === 'gown') {
+      const skirt = new THREE.Mesh(new THREE.CylinderGeometry(0.24 * bodyW, 0.62 * bodyW, 0.88, 14, 1, true), T.skirt === 'red' ? mat : solid); skirt.position.y = -0.42; hips.add(skirt);
+      const hem = new THREE.Mesh(new THREE.TorusGeometry(0.62 * bodyW, 0.025, 4, 16), ivory); hem.rotation.x = Math.PI / 2; hem.position.y = -0.85; hips.add(hem);
+    }
+  }
   for (const [k, g] of [['armL', armL], ['armR', armR], ['foreL', foreL], ['foreR', foreR], ['legL', legL], ['legR', legR], ['shinL', shinL], ['shinR', shinR]]) parts[k] = g.userData.mid;
   const gun = new THREE.Group(); gun.position.set(0, -0.29, 0.07); foreR.add(gun); buildWeaponProp(gun, mat, solid, T);
   const tip = new THREE.Object3D(); tip.position.set(0, 0.05, T.weapon === 'blade' ? 0.92 : T.weapon === 'boss' ? 0.4 : 0.78); gun.add(tip);
@@ -206,11 +244,11 @@ class Projectiles {
     return n;
   }
   _deflect(p, player, perfect) {
-    const mgr = this.mgr; p.deflected = true; p.ink = INK.BLUE; p.dmg *= perfect ? 3.5 : 2.2; p.life = 3;
+    const mgr = this.mgr; p.deflected = true; p.ink = INK.BLACK; p.dmg *= perfect ? 3.5 : 2.2; p.life = 3;
     let target = null;
     if (perfect && p.owner && p.owner.alive) target = p.owner; else target = mgr.nearestVisible(player.eye, player.forward, Math.cos(0.7), 70) || (p.owner && p.owner.alive ? p.owner : null);
     const speed = p.vel.length() * 1.6; if (target) _d.subVectors(target.center, p.pos).normalize(); else _d.copy(player.forward);
-    p.vel.copy(_d).multiplyScalar(speed); mgr.ctx.effects.sparks(p.pos, _d, INK.ORANGE, 10, 9); mgr.ctx.effects.strokeBurst(p.pos, INK.BLUE, 8, 4, { life: 0.2 });
+    p.vel.copy(_d).multiplyScalar(speed); mgr.ctx.effects.sparks(p.pos, _d, INK.ORANGE, 10, 9); mgr.ctx.effects.strokeBurst(p.pos, INK.BLACK, 8, 4, { life: 0.2 });
   }
   _burst(p, point) { const ctx = this.mgr.ctx; ctx.effects.explosion(point, 2.5, INK.BLACK); audio.explosion(point); const P = ctx.player; const d = P.center.distanceTo(point); if (d < 3.5 && P.alive) { P.takeDamage(p.dmg * (1 - d / 3.5), point); P.knockback(_v.subVectors(P.center, point).normalize(), 6); } if (!this.mgr.mirror) this.mgr.blastEnemies(point, 3.5, p.dmg * 1.5, p.owner); }
   update(dt) {
