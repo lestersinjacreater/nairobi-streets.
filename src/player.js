@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { makeBody } from './physics.js';
 import { makeInkMaterial, INK } from './render.js';
 import { buildHumanoid } from './enemies.js';
-import { Rifle, Shotgun, Sniper, Katana, BoxingGloves } from './weapons.js';
+import { Rifle, Shotgun, Sniper, Katana, BoxingGloves, MachineGun } from './weapons.js';
 // the dome shell and anything else flagged this way cannot be hooked
 const NO_GRAPPLE = (b) => !!b.data.noGrapple;
 const STAM_FIRE = 0.09, STAM_DRAIN = 0.08, STAM_GROUND = 0.4, STAM_AIR = 0.2, STAM_MIN = 0.18, STAM_PAUSE = 0.5, PARRY_WINDOW = 0.55;
@@ -24,7 +24,7 @@ export class Player {
     this.rig = new THREE.Group(); this.camera.add(this.rig); ctx.scene.add(this.camera);
     const avatar = buildHumanoid(makeInkMaterial({ ink: INK.BLUE, shadeScale: 0, shadeBias: 1 }), makeInkMaterial({ ink: INK.BLACK, fill: true, side: THREE.DoubleSide }), { weapon: 'rifle', scale: 1, hat: 'cap', build: { bodyW: 1, headS: 1, limbR: 0.033 } });
     this.avatar = avatar.root; this.avatarJ = avatar.J; this.avatar.visible = false; ctx.scene.add(this.avatar);
-    this.weapons = [new Rifle(ctx), new Shotgun(ctx), new Sniper(ctx), new Katana(ctx), new BoxingGloves(ctx)]; this.katanaIndex = 3;
+    this.weapons = [new Rifle(ctx), new Shotgun(ctx), new Sniper(ctx), new Katana(ctx), new BoxingGloves(ctx), new MachineGun(ctx)]; this.katanaIndex = 3; // new guns go on the end so slot numbers (and what online players see) never shift
     for (const w of this.weapons) { this.rig.add(w.root); if (w.isGun) w.startReserve = w.reserve; }
     this.weaponIndex = 0; this.weapon = this.weapons[0]; this.weapon.equip(); this.returnT = 0; this.prevWeaponIndex = 0;
     this.recoilPitch = new Spring(190, 17); this.recoilYaw = new Spring(190, 17); this.fovKick = new Spring(220, 14); this.landDip = new Spring(170, 15);
@@ -239,7 +239,7 @@ export class Player {
     this.updateNadeArc(this._nadeHeld ? this.nadeCharge : -1);
     this.updateNades(dt);
     // ---- weapons ----
-    for (let i = 0; i < 5; i++) if (inp.pressed('slot' + (i + 1))) this.switchTo(Math.min(i, this.weapons.length - 1));
+    for (let i = 0; i < 6; i++) if (inp.pressed('slot' + (i + 1))) this.switchTo(Math.min(i, this.weapons.length - 1));
     if (inp.pressed('nextWeapon')) this.switchTo((this.weaponIndex + 1) % this.weapons.length);
     if (inp.pressed('prevWeapon')) this.switchTo((this.weaponIndex + this.weapons.length - 1) % this.weapons.length);
     const st = this._weaponState(sprinting, aiming, hs2);

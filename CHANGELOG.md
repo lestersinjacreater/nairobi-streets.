@@ -2,6 +2,15 @@
 
 Every code change, newest first. Add an entry here with each change.
 
+## 2026-10-15
+- **New weapon: the machine gun** (`src/weapons.js`, `src/player.js`, `src/input.js`, `src/players.js`, `src/enemies.js`, `src/audio.js`, `src/main.js`, `src/hud.js`, `README.md`, `docs/play-store-listing.md`)
+  - A belt-fed LMG in slot 6 (press 6, or cycle with the wheel or the SWAP button). 100-round belt (200 in reserve, 400 max), about 15 shots a second at 60 fps, 14 damage (12 against players), headshots x2.
+  - Its trade-offs: a wide spread that grows as you fire, heavy recoil, a 3.3 second reload, and damage that fades from 22 m out (to half at 58 m). It wins close and mid range; the rifle is better when you need to aim.
+  - New first-person model (heavy vented barrel, top rail, bipod, belt box that drops away on reload), a short low gunshot sound, tracers and a "MACHINE GUN" kill-feed name.
+  - Online: other players see the machine gun in your hands and hear it. It is the sixth weapon on the end of the list, so the weapon numbers of the other guns, and what players on older versions see, do not change (an older version shows it as a rifle).
+  - Checked: 6 weapons load, key 6 and key 1 switch, the magazine drops by shots fired and refills on reload, real touch-fire damages enemies, and a second online browser sees weapon 6 with no errors.
+  - Not tuned by play: the numbers are a first pass. Tell me if it feels too strong or too weak.
+
 ## 2026-10-14 (asset links)
 - **Site-to-app link filled in** (`.well-known/assetlinks.json`, `play/twa-manifest.json`, `docs/PLAY_STORE.md`)
   - `assetlinks.json` now holds the app's package name, `app.vercel.nairobi_streets.twa`, and the SHA-256 fingerprint of the signing key PWABuilder generated. This is what lets the installed app open the game full screen without an address bar.

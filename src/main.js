@@ -181,7 +181,7 @@ function breakProp(br, dir, local, quiet = false) {
 // every ray a gun fires this tick is sent to the others, who draw it as a tracer from the shooter's gun
 const shotQueue = [];
 ctx.onShot = (end) => { if (net.active && inMatch()) shotQueue.push(+end.x.toFixed(1), +end.y.toFixed(1), +end.z.toFixed(1)); };
-const TRACER_THICK = { rifle: 0.02, shotgun: 0.014, sniper: 0.03 };
+const TRACER_THICK = { rifle: 0.02, shotgun: 0.014, sniper: 0.03, machinegun: 0.022 };
 const _sm = new THREE.Vector3(), _se = new THREE.Vector3();
 let vehicleHitCooldown = 0;
 function checkVehicleImpacts(dt) {
@@ -393,7 +393,7 @@ function updateFocus(dt) {
 }
 
 // ---------------- free for all: spawning, death, scoring ----------------
-const HOW = { rifle: 'RIFLE', shotgun: 'SHOTGUN', sniper: 'SNIPER', katana: 'KATANA', boxing: 'BOXING GLOVES', grenade: 'GRENADE', deflect: 'OWN BULLET' };
+const HOW = { rifle: 'RIFLE', shotgun: 'SHOTGUN', sniper: 'SNIPER', machinegun: 'MACHINE GUN', katana: 'KATANA', boxing: 'BOXING GLOVES', grenade: 'GRENADE', deflect: 'OWN BULLET' };
 const howWord = (src) => HOW[src] || null;
 const spawnSpots = () => (level.arenaSpawns && level.arenaSpawns.length ? level.arenaSpawns : level.spawns);
 function arenaSpawn() {

@@ -87,6 +87,12 @@ export function buildWeaponProp(gun, mat, solid, T) {
     bx(0.08, 0.08, 0.08, 0, 0.15, -0.22, solid, gun);
   }
   else if (T.weapon === 'boss') { const pen = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2.4, 7), makeInkMaterial({ ink: INK.ORANGE, shadeScale: 0, shadeBias: 1 })); pen.position.y = 0.7; gun.add(pen); const tip = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.38, 6), solid); tip.position.y = 2.08; gun.add(tip); const er = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.26, 8), makeInkMaterial({ ink: INK.PINK, shadeScale: 0, shadeBias: 1 })); er.position.y = -0.62; gun.add(er); }
+  else if (T.weapon === 'machinegun') {
+    bx(0.13, 0.15, 0.62, 0, 0.04, 0.06, mat, gun);
+    bx(0.09, 0.12, 0.34, 0, -0.02, 0.58, solid, gun);
+    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.036, 0.95, 8), solid); barrel.rotation.x = Math.PI / 2; barrel.position.set(0, 0.07, -0.62); gun.add(barrel);
+    bx(0.16, 0.2, 0.22, 0, -0.14, 0.08, solid, gun);
+  }
   else { bx(0.085, 0.12, 0.5, 0, 0.02, 0.16, mat, gun); const b = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.34, 6), solid); b.rotation.x = Math.PI / 2; b.position.set(0, 0.05, 0.52); gun.add(b); bx(0.05, 0.16, 0.09, 0, -0.09, 0.08, mat, gun); }
 }
 
